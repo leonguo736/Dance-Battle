@@ -27,7 +27,7 @@ all: fpga-hps
 # Tool invocations
 fpga-hps: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
-	@echo 'Invoking: GCC C Linker 10.3.1 [arm-none-linux-gnueabihf]'
+	@echo 'Invoking: GCC C Linker 12.2.1 [arm-none-linux-gnueabihf]'
 	arm-none-linux-gnueabihf-gcc.exe  -o "fpga-hps" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
