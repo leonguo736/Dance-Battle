@@ -10,10 +10,12 @@
 #include "SW.h"
 #include "audio.h"
 
-#define AUDIO_RATE 48000
+#include "frogsarefriends.h"
+
+#define AUDIO_RATE 8000
 #define VOLUME 0x7FFFFFF
 
-double C_SCALE[8] = {261.63,293.66,329.63,349.23,392.00,440.00,493.88,523.25};
+#define NUM_SAMPLES 480000
 
 void writeAudio(int l, int r) {
     audio_wait_write();
@@ -38,14 +40,14 @@ int main(void) {
     audio_init();
     audio_rate(AUDIO_RATE);
 
-    // for (int i = 0; i < NUM_SAMPLES; i++) {
-    //     writeAudio(frogsarefriends_L[i], frogsarefriends_R[i]);
-    // }
-
-    for (int tone = 0; tone < 8; tone++) {
-        playTone(C_SCALE[tone], 0.25);
-        printf("Played\n");
+    for (int i = 0; i < NUM_SAMPLES; i++) {
+        writeAudio(VOLUME * frogsarefriends_L[i], VOLUME * frogsarefriends_R[i]);
     }
+
+    // for (int tone = 0; tone < 8; tone++) {
+    //     playTone(C_SCALE[tone], 0.25);
+    //     printf("Played\n");
+    // }
 
     audio_close();
 
