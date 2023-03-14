@@ -4,8 +4,11 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <math.h>
-#include <intelfpgaup/SW.h>
-#include <intelfpgaup/audio.h>
+//#include <intelfpgaup/SW.h>
+//#include <intelfpgaup/audio.h>
+
+#include "SW.h"
+#include "audio.h"
 
 #define AUDIO_RATE 48000
 #define VOLUME 0x7FFFFFF
