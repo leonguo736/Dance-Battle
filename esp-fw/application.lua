@@ -55,18 +55,3 @@ function ping(url)
 end
 
 
-ws = websocket.createClient()
-ws:connect("ws://192.168.137.23:8080")
-
-ws:on("connection", function(ws)
-    print("connected")
-    ws:send("hello")
-end)
-
-ws:on("receive", function(_, msg, opcode)
-    print("received", msg, opcode)
-end)
-
-ws:on("close", function(_, status)
-    print("connection closed", status)
-end)

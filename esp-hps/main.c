@@ -72,6 +72,8 @@ int main(int argc, char** argv) {
 	uart_init(virtual_base);
 	// toggle the LEDs a bit
 	char buffer[1024];
+	char recvBuffer[1024];
+	char *recvCur;
 	char *cur;
 	loop_count = 0;
 	led_mask = 0x01;
@@ -101,6 +103,31 @@ int main(int argc, char** argv) {
 			uart_read_data((unsigned int* )&c);
 			printf("%c", c);
 			// printf("Echo: %c\n", c);
+		} else if (argv[1][0] == '4') {
+			scanf("%s", buffer);
+			cur = buffer;
+
+			while (*cur != '\0') {
+				uart_write_data((unsigned int) *cur);
+				cur++;
+			}
+
+			uart_write_data((unsigned int) '\n');
+			
+			recvCur = recvBuffer;
+
+			while (1) {
+				uart_read_data(recvCur);
+				
+				if (*recvCur == '\n') {
+					break;
+				}
+				printf("%c", *recvCur);
+				*recvCur++;
+			}
+		} else {
+			printf("Invalid Argument\n");
+			return 1;
 		}
 
 		usleep(100 * 1000);
