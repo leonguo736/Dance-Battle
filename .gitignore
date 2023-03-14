@@ -83,3 +83,5 @@ language.settings.xml
 
 *.flock
 *.exe
+
+credentials.lua
