@@ -24,25 +24,28 @@
 								<option defaultValue="gnu.cpp.compiler.debugging.level.default" id="com.arm.eclipse.cdt.managedbuild.ds5.gcc.tool.cpp.compiler.base.exe.debug.base.option.debugging.level.base.var.gcc-10.3.1-arm-none-linux-gnueabihf.113526010" name="Debug Level" superClass="com.arm.eclipse.cdt.managedbuild.ds5.gcc.tool.cpp.compiler.base.exe.debug.base.option.debugging.level.base.var.gcc-10.3.1-arm-none-linux-gnueabihf" valueType="enumerated"/>
 							</tool>
 							<tool id="com.arm.eclipse.cdt.managedbuild.ds5.gcc.tool.c.compiler.base.exe.debug.base.var.gcc-10.3.1-arm-none-linux-gnueabihf.13363376" name="GCC C Compiler 10.3.1 [arm-none-linux-gnueabihf]" superClass="com.arm.eclipse.cdt.managedbuild.ds5.gcc.tool.c.compiler.base.exe.debug.base.var.gcc-10.3.1-arm-none-linux-gnueabihf">
-								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.option.optimization.level.693918992" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" valueType="enumerated"/>
-								<option defaultValue="gnu.c.debugging.level.default" id="com.arm.eclipse.cdt.managedbuild.ds5.gcc.tool.c.compiler.base.exe.debug.base.option.debugging.level.base.var.gcc-10.3.1-arm-none-linux-gnueabihf.1590101974" name="Debug Level" superClass="com.arm.eclipse.cdt.managedbuild.ds5.gcc.tool.c.compiler.base.exe.debug.base.option.debugging.level.base.var.gcc-10.3.1-arm-none-linux-gnueabihf" valueType="enumerated"/>
-								<option id="gnu.c.compiler.option.dialect.std.2023232284" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
+								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.option.optimization.level.693918992" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" useByScannerDiscovery="false" valueType="enumerated"/>
+								<option defaultValue="gnu.c.debugging.level.default" id="com.arm.eclipse.cdt.managedbuild.ds5.gcc.tool.c.compiler.base.exe.debug.base.option.debugging.level.base.var.gcc-10.3.1-arm-none-linux-gnueabihf.1590101974" name="Debug Level" superClass="com.arm.eclipse.cdt.managedbuild.ds5.gcc.tool.c.compiler.base.exe.debug.base.option.debugging.level.base.var.gcc-10.3.1-arm-none-linux-gnueabihf" useByScannerDiscovery="false" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.dialect.std.2023232284" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.c.compiler.dialect.c99" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.include.paths.522441668" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/fpga-hps/hwlib/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/tools/AudioSamples/resources/results}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/intelfpgaup/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/fpga-hps/hwlib/include/soc_cv_av}&quot;"/>
 								</option>
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.636886503" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="soc_cv_av"/>
 								</option>
-								<option id="com.arm.eclipse.cdt.managedbuild.ds5.gcc.option.c.compiler.posind.821023135" name="Generate position independent code (-fpic)" superClass="com.arm.eclipse.cdt.managedbuild.ds5.gcc.option.c.compiler.posind" useByScannerDiscovery="false" value="true" valueType="boolean"/>
+								<option id="com.arm.eclipse.cdt.managedbuild.ds5.gcc.option.c.compiler.posind.821023135" name="Generate position independent code (-fpic)" superClass="com.arm.eclipse.cdt.managedbuild.ds5.gcc.option.c.compiler.posind" useByScannerDiscovery="false" value="false" valueType="boolean"/>
+								<option id="gnu.c.compiler.option.misc.other.1540558421" name="Other flags" superClass="gnu.c.compiler.option.misc.other" useByScannerDiscovery="false" value="-c -fmessage-length=0" valueType="string"/>
+								<option id="gnu.c.compiler.option.misc.pic.585086293" name="Position Independent Code (-fPIC)" superClass="gnu.c.compiler.option.misc.pic" useByScannerDiscovery="false" value="true" valueType="boolean"/>
 								<inputType id="com.arm.eclipse.cdt.managedbuild.ds5.gcc.tool.c.compiler.base.input.560333328" superClass="com.arm.eclipse.cdt.managedbuild.ds5.gcc.tool.c.compiler.base.input"/>
 							</tool>
 							<tool id="com.arm.eclipse.cdt.managedbuild.ds5.gcc.tool.assembler.base.exe.debug.base.var.gcc-10.3.1-arm-none-linux-gnueabihf.1765423151" name="GCC Assembler 10.3.1 [arm-none-linux-gnueabihf]" superClass="com.arm.eclipse.cdt.managedbuild.ds5.gcc.tool.assembler.base.exe.debug.base.var.gcc-10.3.1-arm-none-linux-gnueabihf">
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1207490046" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 								<inputType id="com.arm.managedbuilder.gcc.inputType.770909686" superClass="com.arm.managedbuilder.gcc.inputType"/>
 							</tool>
-							<tool id="com.arm.eclipse.cdt.managedbuild.ds5.gcc.tool.c.linker.base.exe.debug.base.var.gcc-10.3.1-arm-none-linux-gnueabihf.643166921" name="GCC C Linker 10.3.1 [arm-none-linux-gnueabihf]" superClass="com.arm.eclipse.cdt.managedbuild.ds5.gcc.tool.c.linker.base.exe.debug.base.var.gcc-10.3.1-arm-none-linux-gnueabihf">
+							<tool commandLinePattern="${COMMAND} ${FLAGS}  -pthread ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" id="com.arm.eclipse.cdt.managedbuild.ds5.gcc.tool.c.linker.base.exe.debug.base.var.gcc-10.3.1-arm-none-linux-gnueabihf.643166921" name="GCC C Linker 10.3.1 [arm-none-linux-gnueabihf]" superClass="com.arm.eclipse.cdt.managedbuild.ds5.gcc.tool.c.linker.base.exe.debug.base.var.gcc-10.3.1-arm-none-linux-gnueabihf">
 								<option id="gnu.c.link.option.libs.91178132" name="Libraries (-l)" superClass="gnu.c.link.option.libs" useByScannerDiscovery="false" valueType="libs">
 									<listOptionValue builtIn="false" value="m"/>
 								</option>
@@ -50,6 +53,7 @@
 								<option id="gnu.c.link.option.nostdlibs.881326319" name="No startup or default libs (-nostdlib)" superClass="gnu.c.link.option.nostdlibs" useByScannerDiscovery="false" value="false" valueType="boolean"/>
 								<option id="gnu.c.link.option.shared.1562090309" name="Shared (-shared)" superClass="gnu.c.link.option.shared" useByScannerDiscovery="false" value="false" valueType="boolean"/>
 								<option id="gnu.c.link.option.soname.1380211251" name="Shared object name (-Wl,-soname=)" superClass="gnu.c.link.option.soname" useByScannerDiscovery="false" value="" valueType="string"/>
+								<option id="gnu.c.link.option.userobjs.896887087" name="Other objects" superClass="gnu.c.link.option.userobjs" useByScannerDiscovery="false" valueType="userObjs"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.913753446" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -60,7 +64,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="intelfpgaup/examples|Debug/intelfpgaup/examples|tests/vgatestdriver.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="tests/audio.c|intelfpgaup/examples|Debug/intelfpgaup/examples|tests/vgatestdriver.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -108,7 +112,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="intelfpgaup/examples|Debug/intelfpgaup/examples|tests/vgatestdriver.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="tests/audio.c|intelfpgaup/examples|Debug/intelfpgaup/examples|tests/vgatestdriver.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
