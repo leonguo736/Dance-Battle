@@ -79,9 +79,10 @@ int main(int argc, char** argv) {
 	led_mask = 0x01;
 	led_direction = 0; // 0: left to right direction
 	while( 1 ) {
+		uart_output();
 		// control led
 		*(uint32_t *)h2p_lw_led_addr = ~led_mask;
-		
+
 		if (argv[1][0] == '1') {
 			printf("Setting Hex\n");
 			*(uint8_t *)h2p_hex_addr = hex_values[loop_count % 10] ^ INVERT;
@@ -106,30 +107,42 @@ int main(int argc, char** argv) {
 		} else if (argv[1][0] == '4') {
 			scanf("%s", buffer);
 			cur = buffer;
-
+			
+			*(uint8_t *)h2p_hex_addr = hex_values[0] ^ INVERT;
+			
 			while (*cur != '\0') {
 				uart_write_data((unsigned int) *cur);
 				cur++;
 			}
 
-			uart_write_data((unsigned int) '\n');
-			
+			*(uint8_t *)h2p_hex_addr = hex_values[1] ^ INVERT;
+			uart_write_data((unsigned int) '\r');
+
+			*(uint8_t *)h2p_hex_addr = hex_values[2] ^ INVERT;
 			recvCur = recvBuffer;
 
 			while (1) {
-				uart_read_data(recvCur);
-				
+				*(uint8_t *)h2p_hex_addr = hex_values[3] ^ INVERT;
+				uart_read_data((unsigned int *)recvCur);
+
+				*(uint8_t *)h2p_hex_addr = hex_values[4] ^ INVERT;
+				if (*recvCur - '0' >= 0 && *recvCur - '0' <= 9) {
+					*(uint8_t *)h2p_hex_addr = hex_values[*recvCur - '0'] ^ INVERT;
+				}
+				printf("%c", *recvCur);
+
+				*(uint8_t *)h2p_hex_addr = hex_values[5] ^ INVERT;
 				if (*recvCur == '\n') {
 					break;
 				}
-				printf("%c", *recvCur);
-				*recvCur++;
+				recvCur++;
 			}
 		} else {
 			printf("Invalid Argument\n");
 			return 1;
 		}
 
+		*(uint8_t *)h2p_hex_addr = hex_values[6] ^ INVERT;
 		usleep(100 * 1000);
 
 		// update led mask
