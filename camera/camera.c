@@ -128,13 +128,9 @@ void * audioThread(void *vargp) {
 }
 
 int main(void) {
-
     if (!video_open()) return -1;
     if (!SW_open()) return -1;
     if (!KEY_open()) return -1;
-    if (!audio_open()) return -1;
-    audio_init();
-    audio_rate(AUDIO_RATE);
 
     video_clear();
     video_erase();
@@ -144,43 +140,22 @@ int main(void) {
 
     pthread_t vga_thread_id;
     pthread_create(&vga_thread_id, NULL, vgaThread, NULL);
-    
-    // pthread_t audio_thread_id;
-    // pthread_create(&audio_thread_id, NULL, audioThread, NULL);
 
     int swState = 0;
     int keyState = 0;
 
     while (swState != 0b1111) {
-
         // Get UI inputs
         SW_read(&swState);
         KEY_read(&keyState);
 
         // Rotating hand
         angleVelocity = swState / 64.0;
-
-        if (swState == 1) {
-            if (songSelection < 7) {
-                songSelection++;
-                if (songSelection - songTop >= SONGLIST_ELEMENTS) {
-                    songTop++;
-                }
-            }
-        } else if (swState == 2) {
-            if (songSelection > 0) {
-                songSelection--;
-                if (songSelection - songTop < 0) {
-                    songTop--;
-                }
-            }
-        }
     }
 
     video_close();
     SW_close();
     KEY_close();
-    audio_close();
 
     return 0;
 }
