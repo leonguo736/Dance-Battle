@@ -181,7 +181,7 @@ uint16_t conv24to16bit(uint8_t r, uint8_t g, uint8_t b) {
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 
-void filterByHue(unsigned char *rgb, int hsv_low, int hsv_high) {
+void blackenOutsideHueRange(unsigned char *rgb, int hsv_low, int hsv_high) {
     int r = rgb[0];
     int g = rgb[1];
     int b = rgb[2];
@@ -215,11 +215,46 @@ void filterByHue(unsigned char *rgb, int hsv_low, int hsv_high) {
     }
 }
 
-void drawImage(char* filename) {
+void filterbyHue(Image image, int hsv_low, int hsv_high) {
+    for (int i = 0; i < image.height; i++) {
+        for (int j = 0; j < image.width; j++) {
+            blackenOutsideHueRange(image.data[i][j], hsv_low, hsv_high);
+        }
+    }
+}
+
+// void drawImage(char* filename) {
+//     int scnHeight = (int)SCREEN_HEIGHT;
+//     int scnWidth = (int)SCREEN_WIDTH;
+
+//     Image image = read_bmp(filename);
+//     if (image.height != scnHeight || image.width != scnWidth) {
+//         printf("Image size does not match screen size, printing middle of image and padding with black\n");
+//     }
+
+//     int top = max(0, (image.height - scnHeight) / 2);
+//     int left = max(0, (image.width - scnWidth) / 2);
+//     int bottom = min(image.height, top + scnHeight);
+//     int right = min(image.width, left + scnWidth);
+    
+//     for (int i = top; i < bottom; i++) {
+//         for (int j = left; j < right; j++) {
+//             if (i < top || i >= bottom || j < left || j >= right) {
+//                 video_pixel(j - left, i - top, 0); // TODO: test to see if it works
+//             } else {
+//                 unsigned char *rgb = image.data[image.height - i - 1][j]; 
+//                 uint16_t color = conv24to16bit(rgb[0], rgb[1], rgb[2]);
+//                 video_pixel(j - left, i - top, color);
+//             }
+//         }
+//     }
+//     switchScreen();
+// }
+
+void drawImage(Image image) {
     int scnHeight = (int)SCREEN_HEIGHT;
     int scnWidth = (int)SCREEN_WIDTH;
 
-    Image image = read_bmp(filename);
     if (image.height != scnHeight || image.width != scnWidth) {
         printf("Image size does not match screen size, printing middle of image and padding with black\n");
     }
@@ -235,7 +270,6 @@ void drawImage(char* filename) {
                 video_pixel(j - left, i - top, 0); // TODO: test to see if it works
             } else {
                 unsigned char *rgb = image.data[image.height - i - 1][j]; 
-                filterByHue(rgb, 0, 30); 
                 uint16_t color = conv24to16bit(rgb[0], rgb[1], rgb[2]);
                 video_pixel(j - left, i - top, color);
             }
@@ -263,25 +297,35 @@ int main(void) {
     int swState = 0;
     int keyState = 0;
 
+    Image barackObama = read_bmp("barack_obama.bmp");
+    Image barackObamaFiltered = read_bmp("barack_obama.bmp");
+    Image shrug = read_bmp("shrug.bmp");
+    Image shrugFiltered = read_bmp("shrug.bmp");
+
+    filterbyHue(barackObamaFiltered, 0, 30);
+    filterbyHue(shrugFiltered, 0, 30);
+
     while (swState != 0b1111) {
         // Get UI inputs
         SW_read(&swState);
         KEY_read(&keyState);
+        // print switches and keys as binary
+        printf("SW: %d%d%d%d, KEY: %d%d%d%d\r", (swState >> 3) & 1, (swState >> 2) & 1, (swState >> 1) & 1, swState & 1, (keyState >> 3) & 1, (keyState >> 2) & 1, (keyState >> 1) & 1, keyState & 1);
         
         clock_t start_time, end_time;
         start_time = clock();
-        drawImage("shrug.bmp");
+        drawImage(barackObama);
         end_time = clock();
         printf("Time taken: %fms\n", (double)(end_time - start_time) / CLOCKS_PER_SEC * 1000);
 
-        sleep(5);
+        sleep(2);
 
         start_time = clock();
-        drawImage("barack_obama.bmp");
+        drawImage(barackObamaFiltered);
         end_time = clock();
         printf("Time taken: %fms\n", (double)(end_time - start_time) / CLOCKS_PER_SEC * 1000);
 
-        sleep(3);
+        sleep(2);
     }
 
     video_close();
