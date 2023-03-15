@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <unistd.h>
 #include <pthread.h>
 #include <math.h>
@@ -65,11 +66,7 @@ void sketchCircle(double centerX, double centerY, int radius, short colour) {
 void drawBackground(void) {
     for (int x = 0; x < WIDTH; x++) {
         for (int y = 0; y < HEIGHT; y++) {
-            if (x < BORDER_PADDING || y < BORDER_PADDING || x > WIDTH - BORDER_PADDING || y > HEIGHT - BORDER_PADDING) {
-                video_pixel(x, y, PLUM_DARK);
-            } else {
-                video_pixel(x, y, PLUM);
-            }
+            video_pixel(x, y, PLUM);
         }
     }
     switchScreen();
@@ -127,31 +124,98 @@ void * audioThread(void *vargp) {
     while (1);
 }
 
+void read_bmp(const char* filename, unsigned char**** image, int* height, int* width) {
+    FILE* file = fopen(filename, "rb");
+    unsigned char header[54];
+    fread(header, sizeof(unsigned char), 54, file);
+
+    *width = *(int*)&header[18];
+    *height = *(int*)&header[22];
+    int bit_depth = *(int*)&header[28];
+
+    printf("Width: %d, Height: %d, Bit Depth: %d\n", *width, *height, bit_depth);
+
+    int row_size = ((bit_depth * *width + 31) / 32) * 4;
+    int data_size = row_size * *height;
+
+    unsigned char* data = (unsigned char*)malloc(data_size * sizeof(unsigned char));
+    fread(data, sizeof(unsigned char), data_size, file);
+
+    *image = (unsigned char***)malloc(*height * sizeof(unsigned char**));
+    for (int i = 0; i < *height; i++) {
+        (*image)[i] = (unsigned char**)malloc(*width * sizeof(unsigned char*));
+        for (int j = 0; j < *width; j++) {
+            (*image)[i][j] = (unsigned char*)malloc(3 * sizeof(unsigned char));
+            (*image)[i][j][0] = data[i * row_size + j * 3 + 2];
+            (*image)[i][j][1] = data[i * row_size + j * 3 + 1];
+            (*image)[i][j][2] = data[i * row_size + j * 3 + 0];
+        }
+    }
+
+    fclose(file);
+    free(data);
+}
+
+uint16_t conv24to16bit(uint8_t r, uint8_t g, uint8_t b) {
+    uint16_t color = 0;
+    int r2 = (int)(r / 256.0 * 32);
+    int g2 = (int)(g / 256.0 * 64);
+    int b2 = (int)(b / 256.0 * 32);
+    color = b2 + (g2 << 5) + (r2 << 11);
+    return color;
+}
+
+void drawImage(char* filename) {
+    unsigned char*** image;
+    int height, width;
+    read_bmp(filename, &image, &height, &width);
+    if (height > HEIGHT)  {
+        printf("Image is too tall, printing only the top %d pixels\n", HEIGHT);
+        height = HEIGHT;
+    }
+    if (width > WIDTH) {
+        printf("Image is too wide, printing only the left %d pixels\n", WIDTH);
+        width = WIDTH;
+    }
+    // height goes from height to 0
+    for (int i = 0; i < height; i++) {
+        // width goes from 0 to width
+        for (int j = 0; j < width; j++) {
+            uint16_t color = conv24to16bit(image[height - i - 1][j][0], image[height - i - 1][j][1], image[height - i - 1][j][2]);
+            video_pixel(j, i, color);
+        }
+    }
+    switchScreen();
+}
+
 int main(void) {
     if (!video_open()) return -1;
     if (!SW_open()) return -1;
     if (!KEY_open()) return -1;
-
+    
     video_clear();
     video_erase();
+    
+    // read ./barack_obama.bmp
+    drawImage("barack_obama.bmp");
 
-    drawBackground();
-    drawBackground();
+    // drawBackground();
+    // drawBackground();
 
-    pthread_t vga_thread_id;
-    pthread_create(&vga_thread_id, NULL, vgaThread, NULL);
+    // pthread_t vga_thread_id;
+    // pthread_create(&vga_thread_id, NULL, vgaThread, NULL);
 
     int swState = 0;
     int keyState = 0;
 
-    while (swState != 0b1111) {
-        // Get UI inputs
-        SW_read(&swState);
-        KEY_read(&keyState);
+    // while (swState != 0b1111) {
+    //     // Get UI inputs
+    //     SW_read(&swState);
+    //     KEY_read(&keyState);
 
-        // Rotating hand
-        angleVelocity = swState / 64.0;
-    }
+    //     // Rotating hand
+    //     angleVelocity = swState / 64.0;
+    // }
 
     video_close();
     SW_close();
