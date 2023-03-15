@@ -10,6 +10,7 @@
 #include <intelfpgaup/KEY.h>
 #include <intelfpgaup/SW.h>
 #include <intelfpgaup/audio.h>
+#include <intelfpgaup/HEX.h>
 
 #define AUDIO_RATE 8000
 #define VOLUME 0x7FFFFFF
@@ -255,9 +256,9 @@ void drawImage(Image image) {
     int scnHeight = (int)SCREEN_HEIGHT;
     int scnWidth = (int)SCREEN_WIDTH;
 
-    if (image.height != scnHeight || image.width != scnWidth) {
-        printf("Image size does not match screen size, printing middle of image and padding with black\n");
-    }
+    // if (image.height != scnHeight || image.width != scnWidth) {
+    //     printf("Image size does not match screen size, printing middle of image and padding with black\n");
+    // }
 
     int top = max(0, (image.height - scnHeight) / 2);
     int left = max(0, (image.width - scnWidth) / 2);
@@ -278,10 +279,24 @@ void drawImage(Image image) {
     switchScreen();
 }
 
+int binaryToInt(int binary) {
+    int decimal = 0;
+    int base = 1;
+    while (binary > 0) {
+        if (binary & 1) {
+            decimal += base;
+        }
+        binary >>= 1;
+        base *= 2;
+    }
+    return decimal;
+}
+
 int main(void) {
     if (!video_open()) return -1;
     if (!SW_open()) return -1;
     if (!KEY_open()) return -1;
+    if (!HEX_open()) return -1;
     
     video_clear();
     video_erase();
@@ -309,8 +324,12 @@ int main(void) {
         // Get UI inputs
         SW_read(&swState);
         KEY_read(&keyState);
+
+        int swValue = binaryToInt(swState);
+        printf("swValue: %d\n", swValue);
+        HEX_set(swValue); 
         // print switches and keys as binary
-        printf("SW: %d%d%d%d, KEY: %d%d%d%d\r", (swState >> 3) & 1, (swState >> 2) & 1, (swState >> 1) & 1, swState & 1, (keyState >> 3) & 1, (keyState >> 2) & 1, (keyState >> 1) & 1, keyState & 1);
+        printf("SW: %d%d%d%d%d%d%d%d\n", (swState >> 7) & 1, (swState >> 6) & 1, (swState >> 5) & 1, (swState >> 4) & 1, (swState >> 3) & 1, (swState >> 2) & 1, (swState >> 1) & 1, swState & 1);
         
         clock_t start_time, end_time;
         start_time = clock();
@@ -331,6 +350,7 @@ int main(void) {
     video_close();
     SW_close();
     KEY_close();
+    HEX_close();
 
     return 0;
 }
