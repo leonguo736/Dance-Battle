@@ -12,6 +12,11 @@
 #define HW_REGS_SPAN ( 0x04000000 )
 #define HW_REGS_MASK ( HW_REGS_SPAN - 1 )
 
+#define SDRAM_BASE ( HPS_0_AXI_SDRAM_BASE )
+#define SDRAM_SPAN 0x03FFFFFF
+#define BUFF0_OFFSET 0x100000
+#define BUFF1_OFFSET 0x200000
+
 int main() {
 	int fd;
 	if( ( fd = open( "/dev/mem", ( O_RDWR | O_SYNC ) ) ) == -1 ) {
@@ -25,12 +30,19 @@ int main() {
 		close( fd );
 		return( 1 );
 	}
-	printf("virtual_base: %p\n", virtual_base);
+	printf("virtual_base: %p\n", virtual_base); 
 
-	volatile unsigned int *buf0, *buf1; 
-	buf0 = (unsigned int *)(virtual_base + 0x10000); 
-	buf1 = (unsigned int *)(virtual_base + 0x20000);	
-	printf("buf0: %p, buf1: %p\n", buf0, buf1);
+	void *sdram_virtual_base = mmap( NULL, SDRAM_SPAN, ( PROT_READ | PROT_WRITE ), MAP_SHARED, fd, SDRAM_BASE );
+	if( sdram_virtual_base == MAP_FAILED ) {
+		printf( "ERROR: mmap() failed for sdram_virtual_base...\n" );
+		close( fd );
+		return( 1 );
+	}
+
+	unsigned int *buff0_addr = (unsigned int *)((char *)sdram_virtual_base + BUFF0_OFFSET); 
+	printf("buff0_addr: %p\n", buff0_addr);
+	unsigned int *buff1_addr = (unsigned int *)((char *)sdram_virtual_base + BUFF1_OFFSET);
+	printf("buff1_addr: %p\n", buff1_addr);
 
 // --Avalon slave
 
@@ -69,39 +81,39 @@ int main() {
 // 	 constant IMAGE_COUNTER_ADDRESS  : integer  := 9;
 
 	void *h2p_lw_mode_addr = virtual_base + ( ( unsigned long  )( ALT_LWFPGASLVS_OFST + AVALON_IMG_WRITER_RGBGRAY_BASE ) & ( unsigned long)( HW_REGS_MASK ) );
-	*(uint32_t *)h2p_lw_mode_addr = 1; 
-	printf("Mode: %d\n", *(uint32_t *)h2p_lw_mode_addr); 
-
 	void *h2p_lw_buff0_addr = virtual_base + ( ( unsigned long  )( ALT_LWFPGASLVS_OFST + AVALON_IMG_WRITER_RGBGRAY_BASE + 1*4 ) & ( unsigned long)( HW_REGS_MASK ) );
-	*(uint32_t *)h2p_lw_buff0_addr = (uint32_t)buf0; 
-	printf("Buff0: %p\n", *(uint32_t *)h2p_lw_buff0_addr);
-
 	void *h2p_lw_buff1_addr = virtual_base + ( ( unsigned long  )( ALT_LWFPGASLVS_OFST + AVALON_IMG_WRITER_RGBGRAY_BASE + 2*4 ) & ( unsigned long)( HW_REGS_MASK ) );
-	*(uint32_t *)h2p_lw_buff1_addr = (uint32_t)buf1; 
-	printf("Buff1: %p\n", *(uint32_t *)h2p_lw_buff1_addr);
-	
-	// print out first x values of buffer
-	printf("Buffer0: "); 
-	for (int i = 0; i < 100; i++) {
-		printf("%08X,", buf0[i]);
-	}
-	printf("\n");
-
+	void *h2p_lw_cont_double_buff_addr = virtual_base + ( ( unsigned long  )( ALT_LWFPGASLVS_OFST + AVALON_IMG_WRITER_RGBGRAY_BASE + 3*4 ) & ( unsigned long)( HW_REGS_MASK ) );
+	void *h2p_lw_buffer_select_addr = virtual_base + ( ( unsigned long  )( ALT_LWFPGASLVS_OFST + AVALON_IMG_WRITER_RGBGRAY_BASE + 4*4 ) & ( unsigned long)( HW_REGS_MASK ) );
 	void *h2p_lw_start_capture_addr = virtual_base + ( ( unsigned long  )( ALT_LWFPGASLVS_OFST + AVALON_IMG_WRITER_RGBGRAY_BASE + 5*4 ) & ( unsigned long)( HW_REGS_MASK ) );
-	*(uint32_t *)h2p_lw_start_capture_addr = 1;
-
 	void *h2p_lw_standby_addr = virtual_base + ( ( unsigned long  )( ALT_LWFPGASLVS_OFST + AVALON_IMG_WRITER_RGBGRAY_BASE + 6*4 ) & ( unsigned long)( HW_REGS_MASK ) );
-	while (*(uint32_t *)h2p_lw_standby_addr == 1) {
-		printf("Waiting for standby...\n"); 
-	}
+	void *h2p_lw_last_buffer_addr = virtual_base + ( ( unsigned long  )( ALT_LWFPGASLVS_OFST + AVALON_IMG_WRITER_RGBGRAY_BASE + 7*4 ) & ( unsigned long)( HW_REGS_MASK ) );
+	void *h2p_lw_downsampling_addr = virtual_base + ( ( unsigned long  )( ALT_LWFPGASLVS_OFST + AVALON_IMG_WRITER_RGBGRAY_BASE + 8*4 ) & ( unsigned long)( HW_REGS_MASK ) );
+	void *h2p_lw_image_counter_addr = virtual_base + ( ( unsigned long  )( ALT_LWFPGASLVS_OFST + AVALON_IMG_WRITER_RGBGRAY_BASE + 9*4 ) & ( unsigned long)( HW_REGS_MASK ) );
 
-	void *h2p_lw_img_counter_addr = virtual_base + ( ( unsigned long  )( ALT_LWFPGASLVS_OFST + AVALON_IMG_WRITER_RGBGRAY_BASE + 9*4 ) & ( unsigned long)( HW_REGS_MASK ) );
-	printf("Image counter: %d\n", *(uint32_t *)h2p_lw_img_counter_addr);
+	*(uint32_t *)h2p_lw_mode_addr = 1;
+	printf("Mode: %d\n", *(uint32_t *)h2p_lw_mode_addr);
+	*(uint32_t *)h2p_lw_buff0_addr = (uint32_t)(SDRAM_BASE + BUFF0_OFFSET);
+	printf("Buff0: %p\n", (void *)(*(uint32_t *)h2p_lw_buff0_addr));
+	*(uint32_t *)h2p_lw_buff1_addr = (uint32_t)(SDRAM_BASE + BUFF1_OFFSET);
+	printf("Buff1: %p\n", (void *)(*(uint32_t *)h2p_lw_buff1_addr));
+	*(uint32_t *)h2p_lw_cont_double_buff_addr = 0;
+	printf("Cont double buff: %d\n", *(uint32_t *)h2p_lw_cont_double_buff_addr);
+	*(uint32_t *)h2p_lw_buffer_select_addr = 0;
+	printf("Buffer select: %d\n", *(uint32_t *)h2p_lw_buffer_select_addr);
+	*(uint32_t *)h2p_lw_downsampling_addr = 1;
+	printf("Downsampling: %d\n", *(uint32_t *)h2p_lw_downsampling_addr);
+	*(uint32_t *)h2p_lw_image_counter_addr = 0;
+	printf("Image counter: %d\n", *(uint32_t *)h2p_lw_image_counter_addr);
+	*(uint32_t *)h2p_lw_last_buffer_addr = 0;
+	printf("Last buffer: %d\n", *(uint32_t *)h2p_lw_last_buffer_addr);
+	*(uint32_t *)h2p_lw_start_capture_addr = 1; 
+	printf("Start capture: %d\n", *(uint32_t *)h2p_lw_start_capture_addr);
 
-	// print out first x values of buff0
+	printf("Standby: %d, Last buffer: %d, Image counter: %d\n", *(uint32_t *)h2p_lw_standby_addr, *(uint32_t *)h2p_lw_last_buffer_addr, *(uint32_t *)h2p_lw_image_counter_addr);
 	printf("Buffer0: "); 
 	for (int i = 0; i < 100; i++) {
-		printf("%08X,", buf0[i]);
+		printf("%08X,", buff0_addr[i]);
 	}
 	printf("\n");
 
