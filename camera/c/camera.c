@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <math.h>
+#include <time.h>
 #include <intelfpgaup/video.h>
 #include <intelfpgaup/KEY.h>
 #include <intelfpgaup/SW.h>
@@ -168,6 +169,40 @@ uint16_t conv24to16bit(uint8_t r, uint8_t g, uint8_t b) {
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 
+void filterByHue(unsigned char *rgb, int hsv_low, int hsv_high) {
+    int r = rgb[0];
+    int g = rgb[1];
+    int b = rgb[2];
+
+    double r_ = r / 255.0;
+    double g_ = g / 255.0;
+    double b_ = b / 255.0;
+    double cmax = max(r_, max(g_, b_));
+    double cmin = min(r_, min(g_, b_));
+    double delta = cmax - cmin;
+    
+    double h = 0;
+    if (delta == 0) {
+        h = 0;
+    } else if (cmax == r_) {
+        h = 60 * fmod(((g_ - b_) / delta), 6);
+    } else if (cmax == g_) {
+        h = 60 * (((b_ - r_) / delta) + 2);
+    } else if (cmax == b_) {
+        h = 60 * (((r_ - g_) / delta) + 4);
+    }
+
+    if (hsv_low <= h && h <= hsv_high) {
+        rgb[0] = r;
+        rgb[1] = g;
+        rgb[2] = b;
+    } else {
+        rgb[0] = 0;
+        rgb[1] = 0;
+        rgb[2] = 0;
+    }
+}
+
 void drawImage(char* filename) {
     int scnHeight = (int)HEIGHT;
     int scnWidth = (int)WIDTH;
@@ -189,12 +224,21 @@ void drawImage(char* filename) {
             if (i < top || i >= bottom || j < left || j >= right) {
                 video_pixel(j - left, i - top, 0); // TODO: test to see if it works
             } else {
-                uint16_t color = conv24to16bit(image[imgHeight - i - 1][j][0], image[imgHeight - i - 1][j][1], image[imgHeight - i - 1][j][2]);
+                unsigned char *rgb = image[imgHeight - i - 1][j];
+                filterByHue(rgb, 0, 30); 
+                uint16_t color = conv24to16bit(rgb[0], rgb[1], rgb[2]);
                 video_pixel(j - left, i - top, color);
             }
         }
     }
     switchScreen();
+}
+
+unsigned char*** loadImage(char* filename) {
+    unsigned char*** image;
+    int imgHeight, width;
+    read_bmp(filename, &image, &imgHeight, &width);
+    return image;
 }
 
 int main(void) {
@@ -206,7 +250,6 @@ int main(void) {
     video_erase();
     
     // read ./barack_obama.bmp
-    drawImage("barack_obama.bmp");
 
     // drawBackground();
     // drawBackground();
@@ -217,14 +260,26 @@ int main(void) {
     int swState = 0;
     int keyState = 0;
 
-    // while (swState != 0b1111) {
-    //     // Get UI inputs
-    //     SW_read(&swState);
-    //     KEY_read(&keyState);
+    while (swState != 0b1111) {
+        // Get UI inputs
+        SW_read(&swState);
+        KEY_read(&keyState);
+        
+        clock_t start_time, end_time;
+        start_time = clock();
+        drawImage("shrug.bmp");
+        end_time = clock();
+        printf("Time taken: %fms\n", (double)(end_time - start_time) / CLOCKS_PER_SEC * 1000);
 
-    //     // Rotating hand
-    //     angleVelocity = swState / 64.0;
-    // }
+        sleep(5);
+
+        start_time = clock();
+        drawImage("barack_obama.bmp");
+        end_time = clock();
+        printf("Time taken: %fms\n", (double)(end_time - start_time) / CLOCKS_PER_SEC * 1000);
+
+        sleep(5);
+    }
 
     video_close();
     SW_close();
