@@ -165,24 +165,33 @@ uint16_t conv24to16bit(uint8_t r, uint8_t g, uint8_t b) {
     return color;
 }
 
+#define max(a, b) (((a) > (b)) ? (a) : (b))
+#define min(a, b) (((a) < (b)) ? (a) : (b))
+
 void drawImage(char* filename) {
+    int scnHeight = (int)HEIGHT;
+    int scnWidth = (int)WIDTH;
+
     unsigned char*** image;
-    int height, width;
-    read_bmp(filename, &image, &height, &width);
-    if (height > HEIGHT)  {
-        printf("Image is too tall, printing only the top %d pixels\n", HEIGHT);
-        height = HEIGHT;
+    int imgHeight, width;
+    read_bmp(filename, &image, &imgHeight, &width);
+    if (imgHeight != (int)HEIGHT || width != (int)WIDTH) {
+        printf("Image size does not match screen size, printing middle of image and padding with black\n");
     }
-    if (width > WIDTH) {
-        printf("Image is too wide, printing only the left %d pixels\n", WIDTH);
-        width = WIDTH;
-    }
-    // height goes from height to 0
-    for (int i = 0; i < height; i++) {
-        // width goes from 0 to width
-        for (int j = 0; j < width; j++) {
-            uint16_t color = conv24to16bit(image[height - i - 1][j][0], image[height - i - 1][j][1], image[height - i - 1][j][2]);
-            video_pixel(j, i, color);
+
+    int top = max(0, (imgHeight - scnHeight) / 2);
+    int left = max(0, (width - scnWidth) / 2);
+    int bottom = min(imgHeight, top + scnHeight);
+    int right = min(width, left + scnWidth);
+    
+    for (int i = top; i < bottom; i++) {
+        for (int j = left; j < right; j++) {
+            if (i < top || i >= bottom || j < left || j >= right) {
+                video_pixel(j - left, i - top, 0); // TODO: test to see if it works
+            } else {
+                uint16_t color = conv24to16bit(image[imgHeight - i - 1][j][0], image[imgHeight - i - 1][j][1], image[imgHeight - i - 1][j][2]);
+                video_pixel(j - left, i - top, color);
+            }
         }
     }
     switchScreen();
