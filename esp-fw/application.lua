@@ -2,6 +2,9 @@ print("Application.lua")
 
 dofile("request.lua")
 dofile("server.lua")
+dofile("uart.lua")
+
+gpio.write(led, gpio.HIGH)
 
 local function test()
     print("test")

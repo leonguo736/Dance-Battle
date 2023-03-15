@@ -1,10 +1,15 @@
 -- load credentials, 'SSID' and 'PASSWORD' declared and initialize in there
 dofile("credentials.lua")
 
+led = 3
+gpio.mode(led, gpio.OUTPUT)
+gpio.write(led, gpio.HIGH)
+
 function startup()
     if file.open("init.lua") == nil then
         print("init.lua deleted or renamed")
     else
+        gpio.write(led, gpio.LOW)
         print("Running")
 
         net.dns.setdnsserver("8.8.8.8", 0)
@@ -16,6 +21,7 @@ end
 
 -- Define WiFi station event callbacks
 wifi_connect_event = function(T)
+  gpio.write(led, gpio.LOW)
   print("Connection to AP("..T.SSID..") established!")
   print("Waiting for IP address...")
   if disconnect_ct ~= nil then disconnect_ct = nil end
@@ -27,10 +33,12 @@ wifi_got_ip_event = function(T)
   print("Wifi connection is ready! IP address is: "..T.IP)
   print("Startup will resume momentarily, you have 3 seconds to abort.")
   print("Waiting...")
+  gpio.write(led, gpio.LOW)
   tmr.create():alarm(3000, tmr.ALARM_SINGLE, startup)
 end
 
 wifi_disconnect_event = function(T)
+  gpio.write(led, gpio.HIGH)
   if T.reason == wifi.eventmon.reason.ASSOC_LEAVE then
     --the station has disassociated from a previously connected AP
     return
