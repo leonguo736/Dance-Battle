@@ -23,8 +23,8 @@ double C_SCALE[8] = {261.63,293.66,329.63,349.23,392.00,440.00,493.88,523.25};
 #define PLUM_DARK 0x18a3 // 3,5,3
 #define PLUM_LIGHT 0x59eb // 11,15,11
 
-#define WIDTH 320
-#define HEIGHT 240
+#define SCREEN_WIDTH 320
+#define SCREEN_HEIGHT 240
 #define BORDER_PADDING 10
 
 #define SONGLIST_TOP 20
@@ -65,8 +65,8 @@ void sketchCircle(double centerX, double centerY, int radius, short colour) {
 }
 
 void drawBackground(void) {
-    for (int x = 0; x < WIDTH; x++) {
-        for (int y = 0; y < HEIGHT; y++) {
+    for (int x = 0; x < SCREEN_WIDTH; x++) {
+        for (int y = 0; y < SCREEN_HEIGHT; y++) {
             video_pixel(x, y, PLUM);
         }
     }
@@ -125,36 +125,48 @@ void * audioThread(void *vargp) {
     while (1);
 }
 
-void read_bmp(const char* filename, unsigned char**** image, int* height, int* width) {
+typedef struct Image {
+    int width;
+    int height;
+    unsigned char*** data; // height x width x RGB
+} Image;
+
+Image read_bmp(const char* filename) {
     FILE* file = fopen(filename, "rb");
+
     unsigned char header[54];
     fread(header, sizeof(unsigned char), 54, file);
+    int width, height, bit_depth;
+    width = *(int*)&header[18];
+    height = *(int*)&header[22];
+    bit_depth = *(int*)&header[28];
+    printf("Width: %d, Height: %d, Bit Depth: %d\n", width, height, bit_depth);
 
-    *width = *(int*)&header[18];
-    *height = *(int*)&header[22];
-    int bit_depth = *(int*)&header[28];
-
-    printf("Width: %d, Height: %d, Bit Depth: %d\n", *width, *height, bit_depth);
-
-    int row_size = ((bit_depth * *width + 31) / 32) * 4;
-    int data_size = row_size * *height;
+    unsigned char ***tensor;
+    int row_size = ((bit_depth * width + 31) / 32) * 4;
+    int data_size = row_size * height;
 
     unsigned char* data = (unsigned char*)malloc(data_size * sizeof(unsigned char));
     fread(data, sizeof(unsigned char), data_size, file);
 
-    *image = (unsigned char***)malloc(*height * sizeof(unsigned char**));
-    for (int i = 0; i < *height; i++) {
-        (*image)[i] = (unsigned char**)malloc(*width * sizeof(unsigned char*));
-        for (int j = 0; j < *width; j++) {
-            (*image)[i][j] = (unsigned char*)malloc(3 * sizeof(unsigned char));
-            (*image)[i][j][0] = data[i * row_size + j * 3 + 2];
-            (*image)[i][j][1] = data[i * row_size + j * 3 + 1];
-            (*image)[i][j][2] = data[i * row_size + j * 3 + 0];
+    tensor = (unsigned char***)malloc(height * sizeof(unsigned char**));
+    for (int i = 0; i < height; i++) {
+        tensor[i] = (unsigned char**)malloc(width * sizeof(unsigned char*));
+        for (int j = 0; j < width; j++) {
+            tensor[i][j] = (unsigned char*)malloc(3 * sizeof(unsigned char));
+            tensor[i][j][0] = data[i * row_size + j * 3 + 2];
+            tensor[i][j][1] = data[i * row_size + j * 3 + 1];
+            tensor[i][j][2] = data[i * row_size + j * 3 + 0];
         }
     }
-
     fclose(file);
     free(data);
+
+    Image image; 
+    image.width = width;
+    image.height = height;
+    image.data = tensor;
+    return image;
 }
 
 uint16_t conv24to16bit(uint8_t r, uint8_t g, uint8_t b) {
@@ -204,27 +216,25 @@ void filterByHue(unsigned char *rgb, int hsv_low, int hsv_high) {
 }
 
 void drawImage(char* filename) {
-    int scnHeight = (int)HEIGHT;
-    int scnWidth = (int)WIDTH;
+    int scnHeight = (int)SCREEN_HEIGHT;
+    int scnWidth = (int)SCREEN_WIDTH;
 
-    unsigned char*** image;
-    int imgHeight, width;
-    read_bmp(filename, &image, &imgHeight, &width);
-    if (imgHeight != (int)HEIGHT || width != (int)WIDTH) {
+    Image image = read_bmp(filename);
+    if (image.height != scnHeight || image.width != scnWidth) {
         printf("Image size does not match screen size, printing middle of image and padding with black\n");
     }
 
-    int top = max(0, (imgHeight - scnHeight) / 2);
-    int left = max(0, (width - scnWidth) / 2);
-    int bottom = min(imgHeight, top + scnHeight);
-    int right = min(width, left + scnWidth);
+    int top = max(0, (image.height - scnHeight) / 2);
+    int left = max(0, (image.width - scnWidth) / 2);
+    int bottom = min(image.height, top + scnHeight);
+    int right = min(image.width, left + scnWidth);
     
     for (int i = top; i < bottom; i++) {
         for (int j = left; j < right; j++) {
             if (i < top || i >= bottom || j < left || j >= right) {
                 video_pixel(j - left, i - top, 0); // TODO: test to see if it works
             } else {
-                unsigned char *rgb = image[imgHeight - i - 1][j];
+                unsigned char *rgb = image.data[image.height - i - 1][j]; 
                 filterByHue(rgb, 0, 30); 
                 uint16_t color = conv24to16bit(rgb[0], rgb[1], rgb[2]);
                 video_pixel(j - left, i - top, color);
@@ -232,13 +242,6 @@ void drawImage(char* filename) {
         }
     }
     switchScreen();
-}
-
-unsigned char*** loadImage(char* filename) {
-    unsigned char*** image;
-    int imgHeight, width;
-    read_bmp(filename, &image, &imgHeight, &width);
-    return image;
 }
 
 int main(void) {
@@ -278,7 +281,7 @@ int main(void) {
         end_time = clock();
         printf("Time taken: %fms\n", (double)(end_time - start_time) / CLOCKS_PER_SEC * 1000);
 
-        sleep(5);
+        sleep(3);
     }
 
     video_close();
