@@ -39,6 +39,10 @@ uart.on("data", "\r", function(data)
             end
             gpio.write(led, gpio.HIGH)
         end)
+    elseif (string.find(data, "ws")) then
+        gpio.write(led, gpio.LOW)
+        ws:send(data)
+        gpio.write(led, gpio.HIGH)
     else 
         gpio.write(led, gpio.LOW)
         uart.write(0, data .. "\n")
