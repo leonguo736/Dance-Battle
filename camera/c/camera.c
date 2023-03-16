@@ -29,8 +29,8 @@ int setup_camera() {
         printf("Error: malloc failed\n");
         return -1;
     }
-    images[0] = read_bmp("./images/barack_obama.bmp");
-    images[1] = read_bmp("./images/shrug.bmp");
+    images[0] = read_bmp("../images/barack_obama.bmp");
+    images[1] = read_bmp("../images/shrug.bmp");
     if (images[imgCount - 1].data == NULL) {
         printf("Error: incorrect imgCount\n");
         return -1;

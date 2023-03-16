@@ -6,6 +6,7 @@
 #include <pthread.h>
 #include <math.h>
 #include <time.h>
+#include <libgen.h>
 #include <intelfpgaup/video.h>
 #include <intelfpgaup/KEY.h>
 #include <intelfpgaup/SW.h>
@@ -15,7 +16,7 @@
 #include "camera.h"
 #include "params.h"
 
-int main(void) {
+int main(int argc, char *argv[]) {
     if (!video_open()) return -1;
     if (!SW_open()) return -1;
     if (!KEY_open()) return -1;
