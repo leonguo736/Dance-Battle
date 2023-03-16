@@ -3,7 +3,8 @@
 gcc -std=gnu99 -Wall -pthread -o camera camera.c -lintelfpgaup -lm && ./camera
 
 ## Load drivers
-~/Linux_Libraries/drivers/load_drivers
+cd ~/Linux_Libraries/drivers/
+./load_drivers
 
 ## Compile Code
 gcc -std=gnu99 -Wall -pthread -o camera camera.c -lintelfpgaup -lm
