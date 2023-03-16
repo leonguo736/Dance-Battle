@@ -1,10 +1,10 @@
 # Camera Instructions
 
 ## Load drivers
-cd ~/Linux_Libraries/drivers/ && ./load_drivers && cd ~/camera/
+cd ~/Linux_Libraries/drivers/ && ./load_drivers && cd ~
 
 ## Mount and Copy Images
-mount UUID=BAC3-B2A7 /mnt/usb && cd ~/camera/ && rm ./images/ -r && cp /mnt/usb/images ./images -r
+mount UUID=BAC3-B2A7 /mnt/usb && cp /mnt/usb/camera/ ~/camera2/ -r
 
 ## Compile & Run Everything
 make && ./main

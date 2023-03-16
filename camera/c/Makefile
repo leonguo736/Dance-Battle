@@ -2,9 +2,9 @@ CC = gcc
 CFLAGS = -std=gnu99 -pthread
 LIBS = -lintelfpgaup -lm
 
-SRCS = main.c display.c camera.c
+SRCS = main_camera.c display.c camera.c
 OBJS = $(SRCS:.c=.o)
-TARGET = main
+TARGET = main_camera
 
 all: $(TARGET)
 

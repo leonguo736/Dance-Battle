@@ -17,7 +17,7 @@
 #include "camera.h"
 
 Image *images; 
-const int imgCount = 2;
+const int imgCount = 3;
 int imgIndex = 0;
 
 int hue_low = 0;
@@ -29,8 +29,9 @@ int setup_camera() {
         printf("Error: malloc failed\n");
         return -1;
     }
-    images[0] = read_bmp("../images/barack_obama.bmp");
-    images[1] = read_bmp("../images/shrug.bmp");
+    images[0] = read_bmp("../images/hsv.bmp");
+    images[1] = read_bmp("../images/barack_obama.bmp");
+    images[2] = read_bmp("../images/shrug.bmp");
     if (images[imgCount - 1].data == NULL) {
         printf("Error: incorrect imgCount\n");
         return -1;

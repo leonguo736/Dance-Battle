@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "camera.h": "c",
+        "params.h": "c",
+        "display.h": "c",
+        "youwantgnomes.h": "c"
+    }
+}
