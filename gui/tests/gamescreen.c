@@ -9,149 +9,127 @@
 #include <intelfpgaup/SW.h>
 #include <intelfpgaup/audio.h>
 
+#include "display.h"
 #include "youwantgnomes.h"
 
 // Audio
 
 #define AUDIO_RATE 8000
 #define VOLUME 0x7FFFFFF
-#define NUM_SAMPLES 480000
 
-// Dimensions
+#define SAMPLES_PER_FRAME 200 // 40 FPS
+#define PIXELS_PER_SAMPLE 0.01375 // Pose movement speed
+#define POSE_LIFETIME 16000 // In samples
 
-#define WIDTH 320
-#define HEIGHT 240
-
-#define BORDER 5
-
-#define POSE_PIXELS_PER_SAMPLE 0.01375
-
-// Colors
-
-#define COLOR_BG 0x2804
-#define COLOR_BORDER 0x1802
-
-#define COLOR_HLINE 0xffd8
-#define COLOR_VLINE 0x50a7
-#define COLOR_DOT 0xefa9
-#define COLOR_HHAND 0xee3
-#define COLOR_MHAND 0xb3b
-
-#define COLOR_PROGRESSBORDER 0xb194
-#define COLOR_PROGRESSFILL 0xfab4
-
-// Structs
-
-struct Pose {
-    double beat;   // Song time (beats)
-    double shx, shy, mhx, mhy; // Hour hand and minute hand positions
-};
-
-struct Song {
-    double spb;    // Samples per beat
-    double offset; // Samples of offset before the first beat
-    struct Pose poses[50];  // Array of Pose information
-};
 struct Song song;
-
-struct GamescreenState {
-    double songProgress;
-};
-
-int modifyingScreen = 0;
-
-double songDelay = 4.0;
-double songDelayTimer = 0;
-int sampleCounter;
-struct Song mySong;
-int samplesPerFrame = 200; // 40 frames per second
-
 int started = 0;
 int state = 0;
-struct GamescreenState gamescreenStates[2];
 
-// Audio playing tool
-void writeAudio(int l, int r) {
+struct GamescreenState {
+    int progressBarWidth;
+    int earlyPose;
+    int latePose;
+    int poseXs[MAX_POSES];
+};
+
+int poseXs1[MAX_POSES];
+int poseXs2[MAX_POSES];
+
+struct GamescreenState gamescreenStates[2] = {
+    {0, -1, -1, poseXs1},
+    {0, -1, -1, poseXs2}
+};
+
+// Audio playing
+void writeAudio(int l, int r, int skip) {
     // This function maintains the game speed
-    audio_wait_write();
+    if (!skip) audio_wait_write();
     audio_write_left(l);
     audio_write_right(r);
 }
 
-// DISPLAY TOOLS (for drawing each element)
-
 // Use to switch the screen (also switches state)
 void switchScreen(void) {
     video_show();
-    modifyingScreen = !modifyingScreen;
+    state = !state;
 }
 
-// Draws the vertical line
-void drawVLine(void) {
-    video_line(50, BORDER, 50, HEIGHT - BORDER, COLOR_VLINE);
+void updateProgressBar() {
+    int oldWidth = gamescreenStates[state].progressBarWidth;
+    int newWidth = (int)(159 * (double)song.sampleNo / MAX_SAMPLES);
+    gamescreenStates[state].progressBarWidth = newWidth;
+
+    video_box(81 + oldWidth, 211, 81 + newWidth, 224, COLOR_PROGRESSFILL);
 }
 
-// Draws the horizontal lines
-void drawHLines(void) {
-    video_line(BORDER, 50, WIDTH - BORDER, 50, COLOR_HLINE);
-    video_line(BORDER, HEIGHT - 50, WIDTH - BORDER, HEIGHT - 50, COLOR_HLINE);
-}
-
-// Draws the outline of the progress bar
-void drawProgressOutline(void) {
-    video_line(80, 210, 240, 210, COLOR_PROGRESSBORDER);
-    video_line(80, 225, 240, 225, COLOR_PROGRESSBORDER);
-    video_line(80, 210, 80, 225, COLOR_PROGRESSBORDER);
-    video_line(240, 210, 240, 225, COLOR_PROGRESSBORDER);
-}
-
-// Places the background on both buffers
-void drawBackground(void) {
-    for (int s = 0; s < 2; s++) {
-        for (int x = 0; x < WIDTH; x++) {
-            for (int y = 0; y < HEIGHT; y++) {
-                if (x < BORDER || y < BORDER || x > WIDTH - BORDER || y > HEIGHT - BORDER) {
-                    video_pixel(x, y, COLOR_BORDER);
-                } else {
-                    video_pixel(x, y, COLOR_BG);
-                }
-            }
-        }
-
-        drawVLine();
-        drawHLines();
-        drawProgressOutline();
-
-        video_show();
-    }
-}
-
-void updateProgressBar(double newProgress) {
-    double oldProgress = gamescreenStates[modifyingScreen].songProgress;
-    gamescreenStates[modifyingScreen].songProgress = newProgress;
-
-    int x1 = (int)(81 + 158 * oldProgress);
-    int x2 = (int)(81 + 158 * newProgress);
-    video_box(x1, 211, x2, 224, COLOR_PROGRESSFILL);
-}
-
-int getPoseX(int p) {
-    struct Pose pose = song.poses[p];
-    int x = (int)(50 + POSE_PIXELS_PER_SAMPLE * (pose.beat * song.spb - sampleCounter + song.offset));
+int getPoseX(struct ScreenPose sp) {
+    printf("SP: %d, SONG: %d\n", sp.sample, song.sampleNo);
+    int x = (int)(50 + PIXELS_PER_SAMPLE * (sp.sample - song.sampleNo + song.sampleOffset));
     if (x >= 50 && x <= 270) {
         return x;
     }
     return 0;
 }
 
-void updatePoses(void) {
-    for (int p = 0; p < 50; p++) {
+void drawPose(int x, int hx, int hy, int mx, int my, int erase) {
+    drawVLine();
+    video_line(x, 120, x + hx, 120 + hy, erase ? COLOR_BG : COLOR_HHAND);
+    video_line(x, 120, x + mx, 120 + my, erase ? COLOR_BG : COLOR_MHAND);
+    // video_pixel(x, 50, erase ? COLOR_HLINE : COLOR_DOT);
+    // video_pixel(x, 190, erase ? COLOR_HLINE : COLOR_DOT);
+    video_line(x, 51, x, 189, erase ? COLOR_BG : COLOR_VLINE);
+}
 
+void updatePoses(void) {
+    int oldEarly = gamescreenStates[state].earlyPose;
+    int oldLate = gamescreenStates[state].latePose;
+    printf("Early: %d\n", oldEarly);
+    printf("Late: %d\n", oldLate);
+    if (oldEarly != -1) {
+        for (int p = oldEarly; p <= oldLate; p++) {
+            int oldX = gamescreenStates[state].poseXs[p];
+            struct ScreenPose sp = song.screenPoses[p];
+            drawPose(oldX, sp.hx, sp.hy, sp.mx, sp.my, 1);
+        }
+    }
+
+    // Advance pose range if necessary
+    if (song.earlyPose == -1) {
+        if (song.sampleNo >= song.screenPoses[0].sample - POSE_LIFETIME) {
+            printf("Started\n");
+            song.earlyPose = 0;
+            song.latePose = 0;
+        }
+    } else {
+        if (song.latePose < song.numPoses && song.sampleNo >= song.screenPoses[song.latePose + 1].sample - POSE_LIFETIME) {
+            song.latePose++;
+            printf("Song late pose: %d\n", song.latePose);
+        }
+        if (song.earlyPose < song.numPoses && song.sampleNo >= song.screenPoses[song.earlyPose].sample) {
+            song.earlyPose++;
+            printf("Song early pose: %d\n", song.earlyPose);
+        }
+    }
+
+    gamescreenStates[state].earlyPose = song.earlyPose;
+    gamescreenStates[state].latePose = song.latePose;
+
+    // Advance pose x
+    if (song.earlyPose != -1) {
+        for (int p = song.earlyPose; p <= song.latePose; p++) {
+            struct ScreenPose sp = song.screenPoses[p];
+            int x = getPoseX(sp);
+            printf("X of %d: %d\n", p, x);
+            sp.x = x;
+            gamescreenStates[state].poseXs[p] = x;
+            if (x != 0) drawPose(x, sp.hx, sp.hy, sp.mx, sp.my, 0);
+        }
     }
 }
 
-void updateDisplay(double newProgress) {
-    updateProgressBar(newProgress);
+void updateDisplay() {
+    updateProgressBar();
+    updatePoses();
     switchScreen();
 }
 
@@ -163,18 +141,34 @@ void * guiThread(void *vargp) {
     video_erase();
     drawBackground();
 
+    // Init song data
+
+    int numPoses = 4;
+    struct Pose poses[MAX_POSES] = {
+        {16, 0, 0.1},
+        {18, 0.2, 0.3},
+        {20, 0.4, 0.6},
+        {22, 0.5, 0.7}
+    };
+
+    // double nothingL[480000];
+    // double nothingR[480000];
+
+    song = initSong( AUDIO_RATE / (174.0 / 60), 0, (double *)youwantgnomes_L, (double *)youwantgnomes_R, numPoses, poses);
+
     while (!started);
 
     int frame = 0;
 
-    for (sampleCounter = 0; sampleCounter < NUM_SAMPLES; sampleCounter++) {
-        writeAudio(VOLUME * youwantgnomes_L[sampleCounter], VOLUME * youwantgnomes_R[sampleCounter]);
+    // Loop
+
+    for (song.sampleNo; song.sampleNo < MAX_SAMPLES; song.sampleNo++) {
+        writeAudio(VOLUME * song.samplesL[song.sampleNo], VOLUME * song.samplesR[song.sampleNo], song.sampleNo % SAMPLES_PER_FRAME == 0);
         //writeAudio(0, 0);
 
-        // Update display at equal intervals in the song
-        if (sampleCounter % samplesPerFrame == 0) {
-            double newProgress = (double)sampleCounter / NUM_SAMPLES;
-            updateDisplay(newProgress);
+        // Update display
+        if (song.sampleNo % SAMPLES_PER_FRAME == 0) {
+            updateDisplay();
             frame++;
         }
     }
@@ -188,10 +182,6 @@ int main(void) {
     if (!video_open()) return 1;
     if (!SW_open()) return 1;
     if (!KEY_open()) return 1;
-
-    // Song data
-    song.spb = 8000 / 2.9;
-    song.offset = 0;
 
     pthread_t gui_thread_id;
     pthread_create(&gui_thread_id, NULL, guiThread, NULL);
