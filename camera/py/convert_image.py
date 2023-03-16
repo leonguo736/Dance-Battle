@@ -5,6 +5,9 @@ def convert(path_in: str, path_out: str = None) -> None:
     # Convert image to 24-bit RGB BMP
     img = Image.open(path_in)
     img = img.convert("RGB")
+
+    img = img.resize((320, 240), Image.ANTIALIAS)
+
     if path_out is None:
         path_out = path_in[:path_in.rfind(".")] + ".bmp"
     print(path_out)

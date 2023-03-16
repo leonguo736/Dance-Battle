@@ -12,6 +12,8 @@
 #include <intelfpgaup/audio.h>
 #include <intelfpgaup/HEX.h>
 
+#define STATE_CAMERA_SW 9 // display camera if (swState >> STATE_CAMERA_SW)
+
 const int SCREEN_WIDTH = 320;
 const int SCREEN_HEIGHT = 240;
 
@@ -31,16 +33,6 @@ void sketchCircle(double centerX, double centerY, int radius, short colour) {
             }
         }
     }
-}
-
-void * vgaThread(void *vargp) {
-    // while (1) {
-    //     angle += angleVelocity;
-    //     drawHand();
-    //     //drawSongList();
-    //     sleep(1 / 60.0);
-    // }
-    return NULL;
 }
 
 typedef struct Image {
@@ -95,109 +87,53 @@ Image read_bmp(const char* filename) {
 }
 
 uint16_t conv24to16bit(uint8_t r, uint8_t g, uint8_t b) {
-    uint16_t color = 0;
-    int r2 = (int)(r / 256.0 * 32);
-    int g2 = (int)(g / 256.0 * 64);
-    int b2 = (int)(b / 256.0 * 32);
-    color = b2 + (g2 << 5) + (r2 << 11);
-    return color;
+    return (uint16_t)((int)(b / 256.0 * 32) + ((int)(g / 256.0 * 64) << 5) + ((int)(r / 256.0 * 32) << 11)); 
 }
 
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 
 int withinHueRange(unsigned char *rgb, int *args, int argCount) {
-    if (argCount != 2) {
-        printf("Error: filterbyHue takes 2 arguments\n");
-        return 0;
-    } 
-    int hsv_low = args[0];
-    int hsv_high = args[1];
-
-    int r = rgb[0];
-    int g = rgb[1];
-    int b = rgb[2];
-
-    double r_ = r / 255.0;
-    double g_ = g / 255.0;
-    double b_ = b / 255.0;
-    double cmax = max(r_, max(g_, b_));
-    double cmin = min(r_, min(g_, b_));
-    double delta = cmax - cmin;
-    
-    double h = 0;
-    if (delta == 0) {
+    if (argCount != 2 || args[0] > args[1]) { 
+        printf("Warning: Hue low is greater than hue high, no filter applied\n");
+        return 1;
+    }
+    double r = rgb[0] / 255.0, 
+        g = rgb[1] / 255.0, 
+        b = rgb[2] / 255.0,
+        cmax = fmax(r, fmax(g, b)), 
+        cmin = fmin(r, fmin(g, b)), 
+        delta = cmax - cmin, 
         h = 0;
-    } else if (cmax == r_) {
-        h = 60 * fmod(((g_ - b_) / delta), 6);
-    } else if (cmax == g_) {
-        h = 60 * (((b_ - r_) / delta) + 2);
-    } else if (cmax == b_) {
-        h = 60 * (((r_ - g_) / delta) + 4);
-    }
-
-    return hsv_low <= h && h <= hsv_high;
+    if (delta == 0) { h = 0; }
+    else if (cmax == r) { h = 60 * fmod(((g - b) / delta), 6); }
+    else if (cmax == g) { h = 60 * (((b - r) / delta) + 2); }
+    else if (cmax == b) { h = 60 * (((r - g) / delta) + 4); }
+    if (h < 0) { h += 360; }
+    return (args[0] <= (int)h && (int)h <= args[1]); 
 }
 
-void filterbyHue(Image image, int hsv_low, int hsv_high) {
-    for (int i = 0; i < image.height; i++) {
-        for (int j = 0; j < image.width; j++) {
-            if (!withinHueRange(image.data[i][j], (int[]){hsv_low, hsv_high}, 2)) {
-                image.data[i][j][0] = 0;
-                image.data[i][j][1] = 0;
-                image.data[i][j][2] = 0;
-            } else {
-                image.data[i][j][0] = image.data[i][j][0]; 
-                image.data[i][j][1] = image.data[i][j][1];
-                image.data[i][j][2] = image.data[i][j][2];
-            }
-        }
-    }
-}
-
-void drawImage(Image image) {
-    int scnHeight = SCREEN_HEIGHT;
-    int scnWidth = SCREEN_WIDTH;
-
-    int top = max(0, (image.height - scnHeight) / 2);
-    int left = max(0, (image.width - scnWidth) / 2);
-    int bottom = min(image.height, top + scnHeight);
-    int right = min(image.width, left + scnWidth);
-    
-    for (int i = top; i < bottom; i++) {
-        for (int j = left; j < right; j++) {
-            if (i < top || i >= bottom || j < left || j >= right) {
-                video_pixel(j - left, i - top, 0); // TODO: test to see if it works
-            } else {
-                unsigned char *rgb = image.data[image.height - i - 1][j]; 
-                uint16_t color = conv24to16bit(rgb[0], rgb[1], rgb[2]);
-                video_pixel(j - left, i - top, color);
-            }
-        }
-    }
-    switchScreen();
+int noFilter(unsigned char *rgb, int *args, int argCount) {
+    return 1;
 }
 
 void drawImageFiltered(Image image, int (*localFilter)(unsigned char *, int *, int), int *args, int argCount) {
     int scnHeight = SCREEN_HEIGHT;
     int scnWidth = SCREEN_WIDTH;
 
+    // display image centered on screen
     int top = max(0, (image.height - scnHeight) / 2);
     int left = max(0, (image.width - scnWidth) / 2);
     int bottom = min(image.height, top + scnHeight);
     int right = min(image.width, left + scnWidth);
-
+    
     for (int i = top; i < bottom; i++) {
         for (int j = left; j < right; j++) {
-            if (i < top || i >= bottom || j < left || j >= right) {
-                video_pixel(j - left, i - top, 0); // TODO: test to see if it works
+            unsigned char *rgb = image.data[image.height - i - 1][j]; 
+            if (localFilter(rgb, args, argCount)) {
+                video_pixel(j - left, i - top, conv24to16bit(rgb[0], rgb[1], rgb[2]));
             } else {
-                unsigned char rgb[3] = {image.data[image.height - i - 1][j][0], image.data[image.height - i - 1][j][1], image.data[image.height - i - 1][j][2]};
-                if (localFilter(rgb, args, argCount)) {
-                    video_pixel(j - left, i - top, conv24to16bit(rgb[0], rgb[1], rgb[2]));
-                } else {
-                    video_pixel(j - left, i - top, 0);
-                }
+                video_pixel(j - left, i - top, 0);
             }
         }
     }
@@ -226,49 +162,41 @@ int main(void) {
     video_clear();
     video_erase();
 
-    // drawBackground();
-    // drawBackground();
-
-    // pthread_t vga_thread_id;
-    // pthread_create(&vga_thread_id, NULL, vgaThread, NULL);
-
     int swState = 0;
     int keyState = 0;
 
-    Image barackObama = read_bmp("barack_obama.bmp");
-    Image barackObamaFiltered = read_bmp("barack_obama.bmp");
-    Image shrug = read_bmp("shrug.bmp");
-    Image shrugFiltered = read_bmp("shrug.bmp");
+    int imgCount = 2; 
+    Image images[imgCount];
+    images[0] = read_bmp("./images/barack_obama.bmp");
+    images[1] = read_bmp("./images/shrug.bmp");
+    if (images[imgCount - 1].data == NULL) {
+        printf("Incorrect imgCount\n");
+        return -1;
+    }
 
-    filterbyHue(barackObamaFiltered, 0, 30);
-    filterbyHue(shrugFiltered, 0, 30);
+    int hue_low = 0; 
+    int hue_high = 359; 
 
-    while (swState != 0b1111) {
-        // Get UI inputs
+    int imgIndex = 0; 
+    clock_t startTime, endTime;
+    while (!(keyState >> 3) & 1) {
         SW_read(&swState); 
         KEY_read(&keyState); 
-
-        int swValue = binaryToInt(swState);
-        printf("swValue: %d\n", swValue);
-        HEX_set(swValue); 
-        // print switches and keys as binary
-        printf("SW: %d%d%d%d%d%d%d%d\n", (swState >> 7) & 1, (swState >> 6) & 1, (swState >> 5) & 1, (swState >> 4) & 1, (swState >> 3) & 1, (swState >> 2) & 1, (swState >> 1) & 1, swState & 1);
         
-        clock_t start_time, end_time;
-        start_time = clock();
-        drawImage(barackObama);
-        end_time = clock();
-        printf("Time taken: %fms\n", (double)(end_time - start_time) / CLOCKS_PER_SEC * 1000);
-
-        sleep(1);
-
-        start_time = clock();
-        // drawImage(barackObamaFiltered);
-        drawImageFiltered(barackObama, withinHueRange, (int[]){0, 30}, 2);
-        end_time = clock();
-        printf("Time taken: %fms\n", (double)(end_time - start_time) / CLOCKS_PER_SEC * 1000);
-
-        sleep(1);
+        if ((swState >> STATE_CAMERA_SW) & 1) {
+            int hueValue = binaryToInt((swState & 0b11111) << 4);
+            HEX_set(hueValue); 
+            if ((keyState >> 2) & 1 ) {
+                imgIndex = 1 % imgCount; 
+            } else if ((keyState >> 1) & 1) {
+                hue_low = hueValue > 359 ? 359 : hueValue;
+            } else if ((keyState >> 0) & 1) {
+                hue_high = hueValue > 359 ? 359 : hueValue;
+            }
+            printf("hue_low: %d, hue_high: %d\n", hue_low, hue_high);
+            
+            drawImageFiltered(images[imgIndex], withinHueRange, (int[]){hue_low, hue_high}, 2);
+        }
     }
 
     video_close();
