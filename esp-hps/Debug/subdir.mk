@@ -4,14 +4,20 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../esp.c \
+../hex.c \
 ../main.c \
 ../uart.c 
 
 OBJS += \
+./esp.o \
+./hex.o \
 ./main.o \
 ./uart.o 
 
 C_DEPS += \
+./esp.d \
+./hex.d \
 ./main.d \
 ./uart.d 
 

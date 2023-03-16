@@ -2,31 +2,11 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/mman.h>
-#include "hwlib.h"
-#include "socal/socal.h"
-#include "socal/hps.h"
-#include "socal/alt_gpio.h"
-#include "hps_0.h"
+
+#include "regs.h"
+#include "hex.h"
 #include "uart.h"
-
-#define HW_REGS_BASE ( ALT_STM_OFST )
-#define HW_REGS_SPAN ( 0x04000000 )
-#define HW_REGS_MASK ( HW_REGS_SPAN - 1 )
-
-#define INVERT 0xFFFFFFFF
-
-char hex_values[10] = {
-	0x3F, // 0
-	0x06, // 1
-	0x5B, // 2
-	0x4F, // 3
-	0x66, // 4
-	0x6D, // 5
-	0x7D, // 6
-	0x07, // 7
-	0x7F, // 8
-	0x6F  // 9
-};
+#include "esp.h"
 
 int main(int argc, char** argv) {
 
@@ -37,7 +17,6 @@ int main(int argc, char** argv) {
 	int led_mask;
 	char c;
 	void *h2p_lw_led_addr;
-	void *h2p_hex_addr;
 
 	if (argc == 0) {
 		printf("No arguments passed\n");
@@ -63,12 +42,8 @@ int main(int argc, char** argv) {
 	}
 
 	h2p_lw_led_addr = virtual_base + (( unsigned long)(ALT_LWFPGASLVS_OFST + PIO_LED_BASE) & (unsigned long)(HW_REGS_MASK));
-	h2p_hex_addr = virtual_base + ((unsigned long)(ALT_LWFPGASLVS_OFST + HEX0_BASE) & (unsigned long)(HW_REGS_MASK));
 
-	printf("----- REGS -----\n");
-	printf("%p | %p\n", h2p_lw_led_addr, h2p_hex_addr);
-
-
+	hex_init(virtual_base);
 	uart_init(virtual_base);
 	// toggle the LEDs a bit
 	char buffer[1024];
@@ -85,7 +60,7 @@ int main(int argc, char** argv) {
 
 		if (argv[1][0] == '1') {
 			printf("Setting Hex\n");
-			*(uint8_t *)h2p_hex_addr = hex_values[loop_count % 10] ^ INVERT;
+			hex_write(loop_count % 10);
 		}
 		else if (argv[1][0] == '2') {
 			scanf("%s", buffer);
@@ -108,41 +83,35 @@ int main(int argc, char** argv) {
 			scanf("%s", buffer);
 			cur = buffer;
 			
-			*(uint8_t *)h2p_hex_addr = hex_values[0] ^ INVERT;
-			
 			while (*cur != '\0') {
 				uart_write_data((unsigned int) *cur);
 				cur++;
 			}
 
-			*(uint8_t *)h2p_hex_addr = hex_values[1] ^ INVERT;
 			uart_write_data((unsigned int) '\r');
 
-			*(uint8_t *)h2p_hex_addr = hex_values[2] ^ INVERT;
 			recvCur = recvBuffer;
 
 			while (1) {
-				*(uint8_t *)h2p_hex_addr = hex_values[3] ^ INVERT;
 				uart_read_data((unsigned int *)recvCur);
 
-				*(uint8_t *)h2p_hex_addr = hex_values[4] ^ INVERT;
 				if (*recvCur - '0' >= 0 && *recvCur - '0' <= 9) {
-					*(uint8_t *)h2p_hex_addr = hex_values[*recvCur - '0'] ^ INVERT;
+					hex_write(*recvCur - '0');
 				}
 				printf("%c", *recvCur);
 
-				*(uint8_t *)h2p_hex_addr = hex_values[5] ^ INVERT;
 				if (*recvCur == '\n') {
 					break;
 				}
 				recvCur++;
 			}
 		} else {
-			printf("Invalid Argument\n");
+			printf("Running esp\n");
+
+			run();
 			return 1;
 		}
 
-		*(uint8_t *)h2p_hex_addr = hex_values[6] ^ INVERT;
 		usleep(100 * 1000);
 
 		// update led mask

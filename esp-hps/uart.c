@@ -2,9 +2,7 @@
 #include "hwlib.h"
 #include "socal/hps.h" 
 #include "uart.h"
-
-#define HW_REGS_SPAN ( 0x04000000 )
-#define HW_REGS_MASK (HW_REGS_SPAN - 1)
+#include "regs.h"
 
 volatile uint16_t *UART_RXDATA_REG;
 volatile uint16_t *UART_TXDATA_REG;
