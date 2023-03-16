@@ -9,6 +9,9 @@ typedef struct Image {
     unsigned char*** data; // height x width x RGB
 } Image;
 
+int setup_camera(); 
+void updateCameraStates(int swState, int keyState); 
+void drawFilteredImage(); 
 Image read_bmp(const char* filename);
 uint16_t conv24to16bit(uint8_t r, uint8_t g, uint8_t b);
 int withinHueRange(unsigned char *rgb, int *args, int argCount);

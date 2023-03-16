@@ -16,6 +16,48 @@
 #include "display.h"
 #include "camera.h"
 
+Image *images; 
+const int imgCount = 2;
+int imgIndex = 0;
+
+int hue_low = 0;
+int hue_high = 359;
+
+int setup_camera() {
+    images = (Image*)malloc(imgCount * sizeof(Image));
+    if (images == NULL) {
+        printf("Error: malloc failed\n");
+        return -1;
+    }
+    images[0] = read_bmp("./images/barack_obama.bmp");
+    images[1] = read_bmp("./images/shrug.bmp");
+    if (images[imgCount - 1].data == NULL) {
+        printf("Error: incorrect imgCount\n");
+        return -1;
+    }
+    return 0; 
+}
+
+void updateCameraStates(int swState, int keyState) {
+    int swValue = binaryToInt((swState & 0b11111) << 4);    
+    HEX_set(swValue); 
+
+    if ((keyState >> 2) & 1 ) {
+        imgIndex = 1 % imgCount; 
+    } else if ((keyState >> 1) & 1) {
+        hue_low = swValue > 359 ? 359 : swValue;
+        printf("Info: updated hue_low to %d\n", hue_low);
+    } else if ((keyState >> 0) & 1) {
+        hue_high = swValue > 359 ? 359 : swValue;
+        printf("Info: updated hue_high to %d\n", hue_high);
+    }
+}
+
+void drawFilteredImage() {
+    drawImageFiltered(images[imgIndex], withinHueRange, (int[]){hue_low, hue_high}, 2);
+    printf("Info: hue_low: %d, hue_high: %d\n", hue_low, hue_high);
+}
+
 Image read_bmp(const char* filename) {
     FILE* file = fopen(filename, "rb");
     if (!file) {
@@ -69,8 +111,8 @@ uint16_t conv24to16bit(uint8_t r, uint8_t g, uint8_t b) {
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 
 int withinHueRange(unsigned char *rgb, int *args, int argCount) {
-    if (argCount != 2 || args[0] > args[1]) { 
-        printf("Warning: Hue low is greater than hue high, no filter applied\n");
+    if (argCount != 2) { 
+        printf("Error: no hue range in withinHueRange, returning 1\n");
         return 1;
     }
     double r = rgb[0] / 255.0, 
