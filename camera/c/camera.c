@@ -51,6 +51,10 @@ typedef struct Image {
 
 Image read_bmp(const char* filename) {
     FILE* file = fopen(filename, "rb");
+    if (!file) {
+        printf("Error: %s not found\n", filename);
+        exit(1);
+    }
 
     unsigned char header[54];
     fread(header, sizeof(unsigned char), 54, file);
