@@ -3,12 +3,27 @@
 gcc -std=gnu99 -Wall -pthread -o camera camera.c -lintelfpgaup -lm && ./camera
 
 ## Load drivers
-cd ~/Linux_Libraries/drivers/
-./load_drivers
+cd ~/Linux_Libraries/drivers/ && ./load_drivers && cd ~/camera/
 
 ## Compile Code
 gcc -std=gnu99 -Wall -pthread -o camera camera.c -lintelfpgaup -lm
 
+## Ethernet in Lab
+`xx:xx:xx:xx:xx:xx` is the Physical Address of the "Ethernet adpater Ethernet" after running `ipconfig /all` on the desktop that you stole ethernet cable from. 
+ifconfig eth0 down
+ifconfig eth0 hw xx:xx:xx:xx:xx:xx
+ifconfig eth0 up
+dhclient eth0
+
+## Linux SD Card Setup
+Replace `/etc/apt/sources.list` with "
+deb http://old-releases.ubuntu.com/ubuntu/ precise main universe restricted multiverse
+deb-src http://old-releases.ubuntu.com/ubuntu/ precise main universe restricted multiverse
+deb http://old-releases.ubuntu.com/ubuntu/ precise-updates main universe restricted multiverse
+deb-src http://old-releases.ubuntu.com/ubuntu/ precise-updates main universe restricted multiverse
+deb http://old-releases.ubuntu.com/ubuntu/ precise-security main universe restricted multiverse
+deb-src http://old-releases.ubuntu.com/ubuntu/ precise-security main universe restricted multiverse
+"
 
 # Alex's Instructions
 Instructions for running a program:
