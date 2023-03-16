@@ -6,11 +6,8 @@ cd ~/Linux_Libraries/drivers/ && ./load_drivers && cd ~/camera/
 ## Mount and Copy Images
 mount UUID=BAC3-B2A7 /mnt/usb && cd ~/camera/ && rm ./images/ -r && cp /mnt/usb/images ./images -r
 
-## Combile & Run
-gcc -std=gnu99 -Wall -pthread -o camera camera.c -lintelfpgaup -lm && ./camera
-
-## Compile Code
-gcc -std=gnu99 -Wall -pthread -o camera camera.c -lintelfpgaup -lm
+## Main Compile & Run
+gcc -std=gnu99 -Wall -pthread -o main main.c display.c camera.c -lintelfpgaup -lm && ./main
 
 ## USB Mount
 mount UUID=BAC3-B2A7 /mnt/usb
