@@ -88,7 +88,6 @@ void drawSongList() {
         short color = i + songTop == songSelection ? SONGLIST_COLOR2 : SONGLIST_COLOR1;
         video_box(SONGLIST_LEFT, SONGLIST_TOP + SONGLIST_HEIGHT * i, SONGLIST_LEFT + SONGLIST_WIDTH, SONGLIST_TOP + SONGLIST_HEIGHT * (i + 1), color);
         video_box(SONGLIST_LEFT + 5, SONGLIST_TOP + SONGLIST_HEIGHT * i + 5, SONGLIST_LEFT + SONGLIST_WIDTH - 5, SONGLIST_TOP + SONGLIST_HEIGHT * (i + 1) - 5, songColors[i + songTop]);
-        //video_text(SONGLIST_LEFT, SONGLIST_TOP + SONGLIST_HEIGHT * i, songNames[i + songTop]);
     }
     switchScreen();
 }
@@ -141,7 +140,10 @@ Image read_bmp(const char* filename) {
     width = *(int*)&header[18];
     height = *(int*)&header[22];
     bit_depth = *(int*)&header[28];
-    printf("Width: %d, Height: %d, Bit Depth: %d\n", width, height, bit_depth);
+    
+    if (height != (int)SCREEN_HEIGHT || width != (int)SCREEN_WIDTH) {
+        printf("Warning: img size != screen size, display middle w/ padding\n");
+    }
 
     unsigned char ***tensor;
     int row_size = ((bit_depth * width + 31) / 32) * 4;
@@ -182,7 +184,14 @@ uint16_t conv24to16bit(uint8_t r, uint8_t g, uint8_t b) {
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 
-void blackenOutsideHueRange(unsigned char *rgb, int hsv_low, int hsv_high) {
+int withinHueRange(unsigned char *rgb, int *args, int argCount) {
+    if (argCount != 2) {
+        printf("Error: filterbyHue takes 2 arguments\n");
+        return 0;
+    } 
+    int hsv_low = args[0];
+    int hsv_high = args[1];
+
     int r = rgb[0];
     int g = rgb[1];
     int b = rgb[2];
@@ -205,60 +214,28 @@ void blackenOutsideHueRange(unsigned char *rgb, int hsv_low, int hsv_high) {
         h = 60 * (((r_ - g_) / delta) + 4);
     }
 
-    if (hsv_low <= h && h <= hsv_high) {
-        rgb[0] = r;
-        rgb[1] = g;
-        rgb[2] = b;
-    } else {
-        rgb[0] = 0;
-        rgb[1] = 0;
-        rgb[2] = 0;
-    }
+    return hsv_low <= h && h <= hsv_high;
 }
 
 void filterbyHue(Image image, int hsv_low, int hsv_high) {
     for (int i = 0; i < image.height; i++) {
         for (int j = 0; j < image.width; j++) {
-            blackenOutsideHueRange(image.data[i][j], hsv_low, hsv_high);
+            if (!withinHueRange(image.data[i][j], (int[]){hsv_low, hsv_high}, 2)) {
+                image.data[i][j][0] = 0;
+                image.data[i][j][1] = 0;
+                image.data[i][j][2] = 0;
+            } else {
+                image.data[i][j][0] = image.data[i][j][0]; 
+                image.data[i][j][1] = image.data[i][j][1];
+                image.data[i][j][2] = image.data[i][j][2];
+            }
         }
     }
 }
 
-// void drawImage(char* filename) {
-//     int scnHeight = (int)SCREEN_HEIGHT;
-//     int scnWidth = (int)SCREEN_WIDTH;
-
-//     Image image = read_bmp(filename);
-//     if (image.height != scnHeight || image.width != scnWidth) {
-//         printf("Image size does not match screen size, printing middle of image and padding with black\n");
-//     }
-
-//     int top = max(0, (image.height - scnHeight) / 2);
-//     int left = max(0, (image.width - scnWidth) / 2);
-//     int bottom = min(image.height, top + scnHeight);
-//     int right = min(image.width, left + scnWidth);
-    
-//     for (int i = top; i < bottom; i++) {
-//         for (int j = left; j < right; j++) {
-//             if (i < top || i >= bottom || j < left || j >= right) {
-//                 video_pixel(j - left, i - top, 0); // TODO: test to see if it works
-//             } else {
-//                 unsigned char *rgb = image.data[image.height - i - 1][j]; 
-//                 uint16_t color = conv24to16bit(rgb[0], rgb[1], rgb[2]);
-//                 video_pixel(j - left, i - top, color);
-//             }
-//         }
-//     }
-//     switchScreen();
-// }
-
 void drawImage(Image image) {
     int scnHeight = (int)SCREEN_HEIGHT;
     int scnWidth = (int)SCREEN_WIDTH;
-
-    // if (image.height != scnHeight || image.width != scnWidth) {
-    //     printf("Image size does not match screen size, printing middle of image and padding with black\n");
-    // }
 
     int top = max(0, (image.height - scnHeight) / 2);
     int left = max(0, (image.width - scnWidth) / 2);
@@ -273,6 +250,32 @@ void drawImage(Image image) {
                 unsigned char *rgb = image.data[image.height - i - 1][j]; 
                 uint16_t color = conv24to16bit(rgb[0], rgb[1], rgb[2]);
                 video_pixel(j - left, i - top, color);
+            }
+        }
+    }
+    switchScreen();
+}
+
+void drawImageFiltered(Image image, int (*localFilter)(unsigned char *, int *, int), int *args, int argCount) {
+    int scnHeight = (int)SCREEN_HEIGHT;
+    int scnWidth = (int)SCREEN_WIDTH;
+
+    int top = max(0, (image.height - scnHeight) / 2);
+    int left = max(0, (image.width - scnWidth) / 2);
+    int bottom = min(image.height, top + scnHeight);
+    int right = min(image.width, left + scnWidth);
+
+    for (int i = top; i < bottom; i++) {
+        for (int j = left; j < right; j++) {
+            if (i < top || i >= bottom || j < left || j >= right) {
+                video_pixel(j - left, i - top, 0); // TODO: test to see if it works
+            } else {
+                unsigned char rgb[3] = {image.data[image.height - i - 1][j][0], image.data[image.height - i - 1][j][1], image.data[image.height - i - 1][j][2]};
+                if (localFilter(rgb, args, argCount)) {
+                    video_pixel(j - left, i - top, conv24to16bit(rgb[0], rgb[1], rgb[2]));
+                } else {
+                    video_pixel(j - left, i - top, 0);
+                }
             }
         }
     }
@@ -300,8 +303,6 @@ int main(void) {
     
     video_clear();
     video_erase();
-    
-    // read ./barack_obama.bmp
 
     // drawBackground();
     // drawBackground();
@@ -322,8 +323,8 @@ int main(void) {
 
     while (swState != 0b1111) {
         // Get UI inputs
-        SW_read(&swState);
-        KEY_read(&keyState);
+        SW_read(&swState); 
+        KEY_read(&keyState); 
 
         int swValue = binaryToInt(swState);
         printf("swValue: %d\n", swValue);
@@ -340,7 +341,8 @@ int main(void) {
         sleep(2);
 
         start_time = clock();
-        drawImage(barackObamaFiltered);
+        // drawImage(barackObamaFiltered);
+        drawImageFiltered(barackObama, withinHueRange, (int[]){0, 30}, 2);
         end_time = clock();
         printf("Time taken: %fms\n", (double)(end_time - start_time) / CLOCKS_PER_SEC * 1000);
 
