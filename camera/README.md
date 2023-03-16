@@ -1,17 +1,27 @@
 # Camera Instructions
-## Combine & Run
-gcc -std=gnu99 -Wall -pthread -o camera camera.c -lintelfpgaup -lm && ./camera
 
 ## Load drivers
 cd ~/Linux_Libraries/drivers/ && ./load_drivers && cd ~/camera/
 
+## Mount and Copy Images
+mount UUID=BAC3-B2A7 /mnt/usb && cd ~/camera/ && rm ./images/ -r && cp /mnt/usb/images ./images -r
+
+## Combile & Run
+gcc -std=gnu99 -Wall -pthread -o camera camera.c -lintelfpgaup -lm && ./camera
+
 ## Compile Code
 gcc -std=gnu99 -Wall -pthread -o camera camera.c -lintelfpgaup -lm
+
+## USB Mount
+mount UUID=BAC3-B2A7 /mnt/usb
+
+## Copy Images
+cd ~/camera/ && rm ./images/ -r cp /mnt/usb/images ./images -r
 
 ## Ethernet in Lab
 `xx:xx:xx:xx:xx:xx` is the Physical Address of the "Ethernet adpater Ethernet" after running `ipconfig /all` on the desktop that you stole ethernet cable from. 
 ifconfig eth0 down
-ifconfig eth0 hw xx:xx:xx:xx:xx:xx
+ifconfig eth0 hw ether C8:60:00:C9:4E:E6
 ifconfig eth0 up
 dhclient eth0
 
