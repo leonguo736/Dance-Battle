@@ -88,8 +88,6 @@
 			vga_R                                 : out   std_logic_vector(7 downto 0);                     -- R
 			vga_G                                 : out   std_logic_vector(7 downto 0);                     -- G
 			vga_B                                 : out   std_logic_vector(7 downto 0);                     -- B
-			audio_ADCDAT                          : in    std_logic                     := 'X';             -- ADCDAT
-			audio_ADCLRCK                         : in    std_logic                     := 'X';             -- ADCLRCK
 			audio_BCLK                            : in    std_logic                     := 'X';             -- BCLK
 			audio_DACDAT                          : out   std_logic;                                        -- DACDAT
 			audio_DACLRCK                         : in    std_logic                     := 'X';             -- DACLRCK
@@ -191,9 +189,7 @@
 			vga_R                                 => CONNECTED_TO_vga_R,                                 --                          .R
 			vga_G                                 => CONNECTED_TO_vga_G,                                 --                          .G
 			vga_B                                 => CONNECTED_TO_vga_B,                                 --                          .B
-			audio_ADCDAT                          => CONNECTED_TO_audio_ADCDAT,                          --                     audio.ADCDAT
-			audio_ADCLRCK                         => CONNECTED_TO_audio_ADCLRCK,                         --                          .ADCLRCK
-			audio_BCLK                            => CONNECTED_TO_audio_BCLK,                            --                          .BCLK
+			audio_BCLK                            => CONNECTED_TO_audio_BCLK,                            --                     audio.BCLK
 			audio_DACDAT                          => CONNECTED_TO_audio_DACDAT,                          --                          .DACDAT
 			audio_DACLRCK                         => CONNECTED_TO_audio_DACLRCK,                         --                          .DACLRCK
 			sw_export                             => CONNECTED_TO_sw_export,                             --                        sw.export

@@ -88,8 +88,6 @@ module soc_system (
 	vga_R,
 	vga_G,
 	vga_B,
-	audio_ADCDAT,
-	audio_ADCLRCK,
 	audio_BCLK,
 	audio_DACDAT,
 	audio_DACLRCK,
@@ -187,8 +185,6 @@ module soc_system (
 	output	[7:0]	vga_R;
 	output	[7:0]	vga_G;
 	output	[7:0]	vga_B;
-	input		audio_ADCDAT;
-	input		audio_ADCLRCK;
 	input		audio_BCLK;
 	output		audio_DACDAT;
 	input		audio_DACLRCK;

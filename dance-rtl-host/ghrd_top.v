@@ -321,8 +321,8 @@ module ghrd_top(
         .vga_R                                 (vga_R),                                 //                          .R
         .vga_G                                 (vga_G),                                 //                          .G
         .vga_B                                 (vga_B),                                 //                          .B
-        .audio_ADCDAT                          (audio_ADCDAT),                          //                     audio.ADCDAT
-        .audio_ADCLRCK                         (audio_ADCLRCK),                         //                          .ADCLRCK
+//        .audio_ADCDAT                          (audio_ADCDAT),                          //                     audio.ADCDAT
+//        .audio_ADCLRCK                         (audio_ADCLRCK),                         //                          .ADCLRCK
         .audio_BCLK                            (audio_BCLK),                            //                          .BCLK
         .audio_DACDAT                          (audio_DACDAT),                          //                          .DACDAT
         .audio_DACLRCK                         (audio_DACLRCK),                         //                          .DACLRCK

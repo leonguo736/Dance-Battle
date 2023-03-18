@@ -1,7 +1,5 @@
 	component soc_system is
 		port (
-			audio_ADCDAT                          : in    std_logic                     := 'X';             -- ADCDAT
-			audio_ADCLRCK                         : in    std_logic                     := 'X';             -- ADCLRCK
 			audio_BCLK                            : in    std_logic                     := 'X';             -- BCLK
 			audio_DACDAT                          : out   std_logic;                                        -- DACDAT
 			audio_DACLRCK                         : in    std_logic                     := 'X';             -- DACLRCK

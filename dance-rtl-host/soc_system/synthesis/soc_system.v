@@ -4,9 +4,7 @@
 
 `timescale 1 ps / 1 ps
 module soc_system (
-		input  wire        audio_ADCDAT,                          //                     audio.ADCDAT
-		input  wire        audio_ADCLRCK,                         //                          .ADCLRCK
-		input  wire        audio_BCLK,                            //                          .BCLK
+		input  wire        audio_BCLK,                            //                     audio.BCLK
 		output wire        audio_DACDAT,                          //                          .DACDAT
 		input  wire        audio_DACLRCK,                         //                          .DACLRCK
 		input  wire        clk_clk,                               //                       clk.clk
@@ -116,6 +114,10 @@ module soc_system (
 	wire         video_pixel_buffer_dma_0_avalon_pixel_source_endofpacket;                                 // video_pixel_buffer_dma_0:stream_endofpacket -> video_dual_clock_buffer_0:stream_in_endofpacket
 	wire         audio_pll_0_audio_clk_clk;                                                                // audio_pll_0:audio_clk_clk -> [audio_0:clk, irq_synchronizer:receiver_clk, mm_interconnect_0:audio_pll_0_audio_clk_clk, rst_controller:clk]
 	wire         video_pll_0_vga_clk_clk;                                                                  // video_pll_0:vga_clk_clk -> [rst_controller_002:clk, rst_controller_003:clk, video_dual_clock_buffer_0:clk_stream_out, video_vga_controller_0:clk]
+	wire         video_out_dma_controller_0_avalon_dma_master_waitrequest;                                 // mm_interconnect_0:video_out_dma_controller_0_avalon_dma_master_waitrequest -> video_out_dma_controller_0:master_waitrequest
+	wire  [31:0] video_out_dma_controller_0_avalon_dma_master_address;                                     // video_out_dma_controller_0:master_address -> mm_interconnect_0:video_out_dma_controller_0_avalon_dma_master_address
+	wire         video_out_dma_controller_0_avalon_dma_master_write;                                       // video_out_dma_controller_0:master_write -> mm_interconnect_0:video_out_dma_controller_0_avalon_dma_master_write
+	wire  [31:0] video_out_dma_controller_0_avalon_dma_master_writedata;                                   // video_out_dma_controller_0:master_writedata -> mm_interconnect_0:video_out_dma_controller_0_avalon_dma_master_writedata
 	wire         video_pixel_buffer_dma_0_avalon_pixel_dma_master_waitrequest;                             // mm_interconnect_0:video_pixel_buffer_dma_0_avalon_pixel_dma_master_waitrequest -> video_pixel_buffer_dma_0:master_waitrequest
 	wire  [31:0] video_pixel_buffer_dma_0_avalon_pixel_dma_master_readdata;                                // mm_interconnect_0:video_pixel_buffer_dma_0_avalon_pixel_dma_master_readdata -> video_pixel_buffer_dma_0:master_readdata
 	wire  [31:0] video_pixel_buffer_dma_0_avalon_pixel_dma_master_address;                                 // video_pixel_buffer_dma_0:master_address -> mm_interconnect_0:video_pixel_buffer_dma_0_avalon_pixel_dma_master_address
@@ -247,6 +249,12 @@ module soc_system (
 	wire   [3:0] mm_interconnect_0_video_pixel_buffer_dma_0_avalon_control_slave_byteenable;               // mm_interconnect_0:video_pixel_buffer_dma_0_avalon_control_slave_byteenable -> video_pixel_buffer_dma_0:slave_byteenable
 	wire         mm_interconnect_0_video_pixel_buffer_dma_0_avalon_control_slave_write;                    // mm_interconnect_0:video_pixel_buffer_dma_0_avalon_control_slave_write -> video_pixel_buffer_dma_0:slave_write
 	wire  [31:0] mm_interconnect_0_video_pixel_buffer_dma_0_avalon_control_slave_writedata;                // mm_interconnect_0:video_pixel_buffer_dma_0_avalon_control_slave_writedata -> video_pixel_buffer_dma_0:slave_writedata
+	wire  [31:0] mm_interconnect_0_video_out_dma_controller_0_avalon_dma_control_slave_readdata;           // video_out_dma_controller_0:slave_readdata -> mm_interconnect_0:video_out_dma_controller_0_avalon_dma_control_slave_readdata
+	wire   [1:0] mm_interconnect_0_video_out_dma_controller_0_avalon_dma_control_slave_address;            // mm_interconnect_0:video_out_dma_controller_0_avalon_dma_control_slave_address -> video_out_dma_controller_0:slave_address
+	wire         mm_interconnect_0_video_out_dma_controller_0_avalon_dma_control_slave_read;               // mm_interconnect_0:video_out_dma_controller_0_avalon_dma_control_slave_read -> video_out_dma_controller_0:slave_read
+	wire   [3:0] mm_interconnect_0_video_out_dma_controller_0_avalon_dma_control_slave_byteenable;         // mm_interconnect_0:video_out_dma_controller_0_avalon_dma_control_slave_byteenable -> video_out_dma_controller_0:slave_byteenable
+	wire         mm_interconnect_0_video_out_dma_controller_0_avalon_dma_control_slave_write;              // mm_interconnect_0:video_out_dma_controller_0_avalon_dma_control_slave_write -> video_out_dma_controller_0:slave_write
+	wire  [31:0] mm_interconnect_0_video_out_dma_controller_0_avalon_dma_control_slave_writedata;          // mm_interconnect_0:video_out_dma_controller_0_avalon_dma_control_slave_writedata -> video_out_dma_controller_0:slave_writedata
 	wire         mm_interconnect_0_esp_uart_s1_chipselect;                                                 // mm_interconnect_0:esp_uart_s1_chipselect -> esp_uart:chipselect
 	wire  [15:0] mm_interconnect_0_esp_uart_s1_readdata;                                                   // esp_uart:readdata -> mm_interconnect_0:esp_uart_s1_readdata
 	wire   [2:0] mm_interconnect_0_esp_uart_s1_address;                                                    // mm_interconnect_0:esp_uart_s1_address -> esp_uart:address
@@ -334,7 +342,7 @@ module soc_system (
 	wire         irq_mapper_receiver1_irq;                                                                 // jtag_uart:av_irq -> [irq_mapper:receiver1_irq, irq_mapper_002:receiver1_irq]
 	wire         rst_controller_reset_out_reset;                                                           // rst_controller:reset_out -> [audio_0:reset, irq_synchronizer:receiver_reset, mm_interconnect_0:audio_0_reset_reset_bridge_in_reset_reset]
 	wire         audio_pll_0_reset_source_reset;                                                           // audio_pll_0:reset_source_reset -> rst_controller:reset_in1
-	wire         rst_controller_001_reset_out_reset;                                                       // rst_controller_001:reset_out -> [audio_and_video_config_0:reset, esp_uart:reset_n, hex_h_pio:reset_n, hex_l_pio:reset_n, intr_capturer_0:rst_n, irq_mapper_002:reset, irq_synchronizer:sender_reset, jtag_uart:rst_n, keys_pio:reset_n, led_pio:reset_n, mm_interconnect_0:fpga_only_master_clk_reset_reset_bridge_in_reset_reset, mm_interconnect_0:video_pixel_buffer_dma_0_reset_reset_bridge_in_reset_reset, mm_interconnect_1:hps_only_master_clk_reset_reset_bridge_in_reset_reset, mm_interconnect_1:hps_only_master_master_translator_reset_reset_bridge_in_reset_reset, onchip_memory2_0:reset, rst_translator:in_reset, sw_pio:reset_n, sysid_qsys:reset_n, video_character_buffer_with_dma_0:reset, video_dual_clock_buffer_0:reset_stream_in, video_pixel_buffer_dma_0:reset]
+	wire         rst_controller_001_reset_out_reset;                                                       // rst_controller_001:reset_out -> [audio_and_video_config_0:reset, esp_uart:reset_n, hex_h_pio:reset_n, hex_l_pio:reset_n, intr_capturer_0:rst_n, irq_mapper_002:reset, irq_synchronizer:sender_reset, jtag_uart:rst_n, keys_pio:reset_n, led_pio:reset_n, mm_interconnect_0:fpga_only_master_clk_reset_reset_bridge_in_reset_reset, mm_interconnect_0:video_out_dma_controller_0_reset_reset_bridge_in_reset_reset, mm_interconnect_1:hps_only_master_clk_reset_reset_bridge_in_reset_reset, mm_interconnect_1:hps_only_master_master_translator_reset_reset_bridge_in_reset_reset, onchip_memory2_0:reset, rst_translator:in_reset, sw_pio:reset_n, sysid_qsys:reset_n, video_character_buffer_with_dma_0:reset, video_dual_clock_buffer_0:reset_stream_in, video_out_dma_controller_0:reset, video_pixel_buffer_dma_0:reset]
 	wire         rst_controller_001_reset_out_reset_req;                                                   // rst_controller_001:reset_req -> [onchip_memory2_0:reset_req, rst_translator:reset_req_in]
 	wire         rst_controller_002_reset_out_reset;                                                       // rst_controller_002:reset_out -> video_dual_clock_buffer_0:reset_stream_out
 	wire         rst_controller_003_reset_out_reset;                                                       // rst_controller_003:reset_out -> video_vga_controller_0:reset
@@ -351,9 +359,7 @@ module soc_system (
 		.writedata   (mm_interconnect_0_audio_0_avalon_audio_slave_writedata),  //                   .writedata
 		.readdata    (mm_interconnect_0_audio_0_avalon_audio_slave_readdata),   //                   .readdata
 		.irq         (irq_mapper_receiver0_irq),                                //          interrupt.irq
-		.AUD_ADCDAT  (audio_ADCDAT),                                            // external_interface.export
-		.AUD_ADCLRCK (audio_ADCLRCK),                                           //                   .export
-		.AUD_BCLK    (audio_BCLK),                                              //                   .export
+		.AUD_BCLK    (audio_BCLK),                                              // external_interface.export
 		.AUD_DACDAT  (audio_DACDAT),                                            //                   .export
 		.AUD_DACLRCK (audio_DACLRCK)                                            //                   .export
 	);
@@ -771,6 +777,26 @@ module soc_system (
 		.stream_out_data          (video_dual_clock_buffer_0_avalon_dc_buffer_source_data)           //                        .data
 	);
 
+	soc_system_video_out_dma_controller_0 video_out_dma_controller_0 (
+		.clk                  (clk_clk),                                                                          //                      clk.clk
+		.reset                (rst_controller_001_reset_out_reset),                                               //                    reset.reset
+		.stream_data          (),                                                                                 //          avalon_dma_sink.data
+		.stream_startofpacket (),                                                                                 //                         .startofpacket
+		.stream_endofpacket   (),                                                                                 //                         .endofpacket
+		.stream_valid         (),                                                                                 //                         .valid
+		.stream_ready         (),                                                                                 //                         .ready
+		.slave_address        (mm_interconnect_0_video_out_dma_controller_0_avalon_dma_control_slave_address),    // avalon_dma_control_slave.address
+		.slave_byteenable     (mm_interconnect_0_video_out_dma_controller_0_avalon_dma_control_slave_byteenable), //                         .byteenable
+		.slave_read           (mm_interconnect_0_video_out_dma_controller_0_avalon_dma_control_slave_read),       //                         .read
+		.slave_write          (mm_interconnect_0_video_out_dma_controller_0_avalon_dma_control_slave_write),      //                         .write
+		.slave_writedata      (mm_interconnect_0_video_out_dma_controller_0_avalon_dma_control_slave_writedata),  //                         .writedata
+		.slave_readdata       (mm_interconnect_0_video_out_dma_controller_0_avalon_dma_control_slave_readdata),   //                         .readdata
+		.master_address       (video_out_dma_controller_0_avalon_dma_master_address),                             //        avalon_dma_master.address
+		.master_waitrequest   (video_out_dma_controller_0_avalon_dma_master_waitrequest),                         //                         .waitrequest
+		.master_write         (video_out_dma_controller_0_avalon_dma_master_write),                               //                         .write
+		.master_writedata     (video_out_dma_controller_0_avalon_dma_master_writedata)                            //                         .writedata
+	);
+
 	soc_system_video_pixel_buffer_dma_0 video_pixel_buffer_dma_0 (
 		.clk                  (clk_clk),                                                                    //                     clk.clk
 		.reset                (rst_controller_001_reset_out_reset),                                         //                   reset.reset
@@ -896,7 +922,7 @@ module soc_system (
 		.audio_0_reset_reset_bridge_in_reset_reset                              (rst_controller_reset_out_reset),                                                           //                         audio_0_reset_reset_bridge_in_reset.reset
 		.fpga_only_master_clk_reset_reset_bridge_in_reset_reset                 (rst_controller_001_reset_out_reset),                                                       //            fpga_only_master_clk_reset_reset_bridge_in_reset.reset
 		.hps_0_h2f_axi_master_agent_clk_reset_reset_bridge_in_reset_reset       (rst_controller_004_reset_out_reset),                                                       //  hps_0_h2f_axi_master_agent_clk_reset_reset_bridge_in_reset.reset
-		.video_pixel_buffer_dma_0_reset_reset_bridge_in_reset_reset             (rst_controller_001_reset_out_reset),                                                       //        video_pixel_buffer_dma_0_reset_reset_bridge_in_reset.reset
+		.video_out_dma_controller_0_reset_reset_bridge_in_reset_reset           (rst_controller_001_reset_out_reset),                                                       //      video_out_dma_controller_0_reset_reset_bridge_in_reset.reset
 		.fpga_only_master_master_address                                        (fpga_only_master_master_address),                                                          //                                     fpga_only_master_master.address
 		.fpga_only_master_master_waitrequest                                    (fpga_only_master_master_waitrequest),                                                      //                                                            .waitrequest
 		.fpga_only_master_master_byteenable                                     (fpga_only_master_master_byteenable),                                                       //                                                            .byteenable
@@ -905,6 +931,10 @@ module soc_system (
 		.fpga_only_master_master_readdatavalid                                  (fpga_only_master_master_readdatavalid),                                                    //                                                            .readdatavalid
 		.fpga_only_master_master_write                                          (fpga_only_master_master_write),                                                            //                                                            .write
 		.fpga_only_master_master_writedata                                      (fpga_only_master_master_writedata),                                                        //                                                            .writedata
+		.video_out_dma_controller_0_avalon_dma_master_address                   (video_out_dma_controller_0_avalon_dma_master_address),                                     //                video_out_dma_controller_0_avalon_dma_master.address
+		.video_out_dma_controller_0_avalon_dma_master_waitrequest               (video_out_dma_controller_0_avalon_dma_master_waitrequest),                                 //                                                            .waitrequest
+		.video_out_dma_controller_0_avalon_dma_master_write                     (video_out_dma_controller_0_avalon_dma_master_write),                                       //                                                            .write
+		.video_out_dma_controller_0_avalon_dma_master_writedata                 (video_out_dma_controller_0_avalon_dma_master_writedata),                                   //                                                            .writedata
 		.video_pixel_buffer_dma_0_avalon_pixel_dma_master_address               (video_pixel_buffer_dma_0_avalon_pixel_dma_master_address),                                 //            video_pixel_buffer_dma_0_avalon_pixel_dma_master.address
 		.video_pixel_buffer_dma_0_avalon_pixel_dma_master_waitrequest           (video_pixel_buffer_dma_0_avalon_pixel_dma_master_waitrequest),                             //                                                            .waitrequest
 		.video_pixel_buffer_dma_0_avalon_pixel_dma_master_read                  (video_pixel_buffer_dma_0_avalon_pixel_dma_master_read),                                    //                                                            .read
@@ -982,6 +1012,12 @@ module soc_system (
 		.video_character_buffer_with_dma_0_avalon_char_control_slave_writedata  (mm_interconnect_0_video_character_buffer_with_dma_0_avalon_char_control_slave_writedata),  //                                                            .writedata
 		.video_character_buffer_with_dma_0_avalon_char_control_slave_byteenable (mm_interconnect_0_video_character_buffer_with_dma_0_avalon_char_control_slave_byteenable), //                                                            .byteenable
 		.video_character_buffer_with_dma_0_avalon_char_control_slave_chipselect (mm_interconnect_0_video_character_buffer_with_dma_0_avalon_char_control_slave_chipselect), //                                                            .chipselect
+		.video_out_dma_controller_0_avalon_dma_control_slave_address            (mm_interconnect_0_video_out_dma_controller_0_avalon_dma_control_slave_address),            //         video_out_dma_controller_0_avalon_dma_control_slave.address
+		.video_out_dma_controller_0_avalon_dma_control_slave_write              (mm_interconnect_0_video_out_dma_controller_0_avalon_dma_control_slave_write),              //                                                            .write
+		.video_out_dma_controller_0_avalon_dma_control_slave_read               (mm_interconnect_0_video_out_dma_controller_0_avalon_dma_control_slave_read),               //                                                            .read
+		.video_out_dma_controller_0_avalon_dma_control_slave_readdata           (mm_interconnect_0_video_out_dma_controller_0_avalon_dma_control_slave_readdata),           //                                                            .readdata
+		.video_out_dma_controller_0_avalon_dma_control_slave_writedata          (mm_interconnect_0_video_out_dma_controller_0_avalon_dma_control_slave_writedata),          //                                                            .writedata
+		.video_out_dma_controller_0_avalon_dma_control_slave_byteenable         (mm_interconnect_0_video_out_dma_controller_0_avalon_dma_control_slave_byteenable),         //                                                            .byteenable
 		.video_pixel_buffer_dma_0_avalon_control_slave_address                  (mm_interconnect_0_video_pixel_buffer_dma_0_avalon_control_slave_address),                  //               video_pixel_buffer_dma_0_avalon_control_slave.address
 		.video_pixel_buffer_dma_0_avalon_control_slave_write                    (mm_interconnect_0_video_pixel_buffer_dma_0_avalon_control_slave_write),                    //                                                            .write
 		.video_pixel_buffer_dma_0_avalon_control_slave_read                     (mm_interconnect_0_video_pixel_buffer_dma_0_avalon_control_slave_read),                     //                                                            .read

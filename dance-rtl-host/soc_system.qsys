@@ -13,7 +13,7 @@
    {
       datum _sortIndex
       {
-         value = "12";
+         value = "17";
          type = "int";
       }
    }
@@ -34,7 +34,7 @@
    {
       datum _sortIndex
       {
-         value = "10";
+         value = "15";
          type = "int";
       }
    }
@@ -55,7 +55,7 @@
    {
       datum _sortIndex
       {
-         value = "11";
+         value = "16";
          type = "int";
       }
    }
@@ -71,7 +71,7 @@
    {
       datum _sortIndex
       {
-         value = "9";
+         value = "14";
          type = "int";
       }
    }
@@ -87,7 +87,7 @@
    {
       datum _sortIndex
       {
-         value = "8";
+         value = "13";
          type = "int";
       }
       datum sopceditor_expanded
@@ -116,7 +116,7 @@
    {
       datum _sortIndex
       {
-         value = "22";
+         value = "10";
          type = "int";
       }
    }
@@ -137,7 +137,7 @@
    {
       datum _sortIndex
       {
-         value = "21";
+         value = "9";
          type = "int";
       }
    }
@@ -229,7 +229,7 @@
    {
       datum _sortIndex
       {
-         value = "24";
+         value = "12";
          type = "int";
       }
    }
@@ -250,7 +250,7 @@
    {
       datum _sortIndex
       {
-         value = "20";
+         value = "8";
          type = "int";
       }
    }
@@ -287,7 +287,7 @@
    {
       datum _sortIndex
       {
-         value = "23";
+         value = "11";
          type = "int";
       }
    }
@@ -329,7 +329,7 @@
    {
       datum _sortIndex
       {
-         value = "17";
+         value = "22";
          type = "int";
       }
    }
@@ -337,7 +337,7 @@
    {
       datum _sortIndex
       {
-         value = "15";
+         value = "20";
          type = "int";
       }
    }
@@ -367,19 +367,51 @@
          type = "String";
       }
    }
+   element video_decoder_0
+   {
+      datum _sortIndex
+      {
+         value = "27";
+         type = "int";
+      }
+   }
    element video_dual_clock_buffer_0
    {
       datum _sortIndex
       {
-         value = "18";
+         value = "23";
          type = "int";
+      }
+   }
+   element video_dual_clock_buffer_1
+   {
+      datum _sortIndex
+      {
+         value = "26";
+         type = "int";
+      }
+   }
+   element video_out_dma_controller_0
+   {
+      datum _sortIndex
+      {
+         value = "25";
+         type = "int";
+      }
+   }
+   element video_out_dma_controller_0.avalon_dma_control_slave
+   {
+      datum baseAddress
+      {
+         value = "12384";
+         type = "String";
       }
    }
    element video_pixel_buffer_dma_0
    {
       datum _sortIndex
       {
-         value = "16";
+         value = "21";
          type = "int";
       }
    }
@@ -400,7 +432,7 @@
    {
       datum _sortIndex
       {
-         value = "13";
+         value = "18";
          type = "int";
       }
    }
@@ -408,7 +440,7 @@
    {
       datum _sortIndex
       {
-         value = "14";
+         value = "19";
          type = "int";
       }
       datum sopceditor_expanded
@@ -421,7 +453,7 @@
    {
       datum _sortIndex
       {
-         value = "19";
+         value = "24";
          type = "int";
       }
    }
@@ -524,7 +556,7 @@
    enabled="1">
   <parameter name="AUTO_CLK_CLOCK_RATE" value="12288135" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone V" />
-  <parameter name="audio_in" value="true" />
+  <parameter name="audio_in" value="false" />
   <parameter name="audio_out" value="true" />
   <parameter name="avalon_bus_type" value="Memory Mapped" />
   <parameter name="dw" value="16" />
@@ -1313,6 +1345,15 @@
   <parameter name="vga_device" value="On-board VGA DAC" />
  </module>
  <module
+   name="video_decoder_0"
+   kind="altera_up_avalon_video_decoder"
+   version="18.0"
+   enabled="0">
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="25000000" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone V" />
+  <parameter name="video_source">On-board Video In (NTSC or PAL)</parameter>
+ </module>
+ <module
    name="video_dual_clock_buffer_0"
    kind="altera_up_avalon_video_dual_clock_buffer"
    version="18.0"
@@ -1322,6 +1363,34 @@
   <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone V" />
   <parameter name="color_bits" value="10" />
   <parameter name="color_planes" value="3" />
+ </module>
+ <module
+   name="video_dual_clock_buffer_1"
+   kind="altera_up_avalon_video_dual_clock_buffer"
+   version="18.0"
+   enabled="0">
+  <parameter name="AUTO_CLOCK_STREAM_IN_CLOCK_RATE" value="25000000" />
+  <parameter name="AUTO_CLOCK_STREAM_OUT_CLOCK_RATE" value="50000000" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone V" />
+  <parameter name="color_bits" value="8" />
+  <parameter name="color_planes" value="3" />
+ </module>
+ <module
+   name="video_out_dma_controller_0"
+   kind="altera_up_avalon_video_dma_controller"
+   version="18.0"
+   enabled="1">
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="50000000" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone V" />
+  <parameter name="addr_mode" value="X-Y" />
+  <parameter name="back_start_address" value="0" />
+  <parameter name="color_bits" value="8" />
+  <parameter name="color_planes" value="3" />
+  <parameter name="dma_enabled" value="true" />
+  <parameter name="height" value="240" />
+  <parameter name="mode">From Stream to Memory</parameter>
+  <parameter name="start_address" value="0" />
+  <parameter name="width" value="320" />
  </module>
  <module
    name="video_pixel_buffer_dma_0"
@@ -1380,6 +1449,15 @@
  <connection
    kind="avalon"
    version="18.1"
+   start="video_out_dma_controller_0.avalon_dma_master"
+   end="onchip_memory2_0.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
    start="video_pixel_buffer_dma_0.avalon_pixel_dma_master"
    end="onchip_memory2_0.s1">
   <parameter name="arbitrationPriority" value="1" />
@@ -1429,6 +1507,15 @@
    end="video_pixel_buffer_dma_0.avalon_control_slave">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x3020" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="hps_0.h2f_lw_axi_master"
+   end="video_out_dma_controller_0.avalon_dma_control_slave">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x3060" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -1570,8 +1657,18 @@
  <connection
    kind="avalon_streaming"
    version="18.1"
+   start="video_dual_clock_buffer_1.avalon_dc_buffer_source"
+   end="video_out_dma_controller_0.avalon_dma_sink" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
    start="video_dual_clock_buffer_0.avalon_dc_buffer_source"
    end="video_vga_controller_0.avalon_vga_sink" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="video_decoder_0.avalon_decoder_source"
+   end="video_dual_clock_buffer_1.avalon_dc_buffer_sink" />
  <connection
    kind="avalon_streaming"
    version="18.1"
@@ -1635,6 +1732,11 @@
    kind="clock"
    version="18.1"
    start="clk_0.clk"
+   end="video_out_dma_controller_0.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_0.clk"
    end="onchip_memory2_0.clk1" />
  <connection
    kind="clock"
@@ -1646,6 +1748,11 @@
    version="18.1"
    start="clk_0.clk"
    end="video_dual_clock_buffer_0.clock_stream_in" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_0.clk"
+   end="video_dual_clock_buffer_1.clock_stream_out" />
  <connection
    kind="clock"
    version="18.1"
@@ -1676,6 +1783,16 @@
    version="18.1"
    start="video_pll_0.vga_clk"
    end="video_vga_controller_0.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="video_pll_0.vga_clk"
+   end="video_decoder_0.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="video_pll_0.vga_clk"
+   end="video_dual_clock_buffer_1.clock_stream_in" />
  <connection
    kind="clock"
    version="18.1"
@@ -1836,6 +1953,11 @@
    kind="reset"
    version="18.1"
    start="clk_0.clk_reset"
+   end="video_out_dma_controller_0.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="clk_0.clk_reset"
    end="onchip_memory2_0.reset1" />
  <connection
    kind="reset"
@@ -1851,7 +1973,17 @@
    kind="reset"
    version="18.1"
    start="clk_0.clk_reset"
+   end="video_dual_clock_buffer_1.reset_stream_in" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="clk_0.clk_reset"
    end="video_dual_clock_buffer_0.reset_stream_out" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="clk_0.clk_reset"
+   end="video_dual_clock_buffer_1.reset_stream_out" />
  <connection
    kind="reset"
    version="18.1"
@@ -1862,6 +1994,16 @@
    version="18.1"
    start="audio_pll_0.reset_source"
    end="audio_0.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="video_pll_0.reset_source"
+   end="video_decoder_0.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="video_pll_0.reset_source"
+   end="video_dual_clock_buffer_1.reset_stream_in" />
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
 </system>

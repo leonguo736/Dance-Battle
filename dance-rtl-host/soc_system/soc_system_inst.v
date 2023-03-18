@@ -87,9 +87,7 @@
 		.vga_R                                 (<connected-to-vga_R>),                                 //                          .R
 		.vga_G                                 (<connected-to-vga_G>),                                 //                          .G
 		.vga_B                                 (<connected-to-vga_B>),                                 //                          .B
-		.audio_ADCDAT                          (<connected-to-audio_ADCDAT>),                          //                     audio.ADCDAT
-		.audio_ADCLRCK                         (<connected-to-audio_ADCLRCK>),                         //                          .ADCLRCK
-		.audio_BCLK                            (<connected-to-audio_BCLK>),                            //                          .BCLK
+		.audio_BCLK                            (<connected-to-audio_BCLK>),                            //                     audio.BCLK
 		.audio_DACDAT                          (<connected-to-audio_DACDAT>),                          //                          .DACDAT
 		.audio_DACLRCK                         (<connected-to-audio_DACLRCK>),                         //                          .DACLRCK
 		.sw_export                             (<connected-to-sw_export>),                             //                        sw.export
