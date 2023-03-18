@@ -124,6 +124,7 @@ wire [7:0] GREEN  ;
 wire [7:0] BLUE 		 ; 
 wire [12:0] VGA_H_CNT;			
 wire [12:0] VGA_V_CNT;	
+wire [19:0] VGA_ADDR; 
 
 wire        READ_Request ;
 wire 	[7:0] B_AUTO;
@@ -324,8 +325,9 @@ VGA_Controller		u1	(	//	Host Side
 							 //	Control Signal
 							 .iCLK       ( VGA_CLK ),
 							 .iRST_N     ( DLY_RST_2 ),
-							 .H_Cont     ( VGA_H_CNT ),						
-						    .V_Cont     ( VGA_V_CNT )								
+							//  .H_Cont     ( VGA_H_CNT ),						
+						    //  .V_Cont     ( VGA_V_CNT )	
+							 .oAddress  ( VGA_ADDR )	
 		);	
 
 
