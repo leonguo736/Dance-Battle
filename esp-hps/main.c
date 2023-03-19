@@ -1,143 +1,101 @@
 #include <stdio.h>
 #include <unistd.h>
-#include <fcntl.h>
-#include <sys/mman.h>
 
-#include "regs.h"
-#include "hex.h"
-#include "uart.h"
 #include "esp.h"
+#include "hex.h"
+#include "regs.h"
+#include "uart.h"
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
+  // Regs
+  void *virtual_base;
 
-	void *virtual_base;
-	int fd;
-	int loop_count;
-	int led_direction;
-	int led_mask;
-	char c;
-	void *h2p_lw_led_addr;
+  // LEDs
+  int loop_count;
+  int led_direction;
+  int led_mask;
+  void *h2p_lw_led_addr;
 
-	if (argc == 0) {
-		printf("No arguments passed\n");
-		return 1;
-	} else if (argc != 2) {
-		printf("Too many arguments passed\n");
-		return 1;
-	}
-	// map the address space for the LED registers into user space so we can interact with them.
-	// we'll actually map in the entire CSR span of the HPS since we want to access various registers within that span
+  // ESP
+  char sendBuffer[1024];
+  char recvBuffer[1024];
+  char* recvPtr;
 
-	if( ( fd = open( "/dev/mem", ( O_RDWR | O_SYNC ) ) ) == -1 ) {
-		printf( "ERROR: could not open \"/dev/mem\"...\n" );
-		return( 1 );
-	}
+  if (regs_init(&virtual_base)) {
+    printf("Failed to initialize virtual base\n");
+    return 1;
+  }
 
-	virtual_base = mmap( NULL, HW_REGS_SPAN, ( PROT_READ | PROT_WRITE ), MAP_SHARED, fd, HW_REGS_BASE );
+  h2p_lw_led_addr =
+      virtual_base + ((unsigned long)(ALT_LWFPGASLVS_OFST + LEDS_BASE) &
+                      (unsigned long)(HW_REGS_MASK));
 
-	if( virtual_base == MAP_FAILED ) {
-		printf( "ERROR: mmap() failed...\n" );
-		close( fd );
-		return( 1 );
-	}
+  hex_init(virtual_base);
+  uart_init(virtual_base);
 
-	h2p_lw_led_addr = virtual_base + ((unsigned long)(ALT_LWFPGASLVS_OFST + LEDS_BASE) & (unsigned long)(HW_REGS_MASK));
+  // toggle the LEDs a bit
+  loop_count = 0;
+  led_mask = 0x01;
+  led_direction = 0;  // 0: left to right direction
 
-	hex_init(virtual_base);
-	uart_init(virtual_base);
-	// toggle the LEDs a bit
-	char buffer[1024];
-	char recvBuffer[1024];
-	char *recvCur;
-	char *cur;
-	loop_count = 0;
-	led_mask = 0x01;
-	led_direction = 0; // 0: left to right direction
-	while( 1 ) {
-		uart_output();
-		// control led
-		*(uint32_t *)h2p_lw_led_addr = ~led_mask;
+  // Main while loop
+  while (1) {
+    // control led
+    *(uint32_t *)h2p_lw_led_addr = ~led_mask;
 
-		if (argv[1][0] == '1') {
-			printf("Setting Hex: %d\n", loop_count);
-			display(loop_count);
-		}
-		else if (argv[1][0] == '2') {
-			scanf("%s", buffer);
-			
-			while (*cur != '\0'){
-				uart_write_data((unsigned int) *cur);
-				cur++;
-			}
+    if (argv[1][0] == '1') {
+      printf("Setting Hex: %d\n", loop_count);
+      display(loop_count);
+    } else if (argv[1][0] == '2') {
+      unsigned int len = 0;
+      recvPtr = recvBuffer;
 
-			cur = buffer;
-			// uart_read_data((unsigned int* )&c);
+      while (*recvPtr != '\n') {
+        uart_read_byte((unsigned int *)recvPtr);
 
-			// printf("Echo: %c\n", c);
-		} else if (argv[1][0] == '3') {
-			// printf("Reading Data\n");
-			uart_read_data((unsigned int* )&c);
-			printf("%c", c);
-			// printf("Echo: %c\n", c);
-		} else if (argv[1][0] == '4') {
-			scanf("%s", buffer);
-			cur = buffer;
-			
-			while (*cur != '\0') {
-				uart_write_data((unsigned int) *cur);
-				cur++;
-			}
+        if (*recvPtr == '\n') {
+          break;
+        }
 
-			uart_write_data((unsigned int) '\r');
+        recvPtr++;
+        len++;
+      }
 
-			recvCur = recvBuffer;
+      *recvPtr = '\0';
+      printf("[%d] %s\n", len, recvBuffer);
+    } else if (argv[1][0] == '3') {
+      unsigned int len = uart_read_data(recvBuffer, 1024);
+      printf("[%d] %s\n", len, recvBuffer);
+    } else if (argv[1][0] == '4') {
+      scanf("%s", sendBuffer);
 
-			while (1) {
-				uart_read_data((unsigned int *)recvCur);
+      uart_write_data(sendBuffer);
 
-				if (*recvCur - '0' >= 0 && *recvCur - '0' <= 9) {
-					display(*recvCur - '0');
-				}
-				printf("%c", *recvCur);
+      unsigned int len = uart_read_data(recvBuffer, 1024);
+      printf("[%d] %s\n", len, recvBuffer);
+    } else {
+      printf("Running esp\n");
 
-				if (*recvCur == '\n') {
-					break;
-				}
-				recvCur++;
-			}
-		} else {
-			printf("Running esp\n");
+      run(argc, argv);
+      return 1;
+    }
 
-			run();
-			return 1;
-		}
+    usleep(100 * 1000);
 
-		usleep(100 * 1000);
+    // update led mask
+    if (led_direction == 0) {
+      led_mask <<= 1;
+      if (led_mask == (0x01 << (LEDS_DATA_WIDTH - 1))) led_direction = 1;
+    } else {
+      led_mask >>= 1;
+      if (led_mask == 0x01) {
+        led_direction = 0;
+      }
+    }
 
-		// update led mask
-		if (led_direction == 0){
-			led_mask <<= 1;
-			if (led_mask == (0x01 << (LEDS_DATA_WIDTH - 1)))
-				led_direction = 1;
-		} else {
-			led_mask >>= 1;
-			if (led_mask == 0x01){
-				led_direction = 0;
-			}
-		}
+    loop_count++;
+  }  // while
 
-		loop_count++;
-	} // while
-
-	// clean up our memory mapping and exit
-
-	if( munmap( virtual_base, HW_REGS_SPAN ) != 0 ) {
-		printf( "ERROR: munmap() failed...\n" );
-		close( fd );
-		return( 1 );
-	}
-
-	close( fd );
-
-	return( 0 );
+  // clean up our memory mapping and exit
+  return regs_close(virtual_base);
 }

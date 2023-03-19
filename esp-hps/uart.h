@@ -9,13 +9,13 @@
 #define UART_RXDATA_OFFSET 0x00
 #define UART_RXDATA_MASK 0xFF
 
-
 /* txdata register */
 #define UART_TXDATA_OFFSET 0x04
 #define UART_TXDATA_MASK 0xFF
 
 /* status register */
 #define UART_STATUS_OFFSET 0x08
+#define UART_STATUS_MASK 0xFFFF
 #define UART_PE_MASK 0x1
 #define UART_FE_MASK 0x2
 #define UART_BRK_MASK 0x4
@@ -31,6 +31,7 @@
 
 /* control register */
 #define UART_CONTROL_OFFSET 0x012
+#define UART_CONTROL_MASK 0xFFFF
 #define UART_IPE_MASK 0x1
 #define UART_IFE_MASK 0x2
 #define UART_IBRK_MASK 0x4
@@ -47,8 +48,8 @@
 
 /* UART Functions */
 void uart_init(void *virtual_base);
-int uart_write_data(unsigned int data);
-int uart_read_data(unsigned int *data);
+void uart_write_data(char *data);
+int uart_read_data(char *data, int len);
 void uart_output(void);
 
 #endif

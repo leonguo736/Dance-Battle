@@ -5,6 +5,6 @@
 
 #include "uart.h"
 
-void run(void);
+void run(int argc, char** argv);
 
 #endif

@@ -7,18 +7,21 @@ C_SRCS += \
 ../esp.c \
 ../hex.c \
 ../main.c \
+../regs.c \
 ../uart.c 
 
 OBJS += \
 ./esp.o \
 ./hex.o \
 ./main.o \
+./regs.o \
 ./uart.o 
 
 C_DEPS += \
 ./esp.d \
 ./hex.d \
 ./main.d \
+./regs.d \
 ./uart.d 
 
 
