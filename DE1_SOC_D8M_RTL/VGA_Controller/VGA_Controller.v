@@ -45,8 +45,8 @@ module	VGA_Controller(	//	Host Side
 						iGreen,
 						iBlue,
 						oRequest,
-                  oHRequest,
-                  oVRequest,
+                  		oHRequest,
+                  		oVRequest,
 						//	VGA Side
 						oVGA_R,
 						oVGA_G,

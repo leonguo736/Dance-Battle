@@ -547,6 +547,12 @@ set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "2.5 V"
 
 
 
+set_global_assignment -name VERILOG_FILE V_Color_Tracker/Mod_counter.v
+set_global_assignment -name VERILOG_FILE V_Color_Tracker/ball_ram.v
+set_global_assignment -name VERILOG_FILE V_Color_Tracker/red_line_x.v
+set_global_assignment -name VERILOG_FILE V_Color_Tracker/red_line_buffer.v
+set_global_assignment -name VERILOG_FILE V_Color_Tracker/red_frame.v
+set_global_assignment -name VERILOG_FILE V_Color_Tracker/ball_detector.v
 set_global_assignment -name VERILOG_FILE V/CLOCK_DELAY.v
 set_global_assignment -name VERILOG_FILE V_D8M/VGA_RD_COUNTER.v
 set_global_assignment -name VERILOG_FILE V/I2C_WRITE_WDATA.v
