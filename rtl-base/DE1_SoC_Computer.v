@@ -403,10 +403,10 @@ Computer_System The_System (
 	.pushbuttons_export						(~KEY[3:0]),
 
 	// Expansion JP1
-	.expansion_jp1_export					({GPIO_0[35:19], GPIO_0[17], GPIO_0[15:3], GPIO_0[1]}),
+	// .expansion_jp1_export					({GPIO_0[35:19], GPIO_0[17], GPIO_0[15:3], GPIO_0[1]}),
 
 	// Expansion JP2
-	.expansion_jp2_export					({GPIO_1[35:19], GPIO_1[17], GPIO_1[15:3], GPIO_1[1]}),
+	// .expansion_jp2_export					({GPIO_1[35:19], GPIO_1[17], GPIO_1[15:3], GPIO_1[1]}),
 
 	// LEDs
 	.leds_export								(LEDR),
@@ -422,8 +422,8 @@ Computer_System The_System (
 	.ps2_port_dual_DAT						(PS2_DAT2),
 
 	// IrDA
-	.irda_RXD									(IRDA_RXD),
-	.irda_TXD									(IRDA_TXD),
+	// .irda_RXD									(IRDA_RXD),
+	// .irda_TXD									(IRDA_TXD),
 
 	// VGA Subsystem
 	.vga_CLK										(VGA_CLK),
@@ -505,10 +505,10 @@ Computer_System The_System (
 	// Accelerometer
 	.hps_io_hps_io_gpio_inst_GPIO61	(HPS_GSENSOR_INT),
 
-	.adc_sclk                        (ADC_SCLK),
-	.adc_cs_n                        (ADC_CS_N),
-	.adc_dout                        (ADC_DOUT),
-	.adc_din                         (ADC_DIN),
+	// .adc_sclk                        (ADC_SCLK),
+	// .adc_cs_n                        (ADC_CS_N),
+	// .adc_dout                        (ADC_DOUT),
+	// .adc_din                         (ADC_DIN),
 
 	// General Purpose I/O
 	.hps_io_hps_io_gpio_inst_GPIO40	(HPS_GPIO[0]),
@@ -558,7 +558,11 @@ Computer_System The_System (
 	.hps_io_hps_io_usb1_inst_CLK		(HPS_USB_CLKOUT),
 	.hps_io_hps_io_usb1_inst_STP		(HPS_USB_STP),
 	.hps_io_hps_io_usb1_inst_DIR		(HPS_USB_DIR),
-	.hps_io_hps_io_usb1_inst_NXT		(HPS_USB_NXT)
+	.hps_io_hps_io_usb1_inst_NXT		(HPS_USB_NXT),
+
+	// ESP UART
+	.esp_uart_rxd                          (GPIO_0[34]),                          //                    esp_uart.rxd
+	.esp_uart_txd                          (GPIO_0[35])
 );
 
 

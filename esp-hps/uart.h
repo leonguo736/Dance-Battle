@@ -1,6 +1,8 @@
 #ifndef UART_H
 #define UART_H
 
+#include <unistd.h>
+
 #include "hps_0.h"
 
 /* rxdata register */

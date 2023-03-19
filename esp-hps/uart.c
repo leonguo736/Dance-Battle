@@ -24,10 +24,10 @@ int uart_write_command(volatile uint16_t *reg, unsigned int mask, unsigned int v
 
 void uart_init(void *virtual_base) {
     // Set the control register to enable the UART
-    UART_RXDATA_REG   =  (uint16_t *)(virtual_base + ((unsigned long)(ALT_LWFPGASLVS_OFST + ESP_UART_BASE + UART_RXDATA_OFFSET) & (unsigned long)(HW_REGS_MASK)));
-    UART_TXDATA_REG   =  (uint16_t *)(virtual_base + ((unsigned long)(ALT_LWFPGASLVS_OFST + ESP_UART_BASE + UART_TXDATA_OFFSET) & (unsigned long)(HW_REGS_MASK)));
-    UART_STATUS_REG   =  (uint16_t *)(virtual_base + ((unsigned long)(ALT_LWFPGASLVS_OFST + ESP_UART_BASE + UART_STATUS_OFFSET) & (unsigned long)(HW_REGS_MASK)));
-    UART_CONTROL_REG  =  (uint16_t *)(virtual_base + ((unsigned long)(ALT_LWFPGASLVS_OFST + ESP_UART_BASE + UART_CONTROL_OFFSET) & (unsigned long)(HW_REGS_MASK)));
+    UART_RXDATA_REG   =  (uint16_t *)(virtual_base + ((unsigned long)(ALT_LWFPGASLVS_OFST + ESP_RS232_UART_BASE + UART_RXDATA_OFFSET) & (unsigned long)(HW_REGS_MASK)));
+    UART_TXDATA_REG   =  (uint16_t *)(virtual_base + ((unsigned long)(ALT_LWFPGASLVS_OFST + ESP_RS232_UART_BASE + UART_TXDATA_OFFSET) & (unsigned long)(HW_REGS_MASK)));
+    UART_STATUS_REG   =  (uint16_t *)(virtual_base + ((unsigned long)(ALT_LWFPGASLVS_OFST + ESP_RS232_UART_BASE + UART_STATUS_OFFSET) & (unsigned long)(HW_REGS_MASK)));
+    UART_CONTROL_REG  =  (uint16_t *)(virtual_base + ((unsigned long)(ALT_LWFPGASLVS_OFST + ESP_RS232_UART_BASE + UART_CONTROL_OFFSET) & (unsigned long)(HW_REGS_MASK)));
 
     uart_output();
 }

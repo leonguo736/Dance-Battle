@@ -41,7 +41,7 @@ void run(void) {
     uart_write_data('\r');
 
     while (count < 10) {
-        hex_write(count);
+        display(count);
 
         pose.beat = (rand() % 1000) / (rand() % 100 + 1.0);
         pose.hourAngle = (rand() % 1000) / (rand() % 100 + 1.0);
