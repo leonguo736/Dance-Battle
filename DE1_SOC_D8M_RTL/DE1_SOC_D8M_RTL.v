@@ -119,12 +119,18 @@ wire        D8M_CK_HZ ;
 wire        D8M_CK_HZ2 ; 
 wire        D8M_CK_HZ3 ; 
 
-wire [7:0] RED   ; 
-wire [7:0] GREEN  ; 
-wire [7:0] BLUE 		 ; 
+wire [11:0] RED   ; 
+wire [11:0] GREEN  ; 
+wire [11:0] BLUE 		 ; 
 wire [12:0] VGA_H_CNT;			
 wire [12:0] VGA_V_CNT;	
 wire [19:0] VGA_ADDR; 
+
+wire [7:0] R_to_vga; 
+wire [7:0] G_to_vga;
+wire [7:0] B_to_vga;
+wire H_active_area; 
+wire V_active_area;
 
 wire        READ_Request ;
 wire 	[7:0] B_AUTO;
@@ -266,11 +272,9 @@ RAW2RGB_J				u4	(
                      .VGA_VS       ( VGA_VS ),	
 							.VGA_HS       ( VGA_HS ) , 
 	                  			
-							.oRed         ( RED  ),
-							.oGreen       ( GREEN),
-							.oBlue        ( BLUE )
-
-
+							.oRed         ( RED[11:0]  ),
+							.oGreen       ( GREEN[11:0]),
+							.oBlue        ( BLUE[11:0] )
 							);		 
 //------AOTO FOCUS ENABLE  --
 AUTO_FOCUS_ON  vd( 
@@ -310,9 +314,11 @@ FOCUS_ADJ adl(
 
 VGA_Controller		u1	(	//	Host Side
 							 .oRequest( READ_Request ),
-							 .iRed    ( RED    ),
-							 .iGreen  ( GREEN  ),
-							 .iBlue   ( BLUE   ),
+							 .oHRequest (H_active_area), 
+							 .oVRequest (V_active_area),
+							 .iRed    ( R_to_vga ),
+							 .iGreen  ( G_to_vga ),
+							 .iBlue   ( B_to_vga ),
 							 
 							 //	VGA Side
 							 .oVGA_R  ( R_AUTO[7:0] ),
@@ -350,5 +356,21 @@ CLOCKMEM  ck3 ( .CLK(MIPI_PIXEL_CLK_)   ,.CLK_FREQ  (25000000  ) , . CK_1HZ (D8M
 
 
 assign LEDR = { D8M_CK_HZ ,D8M_CK_HZ2,D8M_CK_HZ3 ,5'h0,CAMERA_MIPI_RELAESE ,MIPI_BRIDGE_RELEASE  } ; 
+
+// Custom Module
+ball_detector  ball_u1( 
+   .reset( KEY[0] ),
+   .video_in( { RED[11:4], GREEN[11:4], BLUE[11:4] } ),
+   .vAddress( VGA_ADDRESS ),
+   .active_area( READ_Request ),
+   .ball_clock( VGA_CLK ),
+   .h_sync( READ_Request ),  // Can use H_active_area or READ_Request here.
+   .v_sync( V_active_area ),
+   .video_out( { R_to_vga, G_to_vga, B_to_vga } ),
+   .vid_select( SW[9] ),
+   .freeze( SW[8] ),
+   .EX_IO( EX_IO ),       // De-bug signals out to pins.
+   .SW( SW )
+ );
 
 endmodule
