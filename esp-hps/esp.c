@@ -13,15 +13,16 @@ struct Pose {
 };
 
 void run(int argc, char** argv) {
-  char recvBuffer[1024];
-  char sendBuffer[1024];
+  printf("esp run\n");
+  char recvBuffer[UART_BUFFER_SIZE];
+  char sendBuffer[UART_BUFFER_SIZE];
   // char *sendPtr;
   // char *recvPtr;
   unsigned int count = 0;
   struct Pose pose;
 
   while (strcmp(recvBuffer, "connected") != 0) {
-    uart_read_data(recvBuffer, 1024);
+    int len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
     //   recvPtr = recvBuffer;
     //   while (*recvPtr != '\n') {
     //     uart_read_data((unsigned int *)recvPtr);
@@ -32,7 +33,7 @@ void run(int argc, char** argv) {
     //     recvPtr++;
     //     }
     //     *recvPtr = '\0';
-    printf("%s\n", recvBuffer);
+    printf("[%d] %s\n", len, recvBuffer);
   }
 
   uart_write_data("start\n");
@@ -62,7 +63,7 @@ void run(int argc, char** argv) {
 
     // uart_write_data('\r');
 
-    unsigned int len = uart_read_data(recvBuffer, 1024);
+    unsigned int len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
 
     // recvPtr = recvBuffer;
     // while (*recvPtr != '\n') {
@@ -79,7 +80,7 @@ void run(int argc, char** argv) {
   }
 
   while (1) {
-    unsigned int len = uart_read_data(recvBuffer, 1024);
+    unsigned int len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
     // recvPtr = recvBuffer;
     // while (*recvPtr != '\n') {
     //     uart_read_data((unsigned int *)recvPtr);

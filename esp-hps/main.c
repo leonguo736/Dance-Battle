@@ -17,8 +17,8 @@ int main(int argc, char **argv) {
   void *h2p_lw_led_addr;
 
   // ESP
-  char sendBuffer[1024];
-  char recvBuffer[1024];
+  char sendBuffer[UART_BUFFER_SIZE];
+  char recvBuffer[UART_BUFFER_SIZE];
   char* recvPtr;
 
   if (regs_init(&virtual_base)) {
@@ -38,6 +38,7 @@ int main(int argc, char **argv) {
   led_mask = 0x01;
   led_direction = 0;  // 0: left to right direction
 
+  printf("Init complete\n");
   // Main while loop
   while (1) {
     // control led
@@ -51,7 +52,7 @@ int main(int argc, char **argv) {
       recvPtr = recvBuffer;
 
       while (*recvPtr != '\n') {
-        uart_read_byte((unsigned int *)recvPtr);
+        uart_read_byte(recvPtr);
 
         if (*recvPtr == '\n') {
           break;
@@ -64,23 +65,23 @@ int main(int argc, char **argv) {
       *recvPtr = '\0';
       printf("[%d] %s\n", len, recvBuffer);
     } else if (argv[1][0] == '3') {
-      unsigned int len = uart_read_data(recvBuffer, 1024);
+      printf("Reading uart\n");
+      unsigned int len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
       printf("[%d] %s\n", len, recvBuffer);
     } else if (argv[1][0] == '4') {
+      printf("Enter string to send: ");
       scanf("%s", sendBuffer);
 
       uart_write_data(sendBuffer);
 
-      unsigned int len = uart_read_data(recvBuffer, 1024);
+      unsigned int len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
       printf("[%d] %s\n", len, recvBuffer);
     } else {
-      printf("Running esp\n");
-
       run(argc, argv);
       return 1;
     }
 
-    usleep(100 * 1000);
+    // usleep(100 * 1000);
 
     // update led mask
     if (led_direction == 0) {

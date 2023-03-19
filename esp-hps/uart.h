@@ -3,7 +3,7 @@
 
 #include <unistd.h>
 
-#include "hps_0.h"
+#include "hwlib.h" // has uintX_t defines
 
 /* rxdata register */
 #define UART_RXDATA_OFFSET 0x00
@@ -46,10 +46,14 @@
 #define UART_RTS_MASK 0x800
 #define UART_IEOP_MASK 0x1000
 
+/* constants */
+#define UART_BUFFER_SIZE 1024
 /* UART Functions */
 void uart_init(void *virtual_base);
 void uart_write_data(char *data);
 int uart_read_data(char *data, int len);
+int uart_read_byte(uint8_t *data);
+void uart_write_byte(uint8_t data);
 void uart_output(void);
 
 #endif
