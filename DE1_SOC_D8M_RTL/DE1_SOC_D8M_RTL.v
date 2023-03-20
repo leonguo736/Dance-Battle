@@ -289,7 +289,7 @@ FOCUS_ADJ adl(
                       .CLK_50        ( CLOCK2_50 ) , 
                       .RESET_N       ( I2C_RELEASE ), 
                       .RESET_SUB_N   ( I2C_RELEASE ), 
-                      .AUTO_FOC      ( SW[5] & AUTO_FOC ), 
+                      .AUTO_FOC      ( SW[6] & AUTO_FOC ), 
                       .SW_Y          ( 0 ),
                       .SW_H_FREQ     ( 0 ),   
                       .SW_FUC_LINE   ( SW[4] ),   
@@ -364,11 +364,37 @@ reg [7:0] crLow;
 reg [7:0] crHigh;
 reg [7:0] cbLow;
 reg [7:0] cbHigh; 
+wire [7:0] redPixelHIndex; 
+wire [7:0] redPixelVIndex;
 
-wire [7:0] displayInt; 
-int8_to_hex3 int8_to_hex3( .i( displayInt ), .o( { HEX2, HEX1, HEX0 } ) );
+reg [15:0] displayInt;
+int16_to_hex6 int16_to_hex6_0(
+	.i(displayInt),
+	.o({HEX5, HEX4, HEX3, HEX2, HEX1, HEX0})
+);
 
-assign displayInt = SW[1] ? (SW[0] ? crHigh : crLow) : (SW[0] ? cbHigh : cbLow);
+// assign displayIntRight = SW[1] ? (SW[0] ? crHigh : crLow) : (SW[0] ? cbHigh : cbLow);
+always @(*) begin
+	if (SW[3]) begin
+		displayInt = redPixelHIndex; 
+	end else if (SW[4]) begin
+		displayInt = redPixelVIndex;
+	end else begin
+		if (SW[1]) begin
+			if (SW[0]) begin
+				displayInt = crHigh;
+			end else begin
+				displayInt = crLow;
+			end
+		end else begin
+			if (SW[0]) begin
+				displayInt = cbHigh;
+			end else begin
+				displayInt = cbLow;
+			end
+		end
+	end
+end
 
 // Increment / Decrement
 reg [3:0] KEY_OLD; 
@@ -413,6 +439,8 @@ ball_detector  ball_u1(
    .iCrHigh( crHigh ),
    .iCbLow( cbLow ),
    .iCbHigh( cbHigh ),
+   .oRedPixelHIndex( redPixelHIndex ),
+   .oRedPixelVIndex( redPixelVIndex )
  );
 
 endmodule

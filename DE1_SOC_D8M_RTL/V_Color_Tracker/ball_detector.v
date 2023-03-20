@@ -17,8 +17,13 @@ module ball_detector (
    input [7:0] iCrLow, 
    input [7:0] iCrHigh, 
    input [7:0] iCbLow,
-   input [7:0] iCbHigh
+   input [7:0] iCbHigh, 
+   output [8:0] oRedPixelHIndex,   // passes up the value of the number of the horizontal line of the center of the red object.
+   output [9:0] oRedPixelVIndex    // passes up the value of the number of the vertical line of the center of the red object.
 );
+
+assign oRedPixelHIndex = RedPixelHIndex;
+assign oRedPixelVIndex = RedPixelVIndex;
 
 wire [8:0] RedPixelHIndex;  // row of red middle.
 wire [9:0] RedPixelVIndex;  // column of red middle.
@@ -58,15 +63,18 @@ red_frame u1 (
 always @(*) begin
    if( iVideoSelect == 1'b0 ) begin
          if( (hIndex == RedPixelVIndex) || (vIndex == RedPixelHIndex) )
-            oVideo8bRgb = { 8'b0111_1111, 8'b0111_1111, 8'b0111_1111 };
+            oVideo8bRgb = { 8'b1111_1111, 8'b1111_1111, 8'b1111_1111 };
          else
             oVideo8bRgb = { RED[7:0], GREEN[7:0], BLUE[7:0] };
       end
    else begin
       if( (hIndex == RedPixelVIndex) || (vIndex == RedPixelHIndex) )
-         oVideo8bRgb = { 8'b0111_1111, 8'b0111_1111, 8'b0111_1111 };
+         oVideo8bRgb = { 8'd255, 8'd255, 8'd255 }; 
       else
-         oVideo8bRgb = { 1'b0, {7{ram_seems_red}}, {2{1'b0}}, {6{ram_seems_red}}, {2{1'b0}}, {6{ram_seems_red}}  };
+         if ( ram_seems_red == 1'b1 )
+            oVideo8bRgb = { RED[7:0], GREEN[7:0], BLUE[7:0] };
+         else
+            oVideo8bRgb = { 8'd0, 8'd0, 8'd0 }; // black
       end
    end   
 
