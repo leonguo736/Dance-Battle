@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 
+#include "const.h"
 #include "hps_0.h"
 #include "hwlib.h"
 #include "socal/alt_gpio.h"

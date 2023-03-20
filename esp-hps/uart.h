@@ -3,6 +3,7 @@
 
 #include <unistd.h>
 
+#include "const.h"
 #include "hwlib.h" // has uintX_t defines
 
 /* rxdata register */
@@ -54,6 +55,8 @@ void uart_write_data(char *data);
 int uart_read_data(char *data, int len);
 int uart_read_byte(uint8_t *data);
 void uart_write_byte(uint8_t data);
+char *uart_wait_for_messages(char **messages, unsigned int numMessages);
+void uart_send_command(char *cmd, char **args, unsigned int numArgs);
 void uart_output(void);
 
 #endif

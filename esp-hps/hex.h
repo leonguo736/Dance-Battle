@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "const.h"
+
 #define INVERT 0xFFFFFFFF
 #define MAX_HEXES 6
 

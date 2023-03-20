@@ -40,42 +40,44 @@ int main(int argc, char **argv) {
 
   printf("Init complete\n");
   // Main while loop
-  while (1) {
+  while (true) {
     // control led
     *(uint32_t *)h2p_lw_led_addr = ~led_mask;
 
-    if (argv[1][0] == '1') {
-      printf("Setting Hex: %d\n", loop_count);
-      display(loop_count);
-    } else if (argv[1][0] == '2') {
-      unsigned int len = 0;
-      recvPtr = recvBuffer;
+    if (argc == 2) {
+      if (argv[1][0] == '1') {
+        printf("Setting Hex: %d\n", loop_count);
+        display(loop_count);
+      } else if (argv[1][0] == '2') {
+        unsigned int len = 0;
+        recvPtr = recvBuffer;
 
-      while (*recvPtr != '\n') {
-        uart_read_byte(recvPtr);
+        while (*recvPtr != '\n') {
+          uart_read_byte(recvPtr);
 
-        if (*recvPtr == '\n') {
-          break;
+          if (*recvPtr == '\n') {
+            break;
+          }
+
+          recvPtr++;
+          len++;
         }
 
-        recvPtr++;
-        len++;
+        *recvPtr = '\0';
+        printf("[%d] %s\n", len, recvBuffer);
+      } else if (argv[1][0] == '3') {
+        unsigned int len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
+        printf("[%d] %s\n", len, recvBuffer);
+      } else if (argv[1][0] == '4') {
+        printf("Enter string to send: ");
+        scanf("%s", sendBuffer);
+
+        uart_write_data(sendBuffer);
+
+        uart_output();
+        unsigned int len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
+        printf("[%d] %s\n", len, recvBuffer);
       }
-
-      *recvPtr = '\0';
-      printf("[%d] %s\n", len, recvBuffer);
-    } else if (argv[1][0] == '3') {
-      printf("Reading uart\n");
-      unsigned int len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
-      printf("[%d] %s\n", len, recvBuffer);
-    } else if (argv[1][0] == '4') {
-      printf("Enter string to send: ");
-      scanf("%s", sendBuffer);
-
-      uart_write_data(sendBuffer);
-
-      unsigned int len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
-      printf("[%d] %s\n", len, recvBuffer);
     } else {
       run(argc, argv);
       return 1;
