@@ -382,15 +382,15 @@ always @(posedge VGA_CLK) begin
 	end else begin
 		if (KEY_OLD != KEY) begin
 			if (~KEY[1]) begin
-				if (~SW[1] && ~SW[0]) cbLow = cbLow + 10;
-				if (~SW[1] &&  SW[0]) cbHigh = cbHigh + 10;
-				if ( SW[1] && ~SW[0]) crLow = crLow + 10;
-				if ( SW[1] &&  SW[0]) crHigh = crHigh + 10;
+				if (~SW[1] && ~SW[0]) cbLow = SW[2] ? cbLow + 10 : cbLow + 1;
+				if (~SW[1] &&  SW[0]) cbHigh = SW[2] ? cbHigh + 10 : cbHigh + 1;
+				if ( SW[1] && ~SW[0]) crLow = SW[2] ? crLow + 10 : crLow + 1;
+				if ( SW[1] &&  SW[0]) crHigh = SW[2] ? crHigh + 10 : crHigh + 1;
 			end else if (~KEY[2]) begin
-				if (~SW[1] && ~SW[0]) cbLow = cbLow - 10;
-				if (~SW[1] &&  SW[0]) cbHigh = cbHigh - 10;
-				if ( SW[1] && ~SW[0]) crLow = crLow - 10;
-				if ( SW[1] &&  SW[0]) crHigh = crHigh - 10;
+				if (~SW[1] && ~SW[0]) cbLow = SW[2] ? cbLow - 10 : cbLow - 1;
+				if (~SW[1] &&  SW[0]) cbHigh = SW[2] ? cbHigh - 10 : cbHigh - 1;
+				if ( SW[1] && ~SW[0]) crLow = SW[2] ? crLow - 10 : crLow - 1;
+				if ( SW[1] &&  SW[0]) crHigh = SW[2] ? crHigh - 10 : crHigh - 1;
 			end
 			KEY_OLD <= KEY;
 		end

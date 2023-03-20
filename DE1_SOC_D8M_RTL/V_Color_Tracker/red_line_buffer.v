@@ -37,7 +37,7 @@ assign RED = iPixel12bRgb[35:24];
 assign GREEN = iPixel12bRgb[23:12];
 assign BLUE = iPixel12bRgb[11:0];
 
-assign RED_OTHER = RED[11:4]; 
+assign RED_OTHER = RED[11:4]; // only nessesary for original red detection
 assign GREEN_OTHER = GREEN[11:4];
 assign BLUE_OTHER = BLUE[11:4];
 
@@ -49,8 +49,8 @@ rgb_to_ycbcr u1 ( .iR( RED ), .iG( GREEN ), .iB( BLUE ), .oY( y ), .oCb( cb ), .
 
 // Detect red. Put a '1' in the line buffer if this iPixel12bRgb seems very red.
 always @ (*) begin
-   if( ({1'b0,RED_OTHER[6:1]} > BLUE_OTHER[7:0]) && ({1'b0,RED_OTHER[6:1]} > GREEN_OTHER[7:0]) ) seems_red = 1'b1; else seems_red = 1'b0;
-   // if (cb >= iCbLow && cb <= iCbHigh && cr >= iCrLow && cr <= iCrHigh) seems_red = 1'b1; else seems_red = 1'b0;
+   // if( ({1'b0,RED_OTHER[6:1]} > BLUE_OTHER[7:0]) && ({1'b0,RED_OTHER[6:1]} > GREEN_OTHER[7:0]) ) seems_red = 1'b1; else seems_red = 1'b0;
+   if (cb >= iCbLow && cb <= iCbHigh && cr >= iCrLow && cr <= iCrHigh) seems_red = 1'b1; else seems_red = 1'b0;
 end
 
 // WR is a pointer to the line buffer that is currently being filled.
