@@ -79,6 +79,9 @@ void uart_init(void *virtual_base) {
                                     UART_CONTROL_OFFSET) &
                     (unsigned long)(HW_REGS_MASK)));
 
+  // Clear status register
+  *UART_STATUS_REG = 0;
+
   uart_output();
 }
 

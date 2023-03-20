@@ -15,16 +15,16 @@ struct Pose {
   double minuteAngle;
 };
 
-bool init_connection(void);
+bool init_connection(char* serverIP);
 
 // Function Definitions
-bool init_connection(void) {
+bool init_connection(char* serverIP) {
   // Reset the ESP
   uart_send_command(ESP_RESET_COMMAND, NULL, 0);
   uart_wait_for_messages((char*[]){ESP_INIT_COMMAND}, 1);
 
   // Connect to the backend
-  uart_send_command(ESP_CONNECT_BACKEND_COMMAND, (char*[]){SERVER_IP}, 1);
+  uart_send_command(ESP_CONNECT_BACKEND_COMMAND, (char*[]){serverIP}, 1);
   char* yieldedMessage = uart_wait_for_messages((char*[]){ESP_READY_COMMAND, ESP_CLOSE_COMMAND}, 2);
 
   if (strcmp(yieldedMessage, ESP_CLOSE_COMMAND) == 0) {
@@ -49,7 +49,7 @@ void run(int argc, char** argv) {
   struct Pose pose;
 
   do {
-    connected = init_connection();
+    connected = init_connection(argc > 1 ? argv[1] : SERVER_IP);
     failCount += !connected;
 
     if (!connected && failCount > 0) {
