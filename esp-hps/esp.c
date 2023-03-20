@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "commands.h"
+#include "const.h"
 #include "hex.h"
 
 #define SERVER_IP "192.168.0.198:8080"
@@ -79,7 +80,7 @@ void run(int argc, char** argv) {
   //   printf("[%d] %s\n", len, recvBuffer);
   // }
 
-  uart_write_data("start\n");
+  // uart_write_data("start\n");
   // uart_write_data('s');
   // uart_write_data('t');
   // uart_write_data('a');
@@ -94,10 +95,10 @@ void run(int argc, char** argv) {
     pose.hourAngle = (rand() % 1000) / (rand() % 100 + 1.0);
     pose.minuteAngle = (rand() % 1000) / (rand() % 100 + 1.0);
 
-    sprintf(sendBuffer, "%f,%f,%f", pose.beat, pose.hourAngle,
+    sprintf(sendBuffer, "%f %f %f", pose.beat, pose.hourAngle,
             pose.minuteAngle);
 
-    uart_write_data(sendBuffer);
+    uart_send_command(ESP_POSE_COMMAND, (char*[]){sendBuffer}, 1);
     // sendPtr = sendBuffer;
     // while (*sendPtr != '\0') {
     //     uart_write_data((unsigned int) *sendPtr);
