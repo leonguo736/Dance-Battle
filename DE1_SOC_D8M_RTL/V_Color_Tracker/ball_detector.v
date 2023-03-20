@@ -72,7 +72,7 @@ always @(*) begin
          oVideo8bRgb = { 8'd255, 8'd255, 8'd255 }; 
       else
          if ( ram_seems_red == 1'b1 )
-            oVideo8bRgb = { RED[7:0], GREEN[7:0], BLUE[7:0] };
+            oVideo8bRgb = { 8'd0, 8'd255, 8'd0 }; // green
          else
             oVideo8bRgb = { 8'd0, 8'd0, 8'd0 }; // black
       end

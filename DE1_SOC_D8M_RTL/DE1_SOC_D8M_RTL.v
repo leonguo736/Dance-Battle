@@ -405,10 +405,10 @@ reg [3:0] KEY_OLD;
 always @(posedge VGA_CLK) begin
 	if (~KEY[0]) begin
 		KEY_OLD <= 4'b1111;
-		crLow = 8'd120; 
-		crHigh = 8'd137;
-		cbLow = 8'd120;
-		cbHigh = 8'd127;
+		crLow = 8'd0; 
+		crHigh = 8'd255;
+		cbLow = 8'd0;
+		cbHigh = 8'd255;
 	end else begin
 		if (KEY_OLD != KEY) begin
 			if (~KEY[1]) begin
@@ -478,14 +478,14 @@ nios2_system ni2s (
 	.coords_ram_data( {7'd0, redPixelHIndex, 6'd0, redPixelVIndex} )
 );
 
-// coords_ram coords_ram_0 (
-// 	.data( { redPixelHIndex, redPixelVIndex } ),
-// 	.rdaddress( coords_ram_addr ),
-// 	.rdclock( CLOCK2_50 ),
-// 	.wraddress( 0 ),
-// 	.wrclock( VGA_CLK ),
-// 	.wren( 1'b1 ),
-// 	.q( coords_ram_data )
-// );
+coords_ram coords_ram_0 (
+	.data( { 7'd0, redPixelHIndex, 6'd0, redPixelVIndex } ),
+	.rdaddress( coords_ram_addr ),
+	.rdclock( CLOCK2_50 ),
+	.wraddress( 0 ),
+	.wrclock( VGA_CLK ),
+	.wren( VGA_CLK ),
+	.q( coords_ram_data )
+);
 
 endmodule

@@ -18,13 +18,16 @@ module coords_slave (
         output wire        avs_s0_waitrequest, //           .waitrequest
         input  wire        clock_clk,          //      clock.clk
         input  wire        reset_reset,        //      reset.reset
-        output wire [4:0]  addr,               // coords_ram.addr
+        output reg [4:0]  addr,               // coords_ram.addr
         input  wire [31:0] data                //           .data
     );
 
     assign avs_s0_waitrequest = 1'b0;
-    
-    assign addr = avs_s0_address;
+
+    always @(posedge clock_clk) begin
+        addr <= avs_s0_address;
+    end
+
     assign avs_s0_readdata = data;
 
 endmodule
