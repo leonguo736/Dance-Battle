@@ -272,9 +272,9 @@ RAW2RGB_J				u4	(
                      .VGA_VS       ( VGA_VS ),	
 							.VGA_HS       ( VGA_HS ) , 
 	                  			
-							.oRed         ( RED[11:0]  ),
-							.oGreen       ( GREEN[11:0]),
-							.oBlue        ( BLUE[11:0] )
+							.oRed         ( RED  ),
+							.oGreen       ( GREEN),
+							.oBlue        ( BLUE )
 							);		 
 //------AOTO FOCUS ENABLE  --
 AUTO_FOCUS_ON  vd( 
@@ -360,16 +360,16 @@ assign LEDR = { D8M_CK_HZ ,D8M_CK_HZ2,D8M_CK_HZ3 ,5'h0,CAMERA_MIPI_RELAESE ,MIPI
 // Custom Module
 ball_detector  ball_u1( 
    .reset( KEY[0] ),
-   .video_in( { RED[11:0], GREEN[11:0], BLUE[11:0] } ),
-   .vAddress( VGA_ADDRESS ),
-   .active_area( READ_Request ),
-   .ball_clock( VGA_CLK ),
-   .h_sync( READ_Request ),  // Can use H_active_area or READ_Request here.
-   .v_sync( V_active_area ),
-   .video_out( { R_to_vga, G_to_vga, B_to_vga } ),
-   .vid_select( SW[9] ),
-   .freeze( SW[8] ),
-   .SW( SW )
+   .iVideo12bRgb( { RED, GREEN, BLUE } ),
+   .iPixelAddress( VGA_ADDRESS ),
+   .iVgaRequest( READ_Request ),
+   .iVgaClk( VGA_CLK ),
+   .iVgaHRequest( READ_Request ),  // Can use H_active_area or READ_Request here.
+   .iVgaVRequest( V_active_area ),
+   .oVideo8bRgb( { R_to_vga, G_to_vga, B_to_vga } ),
+   .iVideoSelect( SW[9] ),
+   .iFreezeRam( SW[8] ),
+   .iFilterOn( SW[7] )
  );
 
 endmodule

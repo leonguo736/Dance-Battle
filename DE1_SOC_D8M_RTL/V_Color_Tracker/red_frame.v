@@ -7,8 +7,8 @@ module red_frame (
    input [23:0] pixel_data,
    input [9:0] x_cont,
    input [8:0] y_cont,
-   input h_sync,
-   input v_sync,
+   input iVgaHRequest,
+   input iVgaVRequest,
    output reg red_pixel,
    output reg [8:0] horz_line,   // passes up the value of the number of the horizontal line of the center of the red object.
    output reg [9:0] vert_line,
@@ -54,23 +54,23 @@ always @ (posedge VGA_clock or negedge reset)
       case( state )
          START_UP : begin
                        cntr <= 0;
-                       if( v_sync == 1'b0 ) state <= START_UP;   // Wait for start of new video frame.
+                       if( iVgaVRequest == 1'b0 ) state <= START_UP;   // Wait for start of new video frame.
                        else state <= WAIT;
                     end
  
-         WAIT : begin        // waiting for h_sync to go high, to start evaluating the next line.
+         WAIT : begin        // waiting for iVgaHRequest to go high, to start evaluating the next line.
                    cntr <= 0;
-                   if( v_sync == 1'b0 ) begin
-                      state <= START_UP;   // If v_sync is low, then current video frame has ended.
+                   if( iVgaVRequest == 1'b0 ) begin
+                      state <= START_UP;   // If iVgaVRequest is low, then current video frame has ended.
                       horz_line <= line_of_max;   // output the line number that had the max sequential red pixels.
                       vert_line <= end_x - ( max_ever >> 1 );
                       end
-                   else if( h_sync == 1'b0 ) state <= WAIT;
+                   else if( iVgaHRequest == 1'b0 ) state <= WAIT;
                    else state <= IS_RED;
                 end
                    
          IS_RED : begin      // in active video area. start counting red pixels
-                      if( h_sync == 1'b0 ) state <= WAIT;
+                      if( iVgaHRequest == 1'b0 ) state <= WAIT;
                       else if( red_pixel == 1'b1 ) begin
                               cntr <= cntr + 1;
                               state <= IS_RED;
@@ -116,7 +116,7 @@ end
 red_line_buffer u1 ( 
    .bit_clk( VGA_clock ),
    .pixel( pixel_data ),
-   .h_sync( h_sync ),
+   .h_sync( iVgaHRequest ),
    .x_cont( x_cont ),
    // The tap outputs are the column of 3 pixels above the current camera pixel location.
    .tap_top( tap_top ),
@@ -124,8 +124,8 @@ red_line_buffer u1 (
    .tap_bottom( tap_bottom )
 );
 
-assign EX_IO[0] = v_sync;
-assign EX_IO[1] = h_sync;
+assign EX_IO[0] = iVgaVRequest;
+assign EX_IO[1] = iVgaHRequest;
 assign EX_IO[2] = cntr[0];
 assign EX_IO[3] = cntr[1];
 assign EX_IO[4] = state[0];
