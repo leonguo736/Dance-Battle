@@ -360,7 +360,7 @@ assign LEDR = { D8M_CK_HZ ,D8M_CK_HZ2,D8M_CK_HZ3 ,5'h0,CAMERA_MIPI_RELAESE ,MIPI
 // Custom Module
 ball_detector  ball_u1( 
    .reset( KEY[0] ),
-   .video_in( { RED[11:4], GREEN[11:4], BLUE[11:4] } ),
+   .video_in( { RED[11:0], GREEN[11:0], BLUE[11:0] } ),
    .vAddress( VGA_ADDRESS ),
    .active_area( READ_Request ),
    .ball_clock( VGA_CLK ),
@@ -369,7 +369,6 @@ ball_detector  ball_u1(
    .video_out( { R_to_vga, G_to_vga, B_to_vga } ),
    .vid_select( SW[9] ),
    .freeze( SW[8] ),
-   .EX_IO( EX_IO ),       // De-bug signals out to pins.
    .SW( SW )
  );
 
