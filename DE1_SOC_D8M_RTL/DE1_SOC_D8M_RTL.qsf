@@ -547,6 +547,8 @@ set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "2.5 V"
 
 
 
+set_global_assignment -name VERILOG_FILE V_Color_Tracker/int_to_hex.v
+set_global_assignment -name VERILOG_FILE V_Color_Tracker/rgb_to_ycbcr.v
 set_global_assignment -name VERILOG_FILE V_Color_Tracker/Mod_counter.v
 set_global_assignment -name VERILOG_FILE V_Color_Tracker/ball_ram.v
 set_global_assignment -name VERILOG_FILE V_Color_Tracker/red_line_x.v

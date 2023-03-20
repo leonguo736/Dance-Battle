@@ -165,10 +165,10 @@ assign LUT_MIPI_PIXEL_D =MIPI_PIXEL_D ;
 assign UART_RTS =0; 
 assign UART_TXD =0; 
 //------HEX OFF --
-assign HEX2           = 7'h7F;
-assign HEX3           = 7'h7F;
-assign HEX4           = 7'h7F;
-assign HEX5           = 7'h7F;
+// assign HEX2           = 7'h7F;
+// assign HEX3           = 7'h7F;
+// assign HEX4           = 7'h7F;
+// assign HEX5           = 7'h7F;
 
 //------ MIPI BRIGE & CAMERA RESET  --
 assign CAMERA_PWDN_n  = 1; 
@@ -289,11 +289,11 @@ FOCUS_ADJ adl(
                       .CLK_50        ( CLOCK2_50 ) , 
                       .RESET_N       ( I2C_RELEASE ), 
                       .RESET_SUB_N   ( I2C_RELEASE ), 
-                      .AUTO_FOC      ( KEY[3] & AUTO_FOC ), 
+                      .AUTO_FOC      ( SW[5] & AUTO_FOC ), 
                       .SW_Y          ( 0 ),
                       .SW_H_FREQ     ( 0 ),   
-                      .SW_FUC_LINE   ( SW[3] ),   
-                      .SW_FUC_ALL_CEN( SW[3] ),
+                      .SW_FUC_LINE   ( SW[4] ),   
+                      .SW_FUC_ALL_CEN( SW[4] ),
                       .VIDEO_HS      ( VGA_HS ),
                       .VIDEO_VS      ( VGA_VS ),
                       .VIDEO_CLK     ( VGA_CLK ),
@@ -344,8 +344,10 @@ FpsMonitor uFps(
 	   .vs       ( LUT_MIPI_PIXEL_VS ),
 	
 	   .fps      (),
-	   .hex_fps_h( HEX1 ),
-	   .hex_fps_l( HEX0 )
+	//    .hex_fps_h( HEX1 ),
+	//    .hex_fps_l( HEX0 )
+		.hex_fps_h( ),
+		.hex_fps_l( )
 );
 
 
@@ -355,9 +357,46 @@ CLOCKMEM  ck2 ( .CLK(MIPI_REFCLK   )   ,.CLK_FREQ  (20000000   ) , . CK_1HZ (D8M
 CLOCKMEM  ck3 ( .CLK(MIPI_PIXEL_CLK_)   ,.CLK_FREQ  (25000000  ) , . CK_1HZ (D8M_CK_HZ3  )  )  ;//25MHZ
 
 
-assign LEDR = { D8M_CK_HZ ,D8M_CK_HZ2,D8M_CK_HZ3 ,5'h0,CAMERA_MIPI_RELAESE ,MIPI_BRIDGE_RELEASE  } ; 
+assign LEDR = { D8M_CK_HZ ,D8M_CK_HZ2,D8M_CK_HZ3 , KEY, 1'h0,CAMERA_MIPI_RELAESE ,MIPI_BRIDGE_RELEASE  } ; 
 
-// Custom Module
+// Custom Modules
+reg [7:0] crLow; 
+reg [7:0] crHigh;
+reg [7:0] cbLow;
+reg [7:0] cbHigh; 
+
+wire [7:0] displayInt; 
+int8_to_hex3 int8_to_hex3( .i( displayInt ), .o( { HEX2, HEX1, HEX0 } ) );
+
+assign displayInt = SW[1] ? (SW[0] ? crHigh : crLow) : (SW[0] ? cbHigh : cbLow);
+
+// Increment / Decrement
+reg [3:0] KEY_OLD; 
+always @(posedge VGA_CLK) begin
+	if (~KEY[0]) begin
+		KEY_OLD <= 4'b1111;
+		crLow = 8'd120; 
+		crHigh = 8'd137;
+		cbLow = 8'd120;
+		cbHigh = 8'd127;
+	end else begin
+		if (KEY_OLD != KEY) begin
+			if (~KEY[1]) begin
+				if (~SW[1] && ~SW[0]) cbLow = cbLow + 10;
+				if (~SW[1] &&  SW[0]) cbHigh = cbHigh + 10;
+				if ( SW[1] && ~SW[0]) crLow = crLow + 10;
+				if ( SW[1] &&  SW[0]) crHigh = crHigh + 10;
+			end else if (~KEY[2]) begin
+				if (~SW[1] && ~SW[0]) cbLow = cbLow - 10;
+				if (~SW[1] &&  SW[0]) cbHigh = cbHigh - 10;
+				if ( SW[1] && ~SW[0]) crLow = crLow - 10;
+				if ( SW[1] &&  SW[0]) crHigh = crHigh - 10;
+			end
+			KEY_OLD <= KEY;
+		end
+	end
+end
+
 ball_detector  ball_u1( 
    .reset( KEY[0] ),
    .iVideo12bRgb( { RED, GREEN, BLUE } ),
@@ -369,7 +408,11 @@ ball_detector  ball_u1(
    .oVideo8bRgb( { R_to_vga, G_to_vga, B_to_vga } ),
    .iVideoSelect( SW[9] ),
    .iFreezeRam( SW[8] ),
-   .iFilterOn( SW[7] )
+   .iFilterOn( SW[7] ), 
+   .iCrLow( crLow ),
+   .iCrHigh( crHigh ),
+   .iCbLow( cbLow ),
+   .iCbHigh( cbHigh ),
  );
 
 endmodule
