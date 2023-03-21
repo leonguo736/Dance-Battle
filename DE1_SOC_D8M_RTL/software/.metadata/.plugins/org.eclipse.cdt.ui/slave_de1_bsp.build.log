@@ -1,6 +1,6 @@
-13:23:41 **** Incremental Build of configuration Nios II for project slave_de1_bsp ****
-make all 
-[BSP build complete]
+19:08:53 **** Clean-only build of configuration Nios II for project slave_de1_bsp ****
+make clean 
+[BSP clean complete]
 
-13:23:42 Build Finished (took 662ms)
+19:08:53 Build Finished (took 203ms)
 
