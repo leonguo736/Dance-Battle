@@ -110,8 +110,8 @@ void esp_run(int argc, char** argv) {
     unsigned int len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
     printf("[%d] %s\n", len, recvBuffer);
 
-    len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
-    printf("[%d] %s\n", len, recvBuffer);
+    // len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
+    // printf("[%d] %s\n", len, recvBuffer);
 
     // len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
     // printf("[%d] %s\n", len, recvBuffer);

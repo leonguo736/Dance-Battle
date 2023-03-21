@@ -1,11 +1,12 @@
 
 #include "uart.h"
 
+#include <unistd.h>
 #include <stdio.h>
 #include <string.h>
 
-#include "system.h"
 #include "altera_avalon_uart_regs.h"
+#include "system.h"
 
 // Private Variables
 volatile uint16_t *UART_RXDATA_REG;
@@ -33,16 +34,22 @@ int uart_read_byte(uint8_t *data) {
     printf("uart_read_byte - %x \n",
            IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE));
   }
+
+  if ((IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE) & UART_ROE_MASK) == 1) {
+    // if (uart_read_command(UART_STATUS_REG, UART_ROE_MASK) != 0) {
+    printf("uart_read_data - ROE\n");
+  }
     // Poll until the previous bit has been shifted
-  while ((IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE) & UART_RRDY_MASK) == 0)
-    ;
+  while ((IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE) & UART_RRDY_MASK) == 0) {
+    usleep(1);
+  }
   // while (uart_read_command(UART_STATUS_REG, UART_RRDY_MASK) == 0);
 
   // Read the data from the data register
   *data = IORD_ALTERA_AVALON_UART_RXDATA(UART_0_BASE);
   // *data = uart_read_command(UART_RXDATA_REG, UART_RXDATA_MASK);
 
-  if (IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE) & UART_ROE_MASK != 0) {
+  if ((IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE) & UART_ROE_MASK) == 1) {
     // if (uart_read_command(UART_STATUS_REG, UART_ROE_MASK) != 0) {
     printf("uart_read_data - ROE\n");
   }
@@ -57,8 +64,9 @@ void uart_write_byte(uint8_t value) {
   }
 
   // Poll until the previous bit has been shifted
-  while ((IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE) & UART_TRDY_MASK) == 0)
-    ;
+  while ((IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE) & UART_TRDY_MASK) == 0) {
+    usleep(1);
+  }
   // while (uart_read_command(UART_STATUS_REG, UART_TRDY_MASK) == 0);
 
   // Write the data to the data register
@@ -169,9 +177,9 @@ void uart_output(void) {
     printf("----- UART REGS COMMANDS -----\n");
     printf("%x | %x | %x | %x\n", IORD_ALTERA_AVALON_UART_RXDATA(UART_0_BASE),
            IORD_ALTERA_AVALON_UART_TXDATA(UART_0_BASE),
-           IORD_ALTERA_AVALON_UART_CONTROL(UART_0_BASE),
-           IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE)
-           );
+           IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE),
+           IORD_ALTERA_AVALON_UART_CONTROL(UART_0_BASE) 
+          );
     // printf("%x | %x | %x | %x\n", uart_read_command(UART_RXDATA_REG, UART_RXDATA_MASK),
     //       uart_read_command(UART_TXDATA_REG, UART_TXDATA_MASK),
     //       uart_read_command(UART_STATUS_REG, UART_STATUS_MASK),
