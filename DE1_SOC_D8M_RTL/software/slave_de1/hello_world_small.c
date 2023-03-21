@@ -78,13 +78,16 @@
  *
  */
 
-#include "sys/alt_stdio.h"
-#include "system.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <termios.h>
 #include <unistd.h>
+
+#include "sys/alt_stdio.h"
+#include "system.h"
+#include "uart.h"
+#include "esp.h"
 
 #define NUM_POINT_FINDERS 1
 volatile uint32_t *camera_base = COORDS_SLAVE_0_BASE;
@@ -97,69 +100,66 @@ static uint32_t thresholds[NUM_POINT_FINDERS];
  * x = arr[i] & 0xFFFF;
  * y = arr[i] >> 16;
  */
-void getFrame(uint32_t *arr, int *len)
-{
-	arr = (uint32_t *)malloc(NUM_POINT_FINDERS * sizeof(uint32_t));
-	*len = NUM_POINT_FINDERS;
+void getFrame(uint32_t *arr, int *len) {
+  arr = (uint32_t *)malloc(NUM_POINT_FINDERS * sizeof(uint32_t));
+  *len = NUM_POINT_FINDERS;
 
-	uint32_t raw_coords;
-	for (int i = 0; i < NUM_POINT_FINDERS; i++)
-	{
-		raw_coords = *(camera_base + i);
-		arr[i] = raw_coords;
-		//	  uint16_t smallUpBigDown = raw_coords >> 16;
-		//	  uint16_t smallLeftBigRight = raw_coords & 0xFFFF;
-		//	  printf("smallUpBigDown: %i, smallLeftBigRight: %i\n", smallUpBigDown, smallLeftBigRight);
-	}
+  uint32_t raw_coords;
+  for (int i = 0; i < NUM_POINT_FINDERS; i++) {
+    raw_coords = *(camera_base + i);
+    arr[i] = raw_coords;
+    //	  uint16_t smallUpBigDown = raw_coords >> 16;
+    //	  uint16_t smallLeftBigRight = raw_coords & 0xFFFF;
+    //	  printf("smallUpBigDown: %i, smallLeftBigRight: %i\n", smallUpBigDown,
+    //smallLeftBigRight);
+  }
 }
 
 // sample code for Bell
-void printCoords()
-{
-	int len;
-	uint32_t *arr = NULL;
-	while (1)
-	{
-		getFrame(arr, &len);
-		for (int i = 0; i < len; i++)
-		{
-			uint32_t raw_coords = arr[i];
-			uint16_t x = raw_coords & 0xFFFF;
-			uint16_t y = raw_coords >> 16;
-			printf("x: %i, y: %i\n", x, y);
-		}
-	}
-	free(arr);
+void printCoords() {
+  int len;
+  uint32_t *arr = NULL;
+  while (1) {
+    getFrame(arr, &len);
+    for (int i = 0; i < len; i++) {
+      uint32_t raw_coords = arr[i];
+      uint16_t x = raw_coords & 0xFFFF;
+      uint16_t y = raw_coords >> 16;
+      printf("x: %i, y: %i\n", x, y);
+    }
+  }
+  free(arr);
 }
 
-void printThresholds(int i)
-{
-    printf("Thresholds: crLow=%d crHigh=%d cbLow=%d cbHigh=%d\n",
-        (thresholds[i] >> 24) & 0xFF, (thresholds[i] >> 16) & 0xFF,
-        (thresholds[i] >> 8) & 0xFF, thresholds[i] & 0xFF);
+void printThresholds(int i) {
+  printf("Thresholds: crLow=%d crHigh=%d cbLow=%d cbHigh=%d\n",
+         (thresholds[i] >> 24) & 0xFF, (thresholds[i] >> 16) & 0xFF,
+         (thresholds[i] >> 8) & 0xFF, thresholds[i] & 0xFF);
 }
 
-void writeThresholds(int i)
-{
-	*(camera_base + i) = thresholds[i];
-}
+void writeThresholds(int i) { *(camera_base + i) = thresholds[i]; }
 
-int main()
-{
-	printf("Program start 1\n");
-	uint8_t cbLow = 111, cbHigh = 133, crLow = 112, crHigh = 134;
-	thresholds[0] = (crLow << 24) | (crHigh << 16) | (cbLow << 8) | cbHigh;
-	writeThresholds(0);
-//	printCoords();
+int main(int argc, char** argv) {
+  printf("Program start 1\n");
+  uint8_t cbLow = 111, cbHigh = 133, crLow = 112, crHigh = 134;
+  thresholds[0] = (crLow << 24) | (crHigh << 16) | (cbLow << 8) | cbHigh;
+  writeThresholds(0);
+  //	printCoords();
 
-	int index = 0;
-	int c;
-	while (1) {
-		printThresholds(index);
-		c = alt_getchar();
-		printf("c: %c\n", c);
-	}
-	return 0;
+  int index = 0;
+  int c;
+
+  uart_init();
+  uart_output();
+
+  esp_run(argc, argv);
+
+  while (1) {
+    printThresholds(index);
+    c = alt_getchar();
+    printf("c: %c\n", c);
+  }
+  return 0;
 }
 
 // Top right: 120, 430
