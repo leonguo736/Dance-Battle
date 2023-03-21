@@ -87,7 +87,7 @@
 #include <unistd.h>
 
 #define NUM_POINT_FINDERS 1
-volatile uint32_t *camera_base = COORDS_SLAVE_0_BASE;
+volatile uint32_t *camera_base = (uint32_t*)COORDS_SLAVE_0_BASE;
 static uint32_t thresholds[NUM_POINT_FINDERS];
 
 /* arr is mutated to contain the coordinates the points
@@ -102,7 +102,7 @@ void getFrame(uint32_t *arr, int *len)
 	arr = (uint32_t *)malloc(NUM_POINT_FINDERS * sizeof(uint32_t));
 	*len = NUM_POINT_FINDERS;
 
-	uint32_t raw_coords;
+	volatile uint32_t raw_coords;
 	for (int i = 0; i < NUM_POINT_FINDERS; i++)
 	{
 		raw_coords = *(camera_base + i);
@@ -130,7 +130,7 @@ void printCoords()
 
 void printThresholds(int i)
 {
-    printf("cbLow: %i, cbHigh: %i, crLow: %i, crHigh: %i\n", (thresholds[i] >> 24) & 0xFF, (thresholds[i] >> 16) & 0xFF, (thresholds[i] >> 8) & 0xFF, thresholds[i] & 0xFF);
+    printf("cbLow: %lu, cbHigh: %lu, crLow: %lu, crHigh: %lu\n", (thresholds[i] >> 24) & 0xFF, (thresholds[i] >> 16) & 0xFF, (thresholds[i] >> 8) & 0xFF, thresholds[i] & 0xFF);
 }
 
 void writeThresholds(int i)
@@ -149,12 +149,13 @@ void updateThresholds() {
 	char c;
 	int i = 0;
 	while (1) {
-	    printf("Modifying point %i, press a button on keyboard", i);
+	    printf("Modifying point %i's thresholds, press a button on keyboard", i);
 		c = getInputLetter();
 		// printf("%c\n", c); 
 		switch (c) {
 			case 'b': return; // break
 			case 'B': return; // break
+			case ' ': break; // do nothing
 			case 't': i = (i + 1) % NUM_POINT_FINDERS; break; // increment index
 			case 'g': i = (i - 1) % NUM_POINT_FINDERS; break; // decrement index
 			case '!': thresholds[i] += 50 << 24; break; // increment cbLow

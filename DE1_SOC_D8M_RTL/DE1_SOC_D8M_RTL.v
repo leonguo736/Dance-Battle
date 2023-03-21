@@ -412,6 +412,11 @@ always @(*) begin
 			G_to_vga = oVideo8bG[1];
 			B_to_vga = oVideo8bB[1];
 		end
+		default: begin
+			R_to_vga = 8'h00;
+			G_to_vga = 8'h00;
+			B_to_vga = 8'h00;
+		end
 	endcase
 end
 ball_detector  ball_detector_0( 
@@ -420,7 +425,7 @@ ball_detector  ball_detector_0(
    .iPixelAddress( VGA_ADDRESS ),
    .iVgaRequest( READ_Request ),
    .iVgaClk( VGA_CLK ),
-   .iVgaHRequest( READ_Request ), 
+   .iVgaHRequest( READ_Request ),
    .iVgaVRequest( V_active_area ),
    .oVideo8bRgb( { oVideo8bR[0], oVideo8bG[0], oVideo8bB[0] } ),
    .iVideoSelect( SW[9] ),
@@ -452,49 +457,76 @@ ball_detector  ball_detector_0(
    .oRedPixelHIndex( redPixelHIndex[1] ),
    .oRedPixelVIndex( redPixelVIndex[1] )
  );
+always @(posedge VGA_CLK) begin
+
+end
 
 // Software System
 wire [4:0] coords_ram_addr; 
-wire [31:0] coords_ram_data;
+wire [31:0] coords_ram_output;
 wire [4:0] thresholds_ram_addr; 
-wire [31:0] thresholds_ram_data;
+wire [31:0] thresholds_ram_input;
 nios2_system nios2_system_0 (
 	.clk_clk( CLOCK2_50 ),
 	.esp_uart_rxd( GPIO[34] ),
 	.esp_uart_txd( GPIO[35] ),
 	.reset_reset_n( KEY[0] ), 
 	.coords_ram_read_addr( coords_ram_addr ), 
-	.coords_ram_read_data( coords_ram_data ), 
-	.coords_ram_write_data( thresholds_ram_data ), 
+	.coords_ram_read_data( coords_ram_output ), 
+	.coords_ram_write_data( thresholds_ram_input ), 
 	.coords_ram_write_addr( thresholds_ram_addr )
 );
 
+// Cyclic Counter Logic To Update RAMs
+reg [4:0] update_counter; 
+always @(posedge VGA_CLK) begin
+	// if (KEY[0]) begin
+	// 	update_counter <= 0;
+	// end else begin
+	// 	update_counter <= update_counter + 1;
+	// end	
+	update_counter <= 0; // for now, just update the first element of the array
+end
+
 // Point Coordinates Logic
+reg [31:0] coords_ram_input; 
+always @(*) begin
+	coords_ram_input = { 7'd0, redPixelHIndex[update_counter], 6'd0, redPixelVIndex[update_counter] };
+end
 ram_32b coords_ram_0 (
-	.data( { 7'd0, redPixelHIndex[0], 6'd0, redPixelVIndex[0] } ),
+	.data( coords_ram_input ),
+	.wraddress( update_counter ),
+	.wrclock( VGA_CLK ),
+	.wren( 1'b1 ),
+
 	.rdaddress( coords_ram_addr ),
 	.rdclock( CLOCK2_50 ),
-	.wraddress( 0 ),
-	.wrclock( VGA_CLK ),
-	.wren( VGA_CLK ),
-	.q( coords_ram_data )
+	.q( coords_ram_output )
 );
 
 // Thresholds Logic
 wire [31:0] thresholds_ram_output; // {cbLow, cbHigh, crLow, crHigh}
 always @(posedge VGA_CLK) begin
-	cbLow[0] <= thresholds_ram_output[31:24];
-	cbHigh[0] <= thresholds_ram_output[23:16];
-	crLow[0] <= thresholds_ram_output[15:8];
-	crHigh[0] <= thresholds_ram_output[7:0];
+	if (~KEY[0]) begin
+		cbLow[update_counter] <= 8'h00;
+		cbHigh[update_counter] <= 8'hFF;
+		crLow[update_counter] <= 8'h00;
+		crHigh[update_counter] <= 8'hFF;
+	end else begin
+		cbLow[update_counter] <= thresholds_ram_output[31:24];
+		cbHigh[update_counter] <= thresholds_ram_output[23:16];
+		crLow[update_counter] <= thresholds_ram_output[15:8];
+		crHigh[update_counter] <= thresholds_ram_output[7:0];
+	end
 end
 ram_32b thresholds_ram_0 (
-	.data( thresholds_ram_data ),
-	.rdaddress( 0 ),
-	.rdclock( VGA_CLK ),
+	.data( thresholds_ram_input ),
 	.wraddress( thresholds_ram_addr ),
 	.wrclock( CLOCK2_50 ),
-	.wren( CLOCK2_50 ),
+	.wren( 1'b1 ),
+
+	.rdaddress( update_counter ),
+	.rdclock( VGA_CLK ),
 	.q( thresholds_ram_output )
 );
 
