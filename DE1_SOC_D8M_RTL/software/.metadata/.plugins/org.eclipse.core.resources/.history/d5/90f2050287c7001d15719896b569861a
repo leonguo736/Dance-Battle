@@ -81,7 +81,6 @@
 #include "sys/alt_stdio.h"
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include "system.h"
 
 volatile uint32_t *camera_base = COORDS_SLAVE_0_BASE;
@@ -122,6 +121,7 @@ int main()
 	  }
   }
   free(arr);
+
   return 0;
 }
 

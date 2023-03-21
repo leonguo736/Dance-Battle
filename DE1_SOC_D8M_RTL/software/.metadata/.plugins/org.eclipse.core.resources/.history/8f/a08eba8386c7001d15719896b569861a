@@ -81,26 +81,24 @@
 #include "sys/alt_stdio.h"
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include "system.h"
 
 volatile uint32_t *camera_base = COORDS_SLAVE_0_BASE;
 
-/* arr is mutated to contain the coordinates the points
- * len is set to the size of arr
+/* arr contains the coordinates the points
+ * len = size of arr
  *
  * (x,y) = (0,0) is at top left of VGA monitor
  * x = arr[i] & 0xFFFF;
  * y = arr[i] >> 16;
  */
-void getFrame(uint32_t* arr, int* len) {
+int getFrame(uint32_t* arr, int* len) {
 	static const int NUM_POINT_FINDERS = 1;
 	arr = (uint32_t*)malloc(NUM_POINT_FINDERS * sizeof(uint32_t));
 	*len = NUM_POINT_FINDERS;
 
-    uint32_t raw_coords;
 	for (int i = 0; i < NUM_POINT_FINDERS; i++) {
-	  raw_coords = *(camera_base + i);
+	  uint32_t raw_coords = *(camera_base + i);
 	  arr[i] = raw_coords;
 //	  uint16_t smallUpBigDown = raw_coords >> 16;
 //	  uint16_t smallLeftBigRight = raw_coords & 0xFFFF;
@@ -110,9 +108,9 @@ void getFrame(uint32_t* arr, int* len) {
 
 int main()
 { 
-  int len;
-  uint32_t *arr = NULL;
   while (1) {
+	  int len;
+	  uint32_t *arr = NULL;
 	  getFrame(arr, &len);
 	  for (int i = 0; i < len; i++) {
 		  uint32_t raw_coords = arr[i];
@@ -121,7 +119,7 @@ int main()
 		  printf("x: %i, y: %i\n", x, y);
 	  }
   }
-  free(arr);
+
   return 0;
 }
 
