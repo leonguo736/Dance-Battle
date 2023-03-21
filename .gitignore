@@ -18,7 +18,7 @@ work/
 db/
 incremental_db/
 simulation/
-output_files/
+# output_files/
 
 # Prerequisites
 *.d
