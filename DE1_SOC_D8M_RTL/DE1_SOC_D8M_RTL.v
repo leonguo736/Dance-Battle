@@ -360,6 +360,21 @@ CLOCKMEM  ck3 ( .CLK(MIPI_PIXEL_CLK_)   ,.CLK_FREQ  (25000000  ) , . CK_1HZ (D8M
 assign LEDR = { D8M_CK_HZ ,D8M_CK_HZ2,D8M_CK_HZ3 , KEY, 1'h0,CAMERA_MIPI_RELAESE ,MIPI_BRIDGE_RELEASE  } ; 
 
 // Custom Modules
+/*
+Switches Manifest
+SW[9] toggles filter on/off
+SW[8:5] toggles which filter is active
+SW[4] shows redPixelVIndex[0] for filter 0
+SW[3] shows redPixelHIndex[0] for filter 0
+SW[2] multiples KEY[2:1] increment/decrement by 10
+SW[1:0] selects between cbLow, cbHigh, crLow, crHigh for filter 0
+
+Keys Manifest
+KEY[0] is reset
+KEY[1] is increment cbLow, cbHigh, crLow, crHigh
+KEY[2] is decrement cbLow, cbHigh, crLow, crHigh
+KEY[3] unused
+*/
 reg [7:0] crLow [0:5];
 reg [7:0] crHigh [0:5];
 reg [7:0] cbLow [0:5];
@@ -426,6 +441,9 @@ always @(posedge CLOCK2_50) begin
 	end
 end
 
+wire [23:0] oVideo8bRgb [0:5];
+assign { R_to_vga, G_to_vga, B_to_vga } = oVideo8bRgb[SW[8:5]];
+
 ball_detector  ball_detector_0( 
    .reset( KEY[0] ),
    .iVideo12bRgb( { RED, GREEN, BLUE } ),
@@ -434,7 +452,7 @@ ball_detector  ball_detector_0(
    .iVgaClk( VGA_CLK ),
    .iVgaHRequest( READ_Request ),  // Can use H_active_area or READ_Request here.
    .iVgaVRequest( V_active_area ),
-   .oVideo8bRgb( { R_to_vga, G_to_vga, B_to_vga } ),
+   .oVideo8bRgb( oVideo8bRgb[0] ),
    .iVideoSelect( SW[9] ),
    .iFreezeRam( SW[8] ),
    .iFilterOn( SW[7] ), 
@@ -454,7 +472,7 @@ ball_detector  ball_detector_1(
    .iVgaClk( VGA_CLK ),
    .iVgaHRequest( READ_Request ),  // Can use H_active_area or READ_Request here.
    .iVgaVRequest( V_active_area ),
-   .oVideo8bRgb(  ),
+   .oVideo8bRgb( oVideo8bRgb[1] ),
    .iVideoSelect( SW[9] ),
    .iFreezeRam( SW[8] ),
    .iFilterOn( SW[7] ), 

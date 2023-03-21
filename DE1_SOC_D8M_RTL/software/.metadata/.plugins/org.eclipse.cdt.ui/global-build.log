@@ -1966,3 +1966,21 @@ Info: Building ../slave_de1_bsp/
 C:/intelFPGA_lite/18.1/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../slave_de1_bsp/
 [BSP build complete]
 [slave_de1 build complete]
+14:11:58 **** Incremental Build of configuration Nios II for project slave_de1 ****
+make all 
+Info: Building ../slave_de1_bsp/
+C:/intelFPGA_lite/18.1/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../slave_de1_bsp/
+[BSP build complete]
+[slave_de1 build complete]
+14:12:12 **** Incremental Build of configuration Nios II for project slave_de1 ****
+make all 
+Info: Building ../slave_de1_bsp/
+C:/intelFPGA_lite/18.1/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../slave_de1_bsp/
+[BSP build complete]
+[slave_de1 build complete]
+14:12:30 **** Incremental Build of configuration Nios II for project slave_de1 ****
+make all 
+Info: Building ../slave_de1_bsp/
+C:/intelFPGA_lite/18.1/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../slave_de1_bsp/
+[BSP build complete]
+[slave_de1 build complete]

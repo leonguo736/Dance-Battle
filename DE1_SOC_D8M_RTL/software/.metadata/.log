@@ -819,3 +819,24 @@ Caused by: java.lang.IllegalStateException: Expected BEGIN_OBJECT but was STRING
 
 !ENTRY com.altera.sbtgui.launch 1 0 2023-03-21 14:03:51.624
 !MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=DE-SoC on localhost [USB-1]' --device=2 --instance=0 --go /cygdrive/c/Users/kerry/repos/l2b-34-elur/DE1_SOC_D8M_RTL/software/slave_de1/slave_de1.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2023-03-21 14:12:00.016
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=DE-SoC on localhost [USB-1]' --device=2 --instance=0 --stop]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2023-03-21 14:12:01.896
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=DE-SoC on localhost [USB-1]' --device=2 --instance=0 --go /cygdrive/c/Users/kerry/repos/l2b-34-elur/DE1_SOC_D8M_RTL/software/slave_de1/slave_de1.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2023-03-21 14:12:13.841
+!MESSAGE Terminated Launch with connection: 20DE-SoC on localhost [USB-1]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2023-03-21 14:12:14.451
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=DE-SoC on localhost [USB-1]' --device=2 --instance=0 --stop]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2023-03-21 14:12:16.470
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=DE-SoC on localhost [USB-1]' --device=2 --instance=0 --go /cygdrive/c/Users/kerry/repos/l2b-34-elur/DE1_SOC_D8M_RTL/software/slave_de1/slave_de1.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2023-03-21 14:12:32.274
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=DE-SoC on localhost [USB-1]' --device=2 --instance=0 --stop]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2023-03-21 14:12:34.193
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=DE-SoC on localhost [USB-1]' --device=2 --instance=0 --go /cygdrive/c/Users/kerry/repos/l2b-34-elur/DE1_SOC_D8M_RTL/software/slave_de1/slave_de1.elf]
