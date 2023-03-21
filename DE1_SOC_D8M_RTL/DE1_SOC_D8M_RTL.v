@@ -426,6 +426,9 @@ always @(posedge CLOCK2_50) begin
 	end
 end
 
+wire [7:0] oVideo8bRgb [0:5];
+assign { R_to_vga, G_to_vga, B_to_vga } = oVideo8bRgb[SW[8:5]];
+
 ball_detector  ball_detector_0( 
    .reset( KEY[0] ),
    .iVideo12bRgb( { RED, GREEN, BLUE } ),
@@ -434,10 +437,10 @@ ball_detector  ball_detector_0(
    .iVgaClk( VGA_CLK ),
    .iVgaHRequest( READ_Request ),  // Can use H_active_area or READ_Request here.
    .iVgaVRequest( V_active_area ),
-   .oVideo8bRgb( { R_to_vga, G_to_vga, B_to_vga } ),
+   .oVideo8bRgb( oVideo8bRgb[0] ),
    .iVideoSelect( SW[9] ),
-   .iFreezeRam( SW[8] ),
-   .iFilterOn( SW[7] ), 
+   .iFreezeRam(  ),
+   .iFilterOn(  ), 
    .iCrLow( crLow[0] ),
    .iCrHigh( crHigh[0] ),
    .iCbLow( cbLow[0] ),
@@ -454,10 +457,10 @@ ball_detector  ball_detector_1(
    .iVgaClk( VGA_CLK ),
    .iVgaHRequest( READ_Request ),  // Can use H_active_area or READ_Request here.
    .iVgaVRequest( V_active_area ),
-   .oVideo8bRgb(  ),
+   .oVideo8bRgb( oVideo8bRgb[1] ),
    .iVideoSelect( SW[9] ),
-   .iFreezeRam( SW[8] ),
-   .iFilterOn( SW[7] ), 
+   .iFreezeRam(  ),
+   .iFilterOn(  ), 
    .iCrLow( crLow[1] ),
    .iCrHigh( crHigh[1] ),
    .iCbLow( cbLow[1] ),
@@ -483,15 +486,5 @@ nios2_system ni2s (
 	.coords_ram_write_en( thresholds_ram_write_en ),
 	.coords_ram_write_data( thresholds_ram_write_data )
 );
-
-// coords_ram coords_ram_0 (
-// 	.data( { 7'd0, redPixelHIndex[0], 6'd0, redPixelVIndex[0] } ),
-// 	.rdaddress( coords_ram_addr ),
-// 	.rdclock( CLOCK2_50 ),
-// 	.wraddress( 0 ),
-// 	.wrclock( VGA_CLK ),
-// 	.wren( VGA_CLK ),
-// 	.q( coords_ram_data )
-// );
 
 endmodule

@@ -86,7 +86,7 @@
 #include <termios.h>
 #include <unistd.h>
 
-#define NUM_POINT_FINDERS 1
+#define NUM_POINT_FINDERS 2
 volatile uint32_t *camera_base = (uint32_t*)COORDS_SLAVE_0_BASE;
 static uint32_t thresholds[NUM_POINT_FINDERS];
 
@@ -123,8 +123,9 @@ void printCoords()
 		uint32_t raw_coords = arr[i];
 		uint16_t x = raw_coords & 0xFFFF;
 		uint16_t y = raw_coords >> 16;
-		printf("Point %i at x: %i, y: %i\n", i, x, y);
+		printf("%i at x: %i, y: %i, ", i, x, y);
 	}
+	printf("\n");
 	free(arr);
 }
 
@@ -144,6 +145,7 @@ int main()
 	printf("Program start number: %i\n", __programNumber__);
 
 	writeThresholds(0, 111, 120, 112, 121);
+	writeThresholds(1, 111, 120, 112, 121);
     while (1) {
     	printCoords();
     }
