@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <math.h>
 #include <intelfpgaup/video.h>
 
@@ -11,16 +12,19 @@ struct ScreenPose convertPose(struct Pose pose, double spb, int so) {
 }
 
 void drawBackground(void) {
-    video_box(0, 0, WIDTH, BORDER, COLOR_BORDER);
-    video_box(0, HEIGHT - BORDER, WIDTH, HEIGHT, COLOR_BORDER);
-    video_box(0, BORDER, BORDER, HEIGHT - BORDER, COLOR_BORDER);
-    video_box(WIDTH - BORDER, BORDER, WIDTH, HEIGHT - BORDER, COLOR_BORDER);
-    video_box(BORDER, BORDER, WIDTH - BORDER, HEIGHT - BORDER, COLOR_BG);
+    video_box(0, 0, WIDTH - 1, BORDER, COLOR_BORDER);
+    video_box(0, HEIGHT - 1 - BORDER, WIDTH - 1, HEIGHT - 1, COLOR_BORDER);
+    video_box(0, BORDER, BORDER, HEIGHT - 1 - BORDER, COLOR_BORDER);
+    video_box(WIDTH - 1 - BORDER, BORDER, WIDTH - 1, HEIGHT - 1 - BORDER, COLOR_BORDER);
+    video_box(BORDER, BORDER, WIDTH - 1 - BORDER, HEIGHT - 1 - BORDER, COLOR_BG);
 }
 
-void drawChar(int font[][][], int c, int tlx, int tly, short color, int scale) {
+void drawChar(int font[NUM_CHARS][FONT_WIDTH][FONT_HEIGHT], int c, int tlx, int tly, short color, int scale) {
     for (int x = 0; x < FONT_WIDTH; x++) {
         for (int y = 0; y < FONT_HEIGHT; y++) {
+            if (c == 100) {
+                printf("Value of d at [%d][%d]: %d\n", x, y, font[c][x][y]);
+            }
             if (font[c][x][y]) {
                 for (int x2 = 0; x2 < scale; x2++) {
                     for (int y2 = 0; y2 < scale; y2++) {
@@ -32,7 +36,7 @@ void drawChar(int font[][][], int c, int tlx, int tly, short color, int scale) {
     }
 }
 
-void drawString(int font[][][], char s[], int tlx, int tly, short color, int scale, int kerning) {
+void drawString(int font[NUM_CHARS][FONT_WIDTH][FONT_HEIGHT], char s[], int tlx, int tly, short color, int scale, int kerning) {
     int offset = 0;
     for (int c = 0; c < strlen(s); c++) {
         drawChar(font, s[c], tlx + offset, tly, color, scale);
@@ -49,21 +53,21 @@ void drawHLine(int y, short color) {
 }
 
 void drawPBarOutline(void) {
-    int r[] = GAME_PBAR_RECT;
-    video_line(r[0], r[1], r[0] + r[2], r[1]);
-    video_line(r[0], r[1] + r[3], r[0] + r[2], r[1] + r[3]);
-    video_line(r[0], r[1], r[0], r[1] + r[3]);
-    video_line(r[0] + r[2], r[1], r[0] + r[2], r[1] + r[3]);
+    int * r = GAME_PBAR_RECT;
+    video_line(r[0], r[1], r[0] + r[2], r[1], COLOR_GAME_PBAR_BORDER);
+    video_line(r[0], r[1] + r[3], r[0] + r[2], r[1] + r[3], COLOR_GAME_PBAR_BORDER);
+    video_line(r[0], r[1], r[0], r[1] + r[3], COLOR_GAME_PBAR_BORDER);
+    video_line(r[0] + r[2], r[1], r[0] + r[2], r[1] + r[3], COLOR_GAME_PBAR_BORDER);
 }
 
 void drawPBarFill(int prevWidth, int currWidth) {
-    int r[] = GAME_PBAR_RECT;
-    video_box(r[0] + prevWidth + 1, r[1] + 1, [0] + currWidth, r[1] + r[3] - 1);
+    int * r = GAME_PBAR_RECT;
+    video_box(r[0] + prevWidth + 1, r[1] + 1, r[0] + currWidth, r[1] + r[3] - 1, COLOR_GAME_PBAR_FILL);
 }
 
 void drawPose(struct ScreenPose sp, int erase) {
-    video_line(sp.x, GAME_POSE_Y, sp.x + sp.hx, GAME_POSE_Y + sp.hy, erase ? COLOR_BG else COLOR_POSE_HHAND);
-    video_line(sp.x, GAME_POSE_Y, sp.x + sp.mx, GAME_POSE_Y + sp.my, erase ? COLOR_BG else COLOR_POSE_MHAND);
+    video_line(sp.x, GAME_POSE_Y, sp.x + sp.hx, GAME_POSE_Y + sp.hy, erase ? COLOR_BG : COLOR_POSE_HHAND);
+    video_line(sp.x, GAME_POSE_Y, sp.x + sp.mx, GAME_POSE_Y + sp.my, erase ? COLOR_BG : COLOR_POSE_MHAND);
     video_pixel(sp.x, GAME_POSE_Y, COLOR_POSE_DOT);
     
 }

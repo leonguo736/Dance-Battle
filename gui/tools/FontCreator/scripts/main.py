@@ -29,10 +29,10 @@ class App:
         f.write("int {}[{}][{}][{}] = {{".format(self.name, 122, *self.size))
         for c in range(123):
             if chr(c) in self.allCharData:
-                f.write("{{ {} }}".format(", ".join(["{{ {} }}".format(", ".join([str(self.allCharData[chr(c)][x][y]) for y in range(self.size[1])])) for x in range(self.size[0])])) + ",\n")
+                f.write("{{ {} }}".format(", ".join(["{{ {} }}".format(", ".join([str(self.allCharData[chr(c)][x][y]) for y in range(self.size[1])])) for x in range(self.size[0])])) + ",")
             else:
-                f.write("{{ {} }}".format(", ".join(["{{ {} }}".format(", ".join(['0' for y in range(self.size[1])])) for x in range(self.size[0])])) + ",\n")
-        f.write(" }};")
+                f.write("{{ {} }}".format(", ".join(["{{ {} }}".format(", ".join(['0' for y in range(self.size[1])])) for x in range(self.size[0])])) + ",")
+        f.write(" };")
 
     def loop(self):
         while True:
@@ -76,6 +76,7 @@ if __name__ == '__main__':
             print("\nCommands:")
             print("\nc [name]: Create new font")
             print("\no [name]: Open existing font")
+            print("\nd [existing] [new]: Duplicate an existing font")
         elif inp[0:2] == 'c ':
             name = inp[2:]
             w = int(input("\nWidth: "))
@@ -85,5 +86,10 @@ if __name__ == '__main__':
         elif inp[0:2] == 'o ':
             name = inp[2:]
             app = App(name, *jsonpickle.decode(loadFile("fonts/" + name + "/" + name + ".txt").read()))
+        elif inp[0:2] == 'd ':
+            params = inp.split(" ")
+            name = params[2]
+            mkdir("fonts/" + name + "/")
+            app = App(name, *jsonpickle.decode(loadFile("fonts/" + params[1] + "/" + params[1] + ".txt").read()))
         else:
             print("\nUnrecognized command")

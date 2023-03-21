@@ -7,19 +7,19 @@
 #include <intelfpgaup/audio.h>
 
 #include "song.h"
-#include "fonts.h"
 #include "sampledata.h"
 
+int started = 0;
 int screen = 0; // 0 for init, 1 for lobby, 2 for game, 3 for results
-int vgaState = 0; // 0 or 1
+int buffer = 0; // 0 or 1
 
 struct InitScreenState {
-    double loadWheelAngle;
+    double dotPositions[INIT_NUM_DOTS];
 };
 
 struct InitScreenState initScreenStates[2] = {
-    { 0.0 },
-    { 0.0 }
+    { {0.0} },
+    { {0.0} }
 };
 
 struct LobbyScreenState {
@@ -43,7 +43,7 @@ struct GameScreenState {
 
 int poseXs1[MAX_POSES];
 int poseXs2[MAX_POSES];
-struct GamescreenState gameScreenStates[2] = {
+struct GameScreenState gameScreenStates[2] = {
     { 0, -1, -1, poseXs1 },
     { 0, -1, -1, poseXs2 }
 };
@@ -63,25 +63,58 @@ void writeAudio(int l, int r, int skip) {
     audio_write_right(r);
 }
 
-void switchScreen(void) {
+void switchBuffer(void) {
     video_show();
-    vgaState = !vgaState;
+    buffer = !buffer;
+    printf("Swapped\n");
+}
+
+void initGraphics(int screen) {
+    for (int i = 0; i < 2; i++) { // Put the same thing on both buffers
+        if (screen == 0) { // Init
+            drawBackground();
+            drawString(italicFont, "dance", 50, 30, COLOR_INIT_DANCE, 3, 2);
+            drawString(italicFont, "battle", 218, 60, COLOR_INIT_BATTLE, 2, 2);
+            drawString(basicFont, "waiting for server connection", 30, 240, COLOR_INIT_STATUS, 1, 1);
+            video_pixel(50, 50, COLOR_GAME_HLINE);
+            printf("Drew words\n");
+        } else if (screen == 1) { // Lobby
+            drawBackground();
+        } else if (screen == 2) { // Game
+            drawBackground();
+
+            // Straight lines
+            video_line(BORDER, 50, WIDTH - BORDER, 50, COLOR_GAME_HLINE);
+            video_line(BORDER, HEIGHT - 50, WIDTH - BORDER, HEIGHT - 50, COLOR_GAME_HLINE);
+            video_line(50, BORDER, 50, HEIGHT - BORDER, COLOR_GAME_VLINE);
+            video_line(WIDTH - BORDER, BORDER, WIDTH - BORDER, HEIGHT - BORDER, COLOR_GAME_VLINE);
+
+            drawPBarOutline();
+        }
+        switchBuffer();
+    }
+}
+
+void switchScreen(int s) {
+    printf("Screen: %d\n", s);
+    screen = s;
+    initGraphics(s);
 }
 
 void * outputThread(void *vargp) {
+
+    // Initialization
     audio_init();
     audio_rate(AUDIO_RATE);
+    switchScreen(0);
 
-    video_clear();
-    video_erase();
-    drawBackground();
-    switchScreen();
-    video_clear();
-    video_erase();
-    drawBackground();
-    switchScreen();
+    // Loop
 
-    while (!started);
+    while (1) {
+        if (screen == 0) {
+
+        }
+    }
 }
 
 int main(void) {
@@ -101,10 +134,10 @@ int main(void) {
 
         SW_read(&swState);
         KEY_read(&keyState);
-
-        if (keyState == 1 && !started) {
-            started = 1;
-        }
+        
+        if (keyState == 1) switchScreen(0);
+        else if (keyState == 2) switchScreen(1);
+        else if (keyState == 4) switchScreen(2);
     }
 
     audio_close();

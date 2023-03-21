@@ -1,3 +1,6 @@
+#ifndef SONG_H
+#define SONG_H
+
 #include <stdio.h>
 
 #include "vgatools.h"
@@ -21,3 +24,5 @@ struct Song {
 };
 
 struct Song initSong(double spb, int so, double * sL, double * sR, int numPoses, struct Pose * poses);
+
+#endif
