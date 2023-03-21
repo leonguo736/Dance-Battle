@@ -2,9 +2,15 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
+<<<<<<< HEAD
         <BspGeneratedTimeStamp>20-Mar-2023 8:10:52 PM</BspGeneratedTimeStamp>
         <BspGeneratedUnixTimeStamp>1679368252894</BspGeneratedUnixTimeStamp>
         <BspGeneratedLocation>C:\Users\Haxrox\Documents\UBC\CPEN-391\l2b-34-elur\DE1_SOC_D8M_RTL\software\slave_de1_bsp</BspGeneratedLocation>
+=======
+        <BspGeneratedTimeStamp>20-Mar-2023 8:34:53 PM</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1679369693250</BspGeneratedUnixTimeStamp>
+        <BspGeneratedLocation>C:\Users\kerry\repos\l2b-34-elur\DE1_SOC_D8M_RTL\software\slave_de1_bsp</BspGeneratedLocation>
+>>>>>>> d8m
         <BspSettingsFile>settings.bsp</BspSettingsFile>
         <SopcDesignFile>..\..\nios2_system.sopcinfo</SopcDesignFile>
         <JdiFile>default</JdiFile>
@@ -734,7 +740,7 @@
                 <SettingName>hal.enable_small_c_library</SettingName>
                 <Identifier>none</Identifier>
                 <Type>Boolean</Type>
-                <Value>1</Value>
+                <Value>0</Value>
                 <DefaultValue>0</DefaultValue>
                 <DestinationFile>public_mk_define</DestinationFile>
                 <Description>Causes the small newlib (C library) to be used. This reduces code and data footprint at the expense of reduced functionality. Several newlib features are removed such as floating-point support in printf(), stdin input routines, and buffered I/O. The small C library is not compatible with Micrium MicroC/OS-II. If true, adds -msmallc to ALT_LDFLAGS in public.mk.</Description>
@@ -924,25 +930,25 @@
         </Setting>
         <MemoryMap>
                 <slaveDescriptor>onchip_memory2_0</slaveDescriptor>
-                <addressRange>0x00008000 - 0x0000CE1F</addressRange>
-                <addressSpan>20000</addressSpan>
+                <addressRange>0x00020000 - 0x0003387F</addressRange>
+                <addressSpan>80000</addressSpan>
                 <attributes>memory</attributes>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>coords_slave_0</slaveDescriptor>
-                <addressRange>0x00011000 - 0x000113FF</addressRange>
+                <addressRange>0x00041000 - 0x000413FF</addressRange>
                 <addressSpan>1024</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>uart_0</slaveDescriptor>
-                <addressRange>0x00011400 - 0x0001141F</addressRange>
+                <addressRange>0x00041400 - 0x0004141F</addressRange>
                 <addressSpan>32</addressSpan>
                 <attributes>printable</attributes>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>jtag_uart_0</slaveDescriptor>
-                <addressRange>0x00011420 - 0x00011427</addressRange>
+                <addressRange>0x00041420 - 0x00041427</addressRange>
                 <addressSpan>8</addressSpan>
                 <attributes>printable</attributes>
         </MemoryMap>

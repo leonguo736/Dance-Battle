@@ -84,10 +84,10 @@
 #include <termios.h>
 #include <unistd.h>
 
+#include "esp.h"
 #include "sys/alt_stdio.h"
 #include "system.h"
 #include "uart.h"
-#include "esp.h"
 
 #define NUM_POINT_FINDERS 1
 volatile uint32_t *camera_base = COORDS_SLAVE_0_BASE;
@@ -111,7 +111,7 @@ void getFrame(uint32_t *arr, int *len) {
     //	  uint16_t smallUpBigDown = raw_coords >> 16;
     //	  uint16_t smallLeftBigRight = raw_coords & 0xFFFF;
     //	  printf("smallUpBigDown: %i, smallLeftBigRight: %i\n", smallUpBigDown,
-    //smallLeftBigRight);
+    // smallLeftBigRight);
   }
 }
 
@@ -139,7 +139,7 @@ void printThresholds(int i) {
 
 void writeThresholds(int i) { *(camera_base + i) = thresholds[i]; }
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
   printf("Program start 1\n");
   uint8_t cbLow = 111, cbHigh = 133, crLow = 112, crHigh = 134;
   thresholds[0] = (crLow << 24) | (crHigh << 16) | (cbLow << 8) | cbHigh;
@@ -151,13 +151,20 @@ int main(int argc, char** argv) {
 
   uart_init();
   uart_output();
-
   esp_run(argc, argv);
 
+  //	int c;
   while (1) {
-    printThresholds(index);
-    c = alt_getchar();
-    printf("c: %c\n", c);
+    char c;
+    printf("Press a key on your keyboard: ");
+    while ((c = getchar()) == '\n')
+      ;  // consume newline characters
+    if (c == 'q') {
+      break;
+    }
+    printf("You pressed the '%c' key.\n", c);
+    while (getchar() != '\n')
+      ;  // clear input buffer
   }
   return 0;
 }
