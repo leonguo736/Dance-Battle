@@ -360,16 +360,13 @@ CLOCKMEM  ck3 ( .CLK(MIPI_PIXEL_CLK_)   ,.CLK_FREQ  (25000000  ) , . CK_1HZ (D8M
 assign LEDR = { D8M_CK_HZ ,D8M_CK_HZ2,D8M_CK_HZ3 , KEY, 1'h0,CAMERA_MIPI_RELAESE ,MIPI_BRIDGE_RELEASE  } ; 
 
 // Custom Modules
-reg [7:0] crLow; 
-reg [7:0] crHigh;
-reg [7:0] cbLow;
-reg [7:0] cbHigh; 
+reg [7:0] crLow [0:5];
+reg [7:0] crHigh [0:5];
+reg [7:0] cbLow [0:5];
+reg [7:0] cbHigh [0:5];
 
 wire [8:0] redPixelHIndex [0:5]; // Live value
 wire [9:0] redPixelVIndex [0:5]; 
-
-reg [7:0] redPixelHIndexCached; // Value displayed on HEX TODO: actually use this
-reg [7:0] redPixelVIndexCached;
 
 reg [15:0] displayInt;
 int16_to_hex6 int16_to_hex6_0(
@@ -377,7 +374,6 @@ int16_to_hex6 int16_to_hex6_0(
 	.o({HEX5, HEX4, HEX3, HEX2, HEX1, HEX0})
 );
 
-// assign displayIntRight = SW[1] ? (SW[0] ? crHigh : crLow) : (SW[0] ? cbHigh : cbLow);
 always @(*) begin
 	if (SW[3]) begin
 		displayInt = redPixelHIndex[0]; 
@@ -386,15 +382,15 @@ always @(*) begin
 	end else begin
 		if (SW[1]) begin
 			if (SW[0]) begin
-				displayInt = crHigh;
+				displayInt = crHigh[0];
 			end else begin
-				displayInt = crLow;
+				displayInt = crLow[0];
 			end
 		end else begin
 			if (SW[0]) begin
-				displayInt = cbHigh;
+				displayInt = cbHigh[0];
 			end else begin
-				displayInt = cbLow;
+				displayInt = cbLow[0];
 			end
 		end
 	end
@@ -405,26 +401,22 @@ reg [3:0] KEY_OLD;
 always @(posedge VGA_CLK) begin
 	if (~KEY[0]) begin
 		KEY_OLD <= 4'b1111;
-		crLow = 8'd0; 
-		crHigh = 8'd255;
-		cbLow = 8'd0;
-		cbHigh = 8'd255;
+		crLow[0] = 8'd0; 
+		crHigh[0] = 8'd255;
+		cbLow[0] = 8'd0;
+		cbHigh[0] = 8'd255;
 	end else begin
 		if (KEY_OLD != KEY) begin
 			if (~KEY[1]) begin
-				if (~SW[1] && ~SW[0]) cbLow = SW[2] ? cbLow + 10 : cbLow + 1;
-				if (~SW[1] &&  SW[0]) cbHigh = SW[2] ? cbHigh + 10 : cbHigh + 1;
-				if ( SW[1] && ~SW[0]) crLow = SW[2] ? crLow + 10 : crLow + 1;
-				if ( SW[1] &&  SW[0]) crHigh = SW[2] ? crHigh + 10 : crHigh + 1;
-				if (KEY[3]) begin
-					redPixelHIndexCached = redPixelHIndex[0];
-					redPixelVIndexCached = redPixelVIndex[0];
-				end
+				if (~SW[1] && ~SW[0]) cbLow[0] = SW[2] ? cbLow[0] + 10 : cbLow[0] + 1;
+				if (~SW[1] &&  SW[0]) cbHigh[0] = SW[2] ? cbHigh[0] + 10 : cbHigh[0] + 1;
+				if ( SW[1] && ~SW[0]) crLow[0] = SW[2] ? crLow[0] + 10 : crLow[0] + 1;
+				if ( SW[1] &&  SW[0]) crHigh[0] = SW[2] ? crHigh[0] + 10 : crHigh[0] + 1;
 			end else if (~KEY[2]) begin
-				if (~SW[1] && ~SW[0]) cbLow = SW[2] ? cbLow - 10 : cbLow - 1;
-				if (~SW[1] &&  SW[0]) cbHigh = SW[2] ? cbHigh - 10 : cbHigh - 1;
-				if ( SW[1] && ~SW[0]) crLow = SW[2] ? crLow - 10 : crLow - 1;
-				if ( SW[1] &&  SW[0]) crHigh = SW[2] ? crHigh - 10 : crHigh - 1;
+				if (~SW[1] && ~SW[0]) cbLow[0] = SW[2] ? cbLow[0] - 10 : cbLow[0] - 1;
+				if (~SW[1] &&  SW[0]) cbHigh[0] = SW[2] ? cbHigh[0] - 10 : cbHigh[0] - 1;
+				if ( SW[1] && ~SW[0]) crLow[0] = SW[2] ? crLow[0] - 10 : crLow[0] - 1;
+				if ( SW[1] &&  SW[0]) crHigh[0] = SW[2] ? crHigh[0] - 10 : crHigh[0] - 1;
 			end
 			KEY_OLD <= KEY;
 		end
@@ -443,10 +435,10 @@ ball_detector  ball_u1(
    .iVideoSelect( SW[9] ),
    .iFreezeRam( SW[8] ),
    .iFilterOn( SW[7] ), 
-   .iCrLow( crLow ),
-   .iCrHigh( crHigh ),
-   .iCbLow( cbLow ),
-   .iCbHigh( cbHigh ),
+   .iCrLow( crLow[0] ),
+   .iCrHigh( crHigh[0] ),
+   .iCbLow( cbLow[0] ),
+   .iCbHigh( cbHigh[0] ),
    .oRedPixelHIndex( redPixelHIndex[0] ),
    .oRedPixelVIndex( redPixelVIndex[0] )
  );
