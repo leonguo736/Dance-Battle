@@ -2,6 +2,7 @@
 #define SONG_H
 
 #include <stdio.h>
+#include "pose.h"
 
 #include "vgatools.h"
 

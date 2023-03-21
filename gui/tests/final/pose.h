@@ -1,3 +1,6 @@
+#ifndef POSE_H
+#define POSE_H
+
 #include <stdio.h>
 #include <stddef.h>
 
@@ -11,3 +14,5 @@ struct Pose {
     double hourAngle;
     double minuteAngle;
 };
+
+#endif

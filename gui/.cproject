@@ -64,7 +64,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="tests/audio.c|intelfpgaup/examples|Debug/intelfpgaup/examples|tests/vgatestdriver.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="tests/gamescreen.c|tests/final/fonts.c|tests/audio.c|intelfpgaup/examples|Debug/intelfpgaup/examples|tests/vgatestdriver.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -112,7 +112,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="tests/audio.c|intelfpgaup/examples|Debug/intelfpgaup/examples|tests/vgatestdriver.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="tests/gamescreen.c|tests/final/fonts.c|tests/audio.c|intelfpgaup/examples|Debug/intelfpgaup/examples|tests/vgatestdriver.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -120,7 +120,7 @@
 		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-		<project id="gui.com.arm.eclipse.cdt.managedbuild.ds5.gcc.target.gnu.exe.base.var.gcc-10.3.1-arm-none-linux-gnueabihf.1052195281" name="Executable" projectType="com.arm.eclipse.cdt.managedbuild.ds5.gcc.target.gnu.exe.base.var.gcc-10.3.1-arm-none-linux-gnueabihf"/>
+		<project id="gui.com.arm.eclipse.cdt.managedbuild.ds5.gcc.target.gnu.exe.base.var.gcc-10.3.1-arm-none-linux-gnueabihf.1052195281" name="Executable"/>
 	</storageModule>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>

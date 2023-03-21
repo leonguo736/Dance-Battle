@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include <intelfpgaup/video.h>
+// #include <intelfpgaup/video.h>
+
+#include "video.h"
 
 #include "vgatools.h"
 
