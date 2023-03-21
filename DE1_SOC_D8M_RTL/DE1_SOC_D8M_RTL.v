@@ -422,7 +422,7 @@ always @(posedge CLOCK2_50) begin
 		end
 	end	
 	if (thresholds_ram_write_en) begin
-		{cbLow[0], cbHigh[0], crLow[0], crHigh[0]} <= thresholds_ram_write_data;
+		{cbLow[thresholds_ram_write_addr], cbHigh[thresholds_ram_write_addr], crLow[thresholds_ram_write_addr], crHigh[thresholds_ram_write_addr]} <= thresholds_ram_write_data;
 	end
 end
 
@@ -478,7 +478,7 @@ nios2_system ni2s (
 	.esp_uart_txd ( GPIO[35] ),
 	.reset_reset_n ( KEY[0] ), 
 	.coords_ram_read_addr( coords_ram_addr ), // unused
-	.coords_ram_read_data( {7'd0, redPixelHIndex[0], 6'd0, redPixelVIndex[0]} ), 
+	.coords_ram_read_data( {7'd0, redPixelHIndex[coords_ram_addr], 6'd0, redPixelVIndex[coords_ram_addr]} ), 
 	.coords_ram_write_addr( thresholds_ram_write_addr ), // unused
 	.coords_ram_write_en( thresholds_ram_write_en ),
 	.coords_ram_write_data( thresholds_ram_write_data )
