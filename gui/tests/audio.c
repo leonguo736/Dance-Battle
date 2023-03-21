@@ -4,8 +4,11 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <math.h>
-#include <intelfpgaup/SW.h>
-#include <intelfpgaup/audio.h>
+//#include <intelfpgaup/SW.h>
+//#include <intelfpgaup/audio.h>
+
+#include "SW.h"
+#include "audio.h"
 
 #include "frogsarefriends.h"
 

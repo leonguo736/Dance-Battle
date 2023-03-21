@@ -4,10 +4,15 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <math.h>
-#include <intelfpgaup/video.h>
-#include <intelfpgaup/KEY.h>
-#include <intelfpgaup/SW.h>
-#include <intelfpgaup/audio.h>
+
+#include "video.h"
+#include "KEY.h"
+#include "SW.h"
+#include "audio.h"
+//#include <intelfpgaup/video.h>
+//#include <intelfpgaup/KEY.h>
+//#include <intelfpgaup/SW.h>
+//#include <intelfpgaup/audio.h>
 
 #include "display.h"
 #include "youwantgnomes.h"
