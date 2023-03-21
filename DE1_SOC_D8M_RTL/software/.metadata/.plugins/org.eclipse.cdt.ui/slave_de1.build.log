@@ -1,9 +1,9 @@
-22:07:59 **** Incremental Build of configuration Nios II for project slave_de1 ****
+22:51:50 **** Incremental Build of configuration Nios II for project slave_de1 ****
 make all 
 Info: Building ../slave_de1_bsp/
 C:/intelFPGA_lite/18.1/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../slave_de1_bsp/
 [BSP build complete]
 [slave_de1 build complete]
 
-22:08:00 Build Finished (took 1s.69ms)
+22:51:51 Build Finished (took 1s.64ms)
 

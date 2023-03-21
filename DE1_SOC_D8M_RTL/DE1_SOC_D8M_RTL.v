@@ -126,9 +126,9 @@ wire [12:0] VGA_H_CNT;
 wire [12:0] VGA_V_CNT;	
 wire [19:0] VGA_ADDR; 
 
-wire [7:0] R_to_vga; 
-wire [7:0] G_to_vga;
-wire [7:0] B_to_vga;
+reg [7:0] R_to_vga; 
+reg [7:0] G_to_vga;
+reg [7:0] B_to_vga;
 wire H_active_area; 
 wire V_active_area;
 
@@ -360,13 +360,13 @@ CLOCKMEM  ck3 ( .CLK(MIPI_PIXEL_CLK_)   ,.CLK_FREQ  (25000000  ) , . CK_1HZ (D8M
 assign LEDR = { D8M_CK_HZ ,D8M_CK_HZ2,D8M_CK_HZ3 , KEY, 1'h0,CAMERA_MIPI_RELAESE ,MIPI_BRIDGE_RELEASE  } ; 
 
 // -------- Custom Modules --------
-reg [7:0] crLow; 
-reg [7:0] crHigh;
-reg [7:0] cbLow;
-reg [7:0] cbHigh; 
+reg [7:0] crLow [0:7];
+reg [7:0] crHigh [0:7];
+reg [7:0] cbLow [0:7];
+reg [7:0] cbHigh [0:7];
 
-wire [8:0] redPixelHIndex; 
-wire [9:0] redPixelVIndex; 
+wire [8:0] redPixelHIndex [0:7];
+wire [9:0] redPixelVIndex [0:7];
 
 // Hex Display Driver Logic
 reg [15:0] displayInt;
@@ -376,27 +376,44 @@ int16_to_hex6 int16_to_hex6_0(
 );
 always @(*) begin
 	if (SW[3]) begin
-		displayInt = redPixelHIndex; 
+		displayInt = redPixelHIndex[0]; 
 	end else if (SW[4]) begin
-		displayInt = redPixelVIndex;
+		displayInt = redPixelVIndex[0];
 	end else begin
 		if (SW[1]) begin
 			if (SW[0]) begin
-				displayInt = crHigh;
+				displayInt = crHigh[0];
 			end else begin
-				displayInt = crLow;
+				displayInt = crLow[0];
 			end
 		end else begin
 			if (SW[0]) begin
-				displayInt = cbHigh;
+				displayInt = cbHigh[0];
 			end else begin
-				displayInt = cbLow;
+				displayInt = cbLow[0];
 			end
 		end
 	end
 end
 
 // Camera and Image Processing Logic
+wire [7:0] oVideo8bR [0:7];
+wire [7:0] oVideo8bG [0:7];
+wire [7:0] oVideo8bB [0:7];
+always @(*) begin
+	case (SW[8:5])
+		4'b0: begin
+			R_to_vga = oVideo8bR[0];
+			G_to_vga = oVideo8bG[0];
+			B_to_vga = oVideo8bB[0];
+		end
+		4'b1: begin
+			R_to_vga = oVideo8bR[1];
+			G_to_vga = oVideo8bG[1];
+			B_to_vga = oVideo8bB[1];
+		end
+	endcase
+end
 ball_detector  ball_detector_0( 
    .reset( KEY[0] ),
    .iVideo12bRgb( { RED, GREEN, BLUE } ),
@@ -405,16 +422,35 @@ ball_detector  ball_detector_0(
    .iVgaClk( VGA_CLK ),
    .iVgaHRequest( READ_Request ), 
    .iVgaVRequest( V_active_area ),
-   .oVideo8bRgb( { R_to_vga, G_to_vga, B_to_vga } ),
+   .oVideo8bRgb( { oVideo8bR[0], oVideo8bG[0], oVideo8bB[0] } ),
    .iVideoSelect( SW[9] ),
-   .iFreezeRam( SW[8] ),
-   .iFilterOn( SW[7] ), 
-   .iCrLow( crLow ),
-   .iCrHigh( crHigh ),
-   .iCbLow( cbLow ),
-   .iCbHigh( cbHigh ),
-   .oRedPixelHIndex( redPixelHIndex ),
-   .oRedPixelVIndex( redPixelVIndex )
+   .iFreezeRam(  ),
+   .iFilterOn(  ), 
+   .iCrLow( crLow[0] ),
+   .iCrHigh( crHigh[0] ),
+   .iCbLow( cbLow[0] ),
+   .iCbHigh( cbHigh[0] ),
+   .oRedPixelHIndex( redPixelHIndex[0] ),
+   .oRedPixelVIndex( redPixelVIndex[0] )
+ );
+ ball_detector  ball_detector_1( 
+   .reset( KEY[0] ),
+   .iVideo12bRgb( { RED, GREEN, BLUE } ),
+   .iPixelAddress( VGA_ADDRESS ),
+   .iVgaRequest( READ_Request ),
+   .iVgaClk( VGA_CLK ),
+   .iVgaHRequest( READ_Request ), 
+   .iVgaVRequest( V_active_area ),
+   .oVideo8bRgb( { oVideo8bR[1], oVideo8bG[1], oVideo8bB[1] } ),
+   .iVideoSelect( SW[9] ),
+   .iFreezeRam(  ),
+   .iFilterOn(  ), 
+   .iCrLow( crLow[1] ),
+   .iCrHigh( crHigh[1] ),
+   .iCbLow( cbLow[1] ),
+   .iCbHigh( cbHigh[1] ),
+   .oRedPixelHIndex( redPixelHIndex[1] ),
+   .oRedPixelVIndex( redPixelVIndex[1] )
  );
 
 // Software System
@@ -435,7 +471,7 @@ nios2_system nios2_system_0 (
 
 // Point Coordinates Logic
 ram_32b coords_ram_0 (
-	.data( { 7'd0, redPixelHIndex, 6'd0, redPixelVIndex } ),
+	.data( { 7'd0, redPixelHIndex[0], 6'd0, redPixelVIndex[0] } ),
 	.rdaddress( coords_ram_addr ),
 	.rdclock( CLOCK2_50 ),
 	.wraddress( 0 ),
@@ -445,12 +481,12 @@ ram_32b coords_ram_0 (
 );
 
 // Thresholds Logic
-wire [31:0] thresholds_ram_output; // {crLow, crHigh, cbLow, cbHigh}
+wire [31:0] thresholds_ram_output; // {cbLow, cbHigh, crLow, crHigh}
 always @(posedge VGA_CLK) begin
-	crLow <= thresholds_ram_output[31:24];
-	crHigh <= thresholds_ram_output[23:16];
-	cbLow <= thresholds_ram_output[15:8]; 
-	cbHigh <= thresholds_ram_output[7:0];
+	cbLow[0] <= thresholds_ram_output[31:24];
+	cbHigh[0] <= thresholds_ram_output[23:16];
+	crLow[0] <= thresholds_ram_output[15:8];
+	crHigh[0] <= thresholds_ram_output[7:0];
 end
 ram_32b thresholds_ram_0 (
 	.data( thresholds_ram_data ),

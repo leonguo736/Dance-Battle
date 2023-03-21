@@ -113,30 +113,24 @@ void getFrame(uint32_t *arr, int *len)
 	}
 }
 
-// sample code for Bell
 void printCoords()
 {
 	int len;
 	uint32_t *arr = NULL;
-	while (1)
+	getFrame(arr, &len);
+	for (int i = 0; i < len; i++)
 	{
-		getFrame(arr, &len);
-		for (int i = 0; i < len; i++)
-		{
-			uint32_t raw_coords = arr[i];
-			uint16_t x = raw_coords & 0xFFFF;
-			uint16_t y = raw_coords >> 16;
-			printf("x: %i, y: %i\n", x, y);
-		}
+		uint32_t raw_coords = arr[i];
+		uint16_t x = raw_coords & 0xFFFF;
+		uint16_t y = raw_coords >> 16;
+		printf("Point %i at x: %i, y: %i\n", i, x, y);
 	}
 	free(arr);
 }
 
 void printThresholds(int i)
 {
-    printf("Thresholds: crLow=%d crHigh=%d cbLow=%d cbHigh=%d\n",
-        (thresholds[i] >> 24) & 0xFF, (thresholds[i] >> 16) & 0xFF,
-        (thresholds[i] >> 8) & 0xFF, thresholds[i] & 0xFF);
+    printf("cbLow: %i, cbHigh: %i, crLow: %i, crHigh: %i\n", (thresholds[i] >> 24) & 0xFF, (thresholds[i] >> 16) & 0xFF, (thresholds[i] >> 8) & 0xFF, thresholds[i] & 0xFF);
 }
 
 void writeThresholds(int i)
@@ -153,52 +147,54 @@ char getInputLetter() {
 
 void updateThresholds() {
 	char c;
-	int index = 0;
+	int i = 0;
 	while (1) {
-	    printf("Modifying point %i, press a button on keyboard", index);
+	    printf("Modifying point %i, press a button on keyboard", i);
 		c = getInputLetter();
 		// printf("%c\n", c); 
 		switch (c) {
 			case 'b': return; // break
 			case 'B': return; // break
-			case 't': index = (index + 1) % NUM_POINT_FINDERS; break; // increment index
-			case 'g': index = (index - 1) % NUM_POINT_FINDERS; break; // decrement index
-			case 'q': thresholds[index] += 1 << 8; break; // increment cbLow
-			case 'w': thresholds[index] += 1; break; // increment cbHigh
-			case 'e': thresholds[index] += 1 << 24; break; // increment crLow
-			case 'r': thresholds[index] += 1 << 16; break; // increment crHigh
-			case 'a': thresholds[index] -= 1 << 8; break; // decrement cbLow
-			case 's': thresholds[index] -= 1; break; // decrement cbHigh
-			case 'd': thresholds[index] -= 1 << 24; break; // decrement crLow
-			case 'f': thresholds[index] -= 1 << 16; break; // decrement crHigh
-			case '1': thresholds[index] += 5 << 8; break; // increment cbLow
-			case '2': thresholds[index] += 5; break; // increment cbHigh
-			case '3': thresholds[index] += 5 << 24; break; // increment crLow
-			case '4': thresholds[index] += 5 << 16; break; // increment crHigh
-			case 'z': thresholds[index] -= 5 << 8; break; // decrement cbLow
-			case 'x': thresholds[index] -= 5; break; // decrement cbHigh
-			case 'c': thresholds[index] -= 5 << 24; break; // decrement crLow
-			case 'v': thresholds[index] -= 5 << 16; break; // decrement crHigh
-			case '!': thresholds[index] += 50 << 8; break; // increment cbLow
-			case '@': thresholds[index] += 50; break; // increment cbHigh
-			case '#': thresholds[index] += 50 << 24; break; // increment crLow
-			case '$': thresholds[index] += 50 << 16; break; // increment crHigh
-			case 'Z': thresholds[index] -= 50 << 8; break; // decrement cbLow
-			case 'X': thresholds[index] -= 50; break; // decrement cbHigh
-			case 'C': thresholds[index] -= 50 << 24; break; // decrement crLow
-			case 'V': thresholds[index] -= 50 << 16; break; // decrement crHigh
-			case 'Q': thresholds[index] += 10 << 8; break; // increment cbLow
-			case 'W': thresholds[index] += 10; break; // increment cbHigh
-			case 'E': thresholds[index] += 10 << 24; break; // increment crLow
-			case 'R': thresholds[index] += 10 << 16; break; // increment crHigh
-			case 'A': thresholds[index] -= 10 << 8; break; // decrement cbLow
-			case 'S': thresholds[index] -= 10; break; // decrement cbHigh
-			case 'D': thresholds[index] -= 10 << 24; break; // decrement crLow
-			case 'F': thresholds[index] -= 10 << 16; break; // decrement crHigh
+			case 't': i = (i + 1) % NUM_POINT_FINDERS; break; // increment index
+			case 'g': i = (i - 1) % NUM_POINT_FINDERS; break; // decrement index
+			case '!': thresholds[i] += 50 << 24; break; // increment cbLow
+			case '@': thresholds[i] += 50 << 16; break; // increment cbHigh
+			case '#': thresholds[i] += 50 << 8; break; // increment crLow
+			case '$': thresholds[i] += 50; break; // increment crHigh
+			case 'Q': thresholds[i] += 10 << 24; break; // increment cbLow
+			case 'W': thresholds[i] += 10 << 16; break; // increment cbHigh
+			case 'E': thresholds[i] += 10 << 8; break; // increment crLow
+			case 'R': thresholds[i] += 10; break; // increment crHigh
+			case '1': thresholds[i] += 5 << 24; break; // increment cbLow
+			case '2': thresholds[i] += 5 << 16; break; // increment cbHigh
+			case '3': thresholds[i] += 5 << 8; break; // increment crLow
+			case '4': thresholds[i] += 5; break; // increment crHigh
+			case 'q': thresholds[i] += 1 << 24; break; // increment cbLow
+			case 'w': thresholds[i] += 1 << 16; break; // increment cbHigh
+			case 'e': thresholds[i] += 1 << 8; break; // increment crLow
+			case 'r': thresholds[i] += 1; break; // increment crHigh
+
+			case 'Z': thresholds[i] -= 50 << 24; break; // decrement cbLow
+			case 'X': thresholds[i] -= 50 << 16; break; // decrement cbHigh
+			case 'C': thresholds[i] -= 50 << 8; break; // decrement crLow
+			case 'V': thresholds[i] -= 50; break; // decrement crHigh
+			case 'A': thresholds[i] -= 10 << 24; break; // decrement cbLow
+			case 'S': thresholds[i] -= 10 << 16; break; // decrement cbHigh
+			case 'D': thresholds[i] -= 10 << 8; break; // decrement crLow
+			case 'F': thresholds[i] -= 10; break; // decrement crHigh
+			case 'z': thresholds[i] -= 5 << 24; break; // decrement cbLow
+			case 'x': thresholds[i] -= 5 << 16; break; // decrement cbHigh
+			case 'c': thresholds[i] -= 5 << 8; break; // decrement crLow
+			case 'v': thresholds[i] -= 5; break; // decrement crHigh
+			case 'a': thresholds[i] -= 1 << 24; break; // decrement cbLow
+			case 's': thresholds[i] -= 1 << 16; break; // decrement cbHigh
+			case 'd': thresholds[i] -= 1 << 8; break; // decrement crLow
+			case 'f': thresholds[i] -= 1; break; // decrement crHigh
 			default: break;
 		}
-		writeThresholds(index);
-		printThresholds(index);
+		writeThresholds(i);
+		printThresholds(i);
+		printCoords();
 	}
 }
 
@@ -209,8 +205,8 @@ int main()
 
 	//	printCoords();
 
-	uint8_t cbLow = 121, cbHigh = 130, crLow = 120, crHigh = 130;
-	thresholds[0] = (crLow << 24) | (crHigh << 16) | (cbLow << 8) | cbHigh;
+	uint8_t cbLow = 120, cbHigh = 130, crLow = 120, crHigh = 130;
+	thresholds[0] = (cbLow << 24) | (cbHigh << 16) | (crLow << 8) | crHigh;
 	writeThresholds(0);
 
 	updateThresholds();
