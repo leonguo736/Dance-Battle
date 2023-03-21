@@ -147,17 +147,23 @@ void writeThresholds(int i)
 int main()
 {
 	printf("Program start 1\n");
-	uint8_t cbLow = 111, cbHigh = 133, crLow = 112, crHigh = 134;
+	//	printCoords();
+
+	uint8_t cbLow = 120, cbHigh = 130, crLow = 120, crHigh = 130;
 	thresholds[0] = (crLow << 24) | (crHigh << 16) | (cbLow << 8) | cbHigh;
 	writeThresholds(0);
-//	printCoords();
 
 	int index = 0;
-	int c;
+//	int c;
 	while (1) {
-		printThresholds(index);
-		c = alt_getchar();
-		printf("c: %c\n", c);
+	    char c;
+	    printf("Press a key on your keyboard: ");
+	    while ((c = getchar()) == '\n'); // consume newline characters
+	    if (c == 'q') {
+	    	break;
+	    }
+	    printf("You pressed the '%c' key.\n", c);
+	    while (getchar() != '\n'); // clear input buffer
 	}
 	return 0;
 }
