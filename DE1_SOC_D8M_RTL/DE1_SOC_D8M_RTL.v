@@ -365,8 +365,8 @@ reg [7:0] crHigh;
 reg [7:0] cbLow;
 reg [7:0] cbHigh; 
 
-wire [8:0] redPixelHIndex; // Live value
-wire [9:0] redPixelVIndex; 
+wire [8:0] redPixelHIndex [0:5]; // Live value
+wire [9:0] redPixelVIndex [0:5]; 
 
 reg [7:0] redPixelHIndexCached; // Value displayed on HEX TODO: actually use this
 reg [7:0] redPixelVIndexCached;
@@ -380,9 +380,9 @@ int16_to_hex6 int16_to_hex6_0(
 // assign displayIntRight = SW[1] ? (SW[0] ? crHigh : crLow) : (SW[0] ? cbHigh : cbLow);
 always @(*) begin
 	if (SW[3]) begin
-		displayInt = redPixelHIndex; 
+		displayInt = redPixelHIndex[0]; 
 	end else if (SW[4]) begin
-		displayInt = redPixelVIndex;
+		displayInt = redPixelVIndex[0];
 	end else begin
 		if (SW[1]) begin
 			if (SW[0]) begin
@@ -417,8 +417,8 @@ always @(posedge VGA_CLK) begin
 				if ( SW[1] && ~SW[0]) crLow = SW[2] ? crLow + 10 : crLow + 1;
 				if ( SW[1] &&  SW[0]) crHigh = SW[2] ? crHigh + 10 : crHigh + 1;
 				if (KEY[3]) begin
-					redPixelHIndexCached = redPixelHIndex;
-					redPixelVIndexCached = redPixelVIndex;
+					redPixelHIndexCached = redPixelHIndex[0];
+					redPixelVIndexCached = redPixelVIndex[0];
 				end
 			end else if (~KEY[2]) begin
 				if (~SW[1] && ~SW[0]) cbLow = SW[2] ? cbLow - 10 : cbLow - 1;
@@ -447,8 +447,8 @@ ball_detector  ball_u1(
    .iCrHigh( crHigh ),
    .iCbLow( cbLow ),
    .iCbHigh( cbHigh ),
-   .oRedPixelHIndex( redPixelHIndex ),
-   .oRedPixelVIndex( redPixelVIndex )
+   .oRedPixelHIndex( redPixelHIndex[0] ),
+   .oRedPixelVIndex( redPixelVIndex[0] )
  );
 
 // nios2_system nios2_system_0 (
@@ -475,17 +475,17 @@ nios2_system ni2s (
 	.esp_uart_txd ( GPIO[35] ),
 	.reset_reset_n ( KEY[0] ), 
 	.coords_ram_addr( coords_ram_addr ), 
-	.coords_ram_data( {7'd0, redPixelHIndex, 6'd0, redPixelVIndex} )
+	.coords_ram_data( {7'd0, redPixelHIndex[0], 6'd0, redPixelVIndex[0]} )
 );
 
-coords_ram coords_ram_0 (
-	.data( { 7'd0, redPixelHIndex, 6'd0, redPixelVIndex } ),
-	.rdaddress( coords_ram_addr ),
-	.rdclock( CLOCK2_50 ),
-	.wraddress( 0 ),
-	.wrclock( VGA_CLK ),
-	.wren( VGA_CLK ),
-	.q( coords_ram_data )
-);
+// coords_ram coords_ram_0 (
+// 	.data( { 7'd0, redPixelHIndex[0], 6'd0, redPixelVIndex[0] } ),
+// 	.rdaddress( coords_ram_addr ),
+// 	.rdclock( CLOCK2_50 ),
+// 	.wraddress( 0 ),
+// 	.wrclock( VGA_CLK ),
+// 	.wren( VGA_CLK ),
+// 	.q( coords_ram_data )
+// );
 
 endmodule
