@@ -86,69 +86,40 @@
 #include <termios.h>
 #include <unistd.h>
 
-#define NUM_POINT_FINDERS 1
+#define NUM_POINT_FINDERS 2
+uint32_t coords[NUM_POINT_FINDERS]; 
 volatile uint32_t *camera_base = (uint32_t*)COORDS_SLAVE_0_BASE;
-static uint32_t thresholds[NUM_POINT_FINDERS];
-
-/* arr is mutated to contain the coordinates the points
- * len is set to the size of arr
- *
- * (x,y) = (0,0) is at top left of VGA monitor
- * x = arr[i] & 0xFFFF;
- * y = arr[i] >> 16;
- */
-void getFrame(uint32_t *arr, int *len)
-{
-	arr = (uint32_t *)malloc(NUM_POINT_FINDERS * sizeof(uint32_t));
-	*len = NUM_POINT_FINDERS;
-
-	volatile uint32_t raw_coords;
-	for (int i = 0; i < NUM_POINT_FINDERS; i++)
-	{
-		raw_coords = *(camera_base + i);
-		arr[i] = raw_coords;
-		//	  uint16_t smallUpBigDown = raw_coords >> 16;
-		//	  uint16_t smallLeftBigRight = raw_coords & 0xFFFF;
-		//	  printf("smallUpBigDown: %i, smallLeftBigRight: %i\n", smallUpBigDown, smallLeftBigRight);
-	}
-}
-
-void printCoords()
-{
-	int len;
-	uint32_t *arr = NULL;
-	getFrame(arr, &len);
-	for (int i = 0; i < len; i++)
-	{
-		uint32_t raw_coords = arr[i];
-		uint16_t x = raw_coords & 0xFFFF;
-		uint16_t y = raw_coords >> 16;
-		printf("Point %i at x: %i, y: %i\n", i, x, y);
-	}
-	free(arr);
-}
-
-void printThresholds(int i)
-{
-    printf("cbLow: %lu, cbHigh: %lu, crLow: %lu, crHigh: %lu\n", (thresholds[i] >> 24) & 0xFF, (thresholds[i] >> 16) & 0xFF, (thresholds[i] >> 8) & 0xFF, thresholds[i] & 0xFF);
-}
 
 void writeThresholds(int i, uint8_t cbLow, uint8_t cbHigh, uint8_t crLow, uint8_t crHigh)
 {
 	*(camera_base + i) = (cbLow << 24) | (cbHigh << 16) | (crLow << 8) | crHigh;
 }
 
+void updateCoords() {	
+	for (int i = 0; i < NUM_POINT_FINDERS; i++) {
+		coords[i] = *(camera_base + i);
+	}
+}
+
 int main()
 {
 	const int __programNumber__ = 420;
-	printf("Program start number: %i\n", __programNumber__);
+	printf("\n === Program start number: %i === \n", __programNumber__);
 
-	writeThresholds(0, 111, 120, 112, 121);
+	writeThresholds(0, 100, 110, 100, 110);
+	writeThresholds(1, 110, 120, 110, 120);
     while (1) {
-    	printCoords();
+		updateCoords();
+    	for (int i = 0; i < NUM_POINT_FINDERS; i++) {
+			uint32_t raw_coords = coords[i];
+			uint16_t smallUpBigDown = raw_coords >> 16;
+			uint16_t smallLeftBigRight = raw_coords & 0xFFFF;
+			printf("%i: (%i, %i), ", i, smallLeftBigRight, smallUpBigDown);
+		}
+		printf("\n");
     }
 
-	printf("Program end number: %i\n", __programNumber__);
+	printf("\n === Program end number: %i === \n", __programNumber__);
 	return 0;
 }
 
