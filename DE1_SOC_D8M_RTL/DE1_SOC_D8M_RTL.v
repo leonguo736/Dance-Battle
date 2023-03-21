@@ -398,28 +398,31 @@ end
 
 // Increment / Decrement
 reg [3:0] KEY_OLD; 
-always @(posedge VGA_CLK) begin
+always @(posedge CLOCK2_50) begin
 	if (~KEY[0]) begin
 		KEY_OLD <= 4'b1111;
-		crLow[0] = 8'd0; 
-		crHigh[0] = 8'd255;
-		cbLow[0] = 8'd0;
-		cbHigh[0] = 8'd255;
+		crLow[0] <= 8'd0; 
+		crHigh[0] <= 8'd255;
+		cbLow[0] <= 8'd0;
+		cbHigh[0] <= 8'd255;
 	end else begin
 		if (KEY_OLD != KEY) begin
 			if (~KEY[1]) begin
-				if (~SW[1] && ~SW[0]) cbLow[0] = SW[2] ? cbLow[0] + 10 : cbLow[0] + 1;
-				if (~SW[1] &&  SW[0]) cbHigh[0] = SW[2] ? cbHigh[0] + 10 : cbHigh[0] + 1;
-				if ( SW[1] && ~SW[0]) crLow[0] = SW[2] ? crLow[0] + 10 : crLow[0] + 1;
-				if ( SW[1] &&  SW[0]) crHigh[0] = SW[2] ? crHigh[0] + 10 : crHigh[0] + 1;
+				if (~SW[1] && ~SW[0]) cbLow[0] <= SW[2] ? cbLow[0] + 10 : cbLow[0] + 1;
+				if (~SW[1] &&  SW[0]) cbHigh[0] <= SW[2] ? cbHigh[0] + 10 : cbHigh[0] + 1;
+				if ( SW[1] && ~SW[0]) crLow[0] <= SW[2] ? crLow[0] + 10 : crLow[0] + 1;
+				if ( SW[1] &&  SW[0]) crHigh[0] <= SW[2] ? crHigh[0] + 10 : crHigh[0] + 1;
 			end else if (~KEY[2]) begin
-				if (~SW[1] && ~SW[0]) cbLow[0] = SW[2] ? cbLow[0] - 10 : cbLow[0] - 1;
-				if (~SW[1] &&  SW[0]) cbHigh[0] = SW[2] ? cbHigh[0] - 10 : cbHigh[0] - 1;
-				if ( SW[1] && ~SW[0]) crLow[0] = SW[2] ? crLow[0] - 10 : crLow[0] - 1;
-				if ( SW[1] &&  SW[0]) crHigh[0] = SW[2] ? crHigh[0] - 10 : crHigh[0] - 1;
+				if (~SW[1] && ~SW[0]) cbLow[0] <= SW[2] ? cbLow[0] - 10 : cbLow[0] - 1;
+				if (~SW[1] &&  SW[0]) cbHigh[0] <= SW[2] ? cbHigh[0] - 10 : cbHigh[0] - 1;
+				if ( SW[1] && ~SW[0]) crLow[0] <= SW[2] ? crLow[0] - 10 : crLow[0] - 1;
+				if ( SW[1] &&  SW[0]) crHigh[0] <= SW[2] ? crHigh[0] - 10 : crHigh[0] - 1;
 			end
 			KEY_OLD <= KEY;
 		end
+	end	
+	if (thresholds_ram_write_en) begin
+		{cbLow[0], cbHigh[0], crLow[0], crHigh[0]} <= thresholds_ram_write_data;
 	end
 end
 
@@ -445,14 +448,20 @@ ball_detector  ball_u1(
 
 wire [4:0] coords_ram_addr; 
 wire [31:0] coords_ram_data; 
+wire thresholds_ram_write_en;
+wire [31:0] thresholds_ram_write_data;
+wire [4:0] thresholds_ram_write_addr;
 
 nios2_system ni2s (
 	.clk_clk ( CLOCK2_50 ),
 	.esp_uart_rxd ( GPIO[34] ),
 	.esp_uart_txd ( GPIO[35] ),
 	.reset_reset_n ( KEY[0] ), 
-	.coords_ram_addr( coords_ram_addr ), 
-	.coords_ram_data( {7'd0, redPixelHIndex[0], 6'd0, redPixelVIndex[0]} )
+	.coords_ram_read_addr( coords_ram_addr ), // unused
+	.coords_ram_read_data( {7'd0, redPixelHIndex[0], 6'd0, redPixelVIndex[0]} ), 
+	.coords_ram_write_addr( thresholds_ram_write_addr ), // unused
+	.coords_ram_write_en( thresholds_ram_write_en ),
+	.coords_ram_write_data( thresholds_ram_write_data )
 );
 
 // coords_ram coords_ram_0 (

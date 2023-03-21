@@ -4,12 +4,15 @@
 
 `timescale 1 ps / 1 ps
 module nios2_system (
-		input  wire        clk_clk,         //        clk.clk
-		output wire [4:0]  coords_ram_addr, // coords_ram.addr
-		input  wire [31:0] coords_ram_data, //           .data
-		input  wire        esp_uart_rxd,    //   esp_uart.rxd
-		output wire        esp_uart_txd,    //           .txd
-		input  wire        reset_reset_n    //      reset.reset_n
+		input  wire        clk_clk,               //        clk.clk
+		output wire [4:0]  coords_ram_read_addr,  // coords_ram.read_addr
+		input  wire [31:0] coords_ram_read_data,  //           .read_data
+		output wire [4:0]  coords_ram_write_addr, //           .write_addr
+		output wire        coords_ram_write_en,   //           .write_en
+		output wire [31:0] coords_ram_write_data, //           .write_data
+		input  wire        esp_uart_rxd,          //   esp_uart.rxd
+		output wire        esp_uart_txd,          //           .txd
+		input  wire        reset_reset_n          //      reset.reset_n
 	);
 
 	wire  [31:0] nios2_gen2_0_data_master_readdata;                           // mm_interconnect_0:nios2_gen2_0_data_master_readdata -> nios2_gen2_0:d_readdata
@@ -75,8 +78,11 @@ module nios2_system (
 		.avs_s0_waitrequest (mm_interconnect_0_coords_slave_0_avs_s0_waitrequest), //           .waitrequest
 		.clock_clk          (clk_clk),                                             //      clock.clk
 		.reset_reset        (rst_controller_reset_out_reset),                      //      reset.reset
-		.addr               (coords_ram_addr),                                     // coords_ram.addr
-		.data               (coords_ram_data)                                      //           .data
+		.read_addr          (coords_ram_read_addr),                                // coords_ram.read_addr
+		.read_data          (coords_ram_read_data),                                //           .read_data
+		.write_addr         (coords_ram_write_addr),                               //           .write_addr
+		.write_en           (coords_ram_write_en),                                 //           .write_en
+		.write_data         (coords_ram_write_data)                                //           .write_data
 	);
 
 	nios2_system_jtag_uart_0 jtag_uart_0 (

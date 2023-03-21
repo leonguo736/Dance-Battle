@@ -18,14 +18,22 @@ module coords_slave (
         output wire        avs_s0_waitrequest, //           .waitrequest
         input  wire        clock_clk,          //      clock.clk
         input  wire        reset_reset,        //      reset.reset
-        output reg [4:0]  addr,               // coords_ram.addr
-        input  wire [31:0] data                //           .data
+        output wire [4:0]  read_addr,          // coords_ram.read_addr
+        input  wire [31:0] read_data,          //           .read_data
+        output wire [4:0]  write_addr,         //           .write_addr
+        output wire        write_en,           //           .write_en
+        output wire [31:0] write_data          //           .write_data
     );
 
     assign avs_s0_waitrequest = 1'b0;
 
     // Read Coords
-    assign addr = avs_s0_address; 
-    assign avs_s0_readdata = data;
+    assign read_addr = avs_s0_address; 
+    assign avs_s0_readdata = read_data;
+
+    // Write Thresholds
+    assign write_addr = avs_s0_address;
+    assign write_en = avs_s0_write;
+    assign write_data = avs_s0_writedata;
 
 endmodule

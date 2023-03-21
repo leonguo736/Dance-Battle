@@ -533,3 +533,12 @@ Caused by: java.lang.IllegalStateException: Expected BEGIN_OBJECT but was STRING
 
 !ENTRY com.altera.sbtgui.launch 1 0 2023-03-21 12:23:26.842
 !MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=DE-SoC on localhost [USB-1]' --device=2 --instance=0 --go --accept-bad-sysid /cygdrive/c/Users/kerry/Repos/l2b-34-elur/DE1_SOC_D8M_RTL/software/slave_de1/slave_de1.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2023-03-21 12:34:17.785
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=DE-SoC on localhost [USB-1]' --device=2 --instance=0 --stop --accept-bad-sysid --sidp=Not Found]
+
+!ENTRY com.altera.sbtgui.launch 4 0 2023-03-21 12:34:19.556
+!MESSAGE Failed Executing: [nios2-download, '--cable=DE-SoC on localhost [USB-1]', --device=2, --instance=0, --stop, --accept-bad-sysid, --sidp=Not Found] return code: 8
+
+!ENTRY com.altera.sbtgui.launch 1 0 2023-03-21 12:34:19.895
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=DE-SoC on localhost [USB-1]' --device=2 --instance=0 --go --accept-bad-sysid /cygdrive/c/Users/kerry/Repos/l2b-34-elur/DE1_SOC_D8M_RTL/software/slave_de1/slave_de1.elf]

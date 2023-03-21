@@ -1,14 +1,16 @@
 
 module nios2_system (
 	clk_clk,
-	reset_reset_n,
+	coords_ram_addr,
+	coords_ram_data,
 	esp_uart_rxd,
 	esp_uart_txd,
-	coords_ram_addr);	
+	reset_reset_n);	
 
 	input		clk_clk;
-	input		reset_reset_n;
+	output	[4:0]	coords_ram_addr;
+	input	[31:0]	coords_ram_data;
 	input		esp_uart_rxd;
 	output		esp_uart_txd;
-	output	[4:0]	coords_ram_addr;
+	input		reset_reset_n;
 endmodule
