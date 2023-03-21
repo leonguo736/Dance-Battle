@@ -1,29 +1,9 @@
-19:34:26 **** Incremental Build of configuration Nios II for project slave_de1 ****
+19:55:00 **** Incremental Build of configuration Nios II for project slave_de1 ****
 make all 
 Info: Building ../slave_de1_bsp/
 C:/intelFPGA_lite/18.1/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../slave_de1_bsp/
 [BSP build complete]
-Info: Compiling hello_world_small.c to obj/default/hello_world_small.o
-nios2-elf-gcc -xc -MP -MMD -c -I../slave_de1_bsp//HAL/inc -I../slave_de1_bsp/ -I../slave_de1_bsp//drivers/inc  -pipe -D__hal__ -DALT_NO_C_PLUS_PLUS -DALT_NO_CLEAN_EXIT -D'exit(a)=_exit(a)' -DALT_NO_EXIT -DALT_USE_DIRECT_DRIVERS -DALT_NO_INSTRUCTION_EMULATION -DALT_USE_SMALL_DRIVERS -DSMALL_C_LIB -DALT_SINGLE_THREADED    -Os -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o obj/default/hello_world_small.o hello_world_small.c
-hello_world_small.c: In function 'printThresholds':
-hello_world_small.c:137:12: warning: format '%d' expects argument of type 'int', but argument 2 has type 'long unsigned int' [-Wformat=]
-     printf("Thresholds: crLow=%d crHigh=%d cbLow=%d cbHigh=%d\n",
-            ^
-hello_world_small.c:137:12: warning: format '%d' expects argument of type 'int', but argument 3 has type 'long unsigned int' [-Wformat=]
-hello_world_small.c:137:12: warning: format '%d' expects argument of type 'int', but argument 4 has type 'long unsigned int' [-Wformat=]
-hello_world_small.c:137:12: warning: format '%d' expects argument of type 'int', but argument 5 has type 'long unsigned int' [-Wformat=]
-hello_world_small.c:137:12: warning: format '%d' expects argument of type 'int', but argument 2 has type 'long unsigned int' [-Wformat=]
-hello_world_small.c:137:12: warning: format '%d' expects argument of type 'int', but argument 3 has type 'long unsigned int' [-Wformat=]
-hello_world_small.c:137:12: warning: format '%d' expects argument of type 'int', but argument 4 has type 'long unsigned int' [-Wformat=]
-hello_world_small.c:137:12: warning: format '%d' expects argument of type 'int', but argument 5 has type 'long unsigned int' [-Wformat=]
-Info: Linking slave_de1.elf
-nios2-elf-g++  -T'../slave_de1_bsp//linker.x' -msys-crt0='../slave_de1_bsp//obj/HAL/src/crt0.o' -msys-lib=hal_bsp -L../slave_de1_bsp/  -msmallc  -Wl,-Map=slave_de1.map   -Os -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o slave_de1.elf obj/default/hello_world_small.o -lm -msys-lib=m
-nios2-elf-insert slave_de1.elf --thread_model hal --cpu_name nios2_gen2_0 --qsys true --simulation_enabled false --stderr_dev jtag_uart_0 --stdin_dev jtag_uart_0 --stdout_dev jtag_uart_0 --sopc_system_name nios2_system --quartus_project_dir "C:/Users/kerry/repos/l2b-34-elur/DE1_SOC_D8M_RTL" --jdi ../..//output_files/DE1_SOC_D8M_RTL.jdi --sopcinfo C:/Users/kerry/repos/l2b-34-elur/DE1_SOC_D8M_RTL/software/slave_de1_bsp/../../nios2_system.sopcinfo
-Info: (slave_de1.elf) 3692 Bytes program size (code + initialized data).
-Info:                 160 Bytes free for stack + heap.
-Info: Creating slave_de1.objdump
-nios2-elf-objdump --disassemble --syms --all-header --source slave_de1.elf >slave_de1.objdump
 [slave_de1 build complete]
 
-19:34:28 Build Finished (took 1s.825ms)
+19:55:01 Build Finished (took 1s.73ms)
 

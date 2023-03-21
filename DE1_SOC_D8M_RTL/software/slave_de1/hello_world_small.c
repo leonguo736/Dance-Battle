@@ -152,13 +152,13 @@ int main()
 	writeThresholds(0);
 //	printCoords();
 
-//	int index = 0;
-//	int c;
-//	while (1) {
-//		printThresholds(i);
-//		c = getch();
-//		printf("c: %c\n", c);
-//	}
+	int index = 0;
+	int c;
+	while (1) {
+		printThresholds(index);
+		c = alt_getchar();
+		printf("c: %c\n", c);
+	}
 	return 0;
 }
 

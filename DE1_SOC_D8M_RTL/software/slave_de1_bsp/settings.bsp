@@ -2,8 +2,8 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>20-Mar-2023 7:31:39 PM</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1679365899575</BspGeneratedUnixTimeStamp>
+        <BspGeneratedTimeStamp>20-Mar-2023 7:49:24 PM</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1679366965003</BspGeneratedUnixTimeStamp>
         <BspGeneratedLocation>C:\Users\kerry\repos\l2b-34-elur\DE1_SOC_D8M_RTL\software\slave_de1_bsp</BspGeneratedLocation>
         <BspSettingsFile>settings.bsp</BspSettingsFile>
         <SopcDesignFile>..\..\nios2_system.sopcinfo</SopcDesignFile>
@@ -923,26 +923,26 @@
                 <Group xsi:nil="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/>
         </Setting>
         <MemoryMap>
+                <slaveDescriptor>onchip_memory2_0</slaveDescriptor>
+                <addressRange>0x00008000 - 0x0000CE1F</addressRange>
+                <addressSpan>20000</addressSpan>
+                <attributes>memory</attributes>
+        </MemoryMap>
+        <MemoryMap>
                 <slaveDescriptor>coords_slave_0</slaveDescriptor>
-                <addressRange>0x00000000 - 0x000003FF</addressRange>
+                <addressRange>0x00011000 - 0x000113FF</addressRange>
                 <addressSpan>1024</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
-                <slaveDescriptor>onchip_memory2_0</slaveDescriptor>
-                <addressRange>0x00001000 - 0x00001FFF</addressRange>
-                <addressSpan>4096</addressSpan>
-                <attributes>memory</attributes>
-        </MemoryMap>
-        <MemoryMap>
                 <slaveDescriptor>uart_0</slaveDescriptor>
-                <addressRange>0x00003000 - 0x0000301F</addressRange>
+                <addressRange>0x00011400 - 0x0001141F</addressRange>
                 <addressSpan>32</addressSpan>
                 <attributes>printable</attributes>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>jtag_uart_0</slaveDescriptor>
-                <addressRange>0x00003020 - 0x00003027</addressRange>
+                <addressRange>0x00011420 - 0x00011427</addressRange>
                 <addressSpan>8</addressSpan>
                 <attributes>printable</attributes>
         </MemoryMap>
