@@ -81,11 +81,9 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <termios.h>
 #include <unistd.h>
 
 #include "esp.h"
-#include "sys/alt_stdio.h"
 #include "system.h"
 #include "uart.h"
 

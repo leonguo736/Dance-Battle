@@ -10,7 +10,7 @@
 #define UART_RXDATA_MASK 0xFF
 
 /* txdata register */
-#define UART_TXDATA_OFFSET 0x04
+#define UART_TXDATA_OFFSET 0x01
 #define UART_TXDATA_MASK 0xFF
 
 /* status register */

@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "system.h"
+#include "altera_avalon_uart_regs.h"
 
 // Private Variables
 volatile uint16_t *UART_RXDATA_REG;
@@ -55,10 +56,10 @@ void uart_write_byte(uint8_t value) {
 // Global Function Definitions
 void uart_init(void) {
   // Set the control register to enable the UART
-  UART_RXDATA_REG  =  (uint16_t *)UART_0_BASE + UART_RXDATA_OFFSET;
-  UART_TXDATA_REG  =  (uint16_t *)UART_0_BASE + UART_TXDATA_OFFSET;
-  UART_STATUS_REG  =  (uint16_t *)UART_0_BASE + UART_STATUS_OFFSET;
-  UART_CONTROL_REG =  (uint16_t *)UART_0_BASE + UART_CONTROL_OFFSET;
+  UART_RXDATA_REG   =   (volatile uint16_t *)IOADDR_ALTERA_AVALON_UART_RXDATA(UART_0_BASE);
+  UART_TXDATA_REG   =   (volatile uint16_t *)IOADDR_ALTERA_AVALON_UART_TXDATA(UART_0_BASE);
+  UART_STATUS_REG   =   (volatile uint16_t *)IOADDR_ALTERA_AVALON_UART_STATUS(UART_0_BASE);
+  UART_CONTROL_REG  =   (volatile uint16_t *)IOADDR_ALTERA_AVALON_UART_CONTROL(UART_0_BASE);
 
   // Clear status register
   *UART_STATUS_REG = 0;
