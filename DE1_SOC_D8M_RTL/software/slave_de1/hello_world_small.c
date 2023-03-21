@@ -106,8 +106,9 @@ int main()
 	const int __programNumber__ = 420;
 	printf("\n === Program start number: %i === \n", __programNumber__);
 
-	writeThresholds(0, 100, 110, 100, 110);
-	writeThresholds(1, 110, 120, 110, 120);
+	writeThresholds(0, 0, 255, 0, 255);
+	writeThresholds(0, 146, 160, 61, 85); // Leon's Blue
+	writeThresholds(1, 64, 93, 156, 175); // Kerry's Dark Red
     while (1) {
 		updateCoords();
     	for (int i = 0; i < NUM_POINT_FINDERS; i++) {
