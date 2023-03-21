@@ -359,25 +359,21 @@ CLOCKMEM  ck3 ( .CLK(MIPI_PIXEL_CLK_)   ,.CLK_FREQ  (25000000  ) , . CK_1HZ (D8M
 
 assign LEDR = { D8M_CK_HZ ,D8M_CK_HZ2,D8M_CK_HZ3 , KEY, 1'h0,CAMERA_MIPI_RELAESE ,MIPI_BRIDGE_RELEASE  } ; 
 
-// Custom Modules
+// -------- Custom Modules --------
 reg [7:0] crLow; 
 reg [7:0] crHigh;
 reg [7:0] cbLow;
 reg [7:0] cbHigh; 
 
-wire [8:0] redPixelHIndex; // Live value
+wire [8:0] redPixelHIndex; 
 wire [9:0] redPixelVIndex; 
 
-reg [7:0] redPixelHIndexCached; // Value displayed on HEX TODO: actually use this
-reg [7:0] redPixelVIndexCached;
-
+// Hex Display Driver Logic
 reg [15:0] displayInt;
 int16_to_hex6 int16_to_hex6_0(
 	.i(displayInt),
 	.o({HEX5, HEX4, HEX3, HEX2, HEX1, HEX0})
 );
-
-// assign displayIntRight = SW[1] ? (SW[0] ? crHigh : crLow) : (SW[0] ? cbHigh : cbLow);
 always @(*) begin
 	if (SW[3]) begin
 		displayInt = redPixelHIndex; 
@@ -400,37 +396,34 @@ always @(*) begin
 	end
 end
 
-// Increment / Decrement
-reg [3:0] KEY_OLD; 
-always @(posedge VGA_CLK) begin
-	if (~KEY[0]) begin
-		KEY_OLD <= 4'b1111;
-		crLow = 8'd0; 
-		crHigh = 8'd255;
-		cbLow = 8'd0;
-		cbHigh = 8'd255;
-	end else begin
-		if (KEY_OLD != KEY) begin
-			if (~KEY[1]) begin
-				if (~SW[1] && ~SW[0]) cbLow = SW[2] ? cbLow + 10 : cbLow + 1;
-				if (~SW[1] &&  SW[0]) cbHigh = SW[2] ? cbHigh + 10 : cbHigh + 1;
-				if ( SW[1] && ~SW[0]) crLow = SW[2] ? crLow + 10 : crLow + 1;
-				if ( SW[1] &&  SW[0]) crHigh = SW[2] ? crHigh + 10 : crHigh + 1;
-				if (KEY[3]) begin
-					redPixelHIndexCached = redPixelHIndex;
-					redPixelVIndexCached = redPixelVIndex;
-				end
-			end else if (~KEY[2]) begin
-				if (~SW[1] && ~SW[0]) cbLow = SW[2] ? cbLow - 10 : cbLow - 1;
-				if (~SW[1] &&  SW[0]) cbHigh = SW[2] ? cbHigh - 10 : cbHigh - 1;
-				if ( SW[1] && ~SW[0]) crLow = SW[2] ? crLow - 10 : crLow - 1;
-				if ( SW[1] &&  SW[0]) crHigh = SW[2] ? crHigh - 10 : crHigh - 1;
-			end
-			KEY_OLD <= KEY;
-		end
-	end
-end
+// Increment / Decrement Thresholds Logic
+// reg [3:0] KEY_OLD; 
+// always @(posedge VGA_CLK) begin
+// 	if (~KEY[0]) begin
+// 		KEY_OLD <= 4'b1111;
+// 		crLow = 8'd0; 
+// 		crHigh = 8'd255;
+// 		cbLow = 8'd0;
+// 		cbHigh = 8'd255;
+// 	end else begin
+// 		if (KEY_OLD != KEY) begin
+// 			if (~KEY[1]) begin
+// 				if (~SW[1] && ~SW[0]) cbLow = SW[2] ? cbLow + 10 : cbLow + 1;
+// 				if (~SW[1] &&  SW[0]) cbHigh = SW[2] ? cbHigh + 10 : cbHigh + 1;
+// 				if ( SW[1] && ~SW[0]) crLow = SW[2] ? crLow + 10 : crLow + 1;
+// 				if ( SW[1] &&  SW[0]) crHigh = SW[2] ? crHigh + 10 : crHigh + 1;
+// 			end else if (~KEY[2]) begin
+// 				if (~SW[1] && ~SW[0]) cbLow = SW[2] ? cbLow - 10 : cbLow - 1;
+// 				if (~SW[1] &&  SW[0]) cbHigh = SW[2] ? cbHigh - 10 : cbHigh - 1;
+// 				if ( SW[1] && ~SW[0]) crLow = SW[2] ? crLow - 10 : crLow - 1;
+// 				if ( SW[1] &&  SW[0]) crHigh = SW[2] ? crHigh - 10 : crHigh - 1;
+// 			end
+// 			KEY_OLD <= KEY;
+// 		end
+// 	end
+// end
 
+// Camera and Image Processing Logic
 ball_detector  ball_u1( 
    .reset( KEY[0] ),
    .iVideo12bRgb( { RED, GREEN, BLUE } ),
@@ -451,33 +444,23 @@ ball_detector  ball_u1(
    .oRedPixelVIndex( redPixelVIndex )
  );
 
-// nios2_system nios2_system_0 (
-// 	.clk_clk ( CLOCK2_50 ),
-// 	.esp_uart_rxd ( GPIO[34] ),
-// 	.esp_uart_txd ( GPIO[35] ),
-// 	.reset_reset_n ( KEY[0] )
-// );
-
-// module nios2_system (
-// 		input  wire       clk_clk,         //        clk.clk
-// 		output wire [4:0] coords_ram_addr, // coords_ram.addr
-// 		input  wire       esp_uart_rxd,    //   esp_uart.rxd
-// 		output wire       esp_uart_txd,    //           .txd
-// 		input  wire       reset_reset_n    //      reset.reset_n
-// 	);
-
+// Software System
 wire [4:0] coords_ram_addr; 
 wire [31:0] coords_ram_data;
-
-nios2_system ni2s (
-	.clk_clk ( CLOCK2_50 ),
-	.esp_uart_rxd ( GPIO[34] ),
-	.esp_uart_txd ( GPIO[35] ),
-	.reset_reset_n ( KEY[0] ), 
-	.coords_ram_addr( coords_ram_addr ), 
-	.coords_ram_data( {7'd0, redPixelHIndex, 6'd0, redPixelVIndex} )
+wire [4:0] thresholds_ram_addr; 
+wire [31:0] thresholds_ram_data;
+nios2_system nios2_system_0 (
+	.clk_clk( CLOCK2_50 ),
+	.esp_uart_rxd( GPIO[34] ),
+	.esp_uart_txd( GPIO[35] ),
+	.reset_reset_n( KEY[0] ), 
+	.coords_ram_read_addr( coords_ram_addr ), 
+	.coords_ram_read_data( {7'd0, redPixelHIndex, 6'd0, redPixelVIndex} ), 
+	.coords_ram_write_data( thresholds_ram_data ), 
+	.coords_ram_write_addr( thresholds_ram_addr )
 );
 
+// Point Coordinates Logic
 coords_ram coords_ram_0 (
 	.data( { 7'd0, redPixelHIndex, 6'd0, redPixelVIndex } ),
 	.rdaddress( coords_ram_addr ),
@@ -486,6 +469,29 @@ coords_ram coords_ram_0 (
 	.wrclock( VGA_CLK ),
 	.wren( VGA_CLK ),
 	.q( coords_ram_data )
+);
+
+// Thresholds Logic
+wire [31:0] thresholds_ram_output; // {crLow, crHigh, cbLow, cbHigh}
+always @(posedge VGA_CLK) begin
+	// crLow <= thresholds_ram_output[31:24];
+	// crHigh <= thresholds_ram_output[23:16];
+	// cbLow <= thresholds_ram_output[15:8]; 
+	// cbHigh <= thresholds_ram_output[7:0];
+	crLow <= 8'd120; 
+	crHigh <= 8'd130;
+	cbLow <= 8'd120;
+	cbHigh <= 8'd130;
+end
+
+coords_ram thresholds_ram_0 (
+	.data( thresholds_ram_data ),
+	.rdaddress( 0 ),
+	.rdclock( VGA_CLK ),
+	.wraddress( thresholds_ram_addr ),
+	.wrclock( CLOCK2_50 ),
+	.wren( VGA_CLK ),
+	.q( thresholds_ram_output )
 );
 
 endmodule

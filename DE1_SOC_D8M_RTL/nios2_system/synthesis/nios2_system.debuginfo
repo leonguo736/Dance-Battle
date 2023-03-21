@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <EnsembleReport name="nios2_system" kind="system" version="18.1" fabric="QSYS">
  <!-- Format version 18.1 625 (Future versions may contain additional information.) -->
- <!-- 2023.03.20.16:05:30 -->
+ <!-- 2023.03.20.18:28:19 -->
  <!-- A collection of modules and connections -->
  <parameter name="clockCrossingAdapter">
   <type>com.altera.sopcmodel.ensemble.EClockAdapter</type>
@@ -53,7 +53,7 @@
  </parameter>
  <parameter name="generationId">
   <type>int</type>
-  <value>1679353494</value>
+  <value>1679362079</value>
   <derived>false</derived>
   <enabled>true</enabled>
   <visible>true</visible>
@@ -1022,16 +1022,28 @@ parameters are a RESULT of the module parameters. -->
    <type>conduit</type>
    <isStart>false</isStart>
    <port>
-    <name>addr</name>
+    <name>read_addr</name>
     <direction>Output</direction>
     <width>5</width>
-    <role>addr</role>
+    <role>read_addr</role>
    </port>
    <port>
-    <name>data</name>
+    <name>read_data</name>
     <direction>Input</direction>
     <width>32</width>
-    <role>data</role>
+    <role>read_data</role>
+   </port>
+   <port>
+    <name>write_data</name>
+    <direction>Output</direction>
+    <width>32</width>
+    <role>write_data</role>
+   </port>
+   <port>
+    <name>write_addr</name>
+    <direction>Output</direction>
+    <width>5</width>
+    <role>write_addr</role>
    </port>
   </interface>
  </module>
@@ -11541,5 +11553,5 @@ parameters are a RESULT of the module parameters. -->
   <version>18.1</version>
  </plugin>
  <reportVersion>18.1 625</reportVersion>
- <uniqueIdentifier>9CB6D094C2B1000001870144D391</uniqueIdentifier>
+ <uniqueIdentifier>302432BE6C020000018701C7C87D</uniqueIdentifier>
 </EnsembleReport>
