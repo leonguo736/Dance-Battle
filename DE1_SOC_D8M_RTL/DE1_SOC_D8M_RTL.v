@@ -472,7 +472,7 @@ nios2_system nios2_system_0 (
 	.esp_uart_txd( GPIO[35] ),
 	.reset_reset_n( KEY[0] ), 
 	.coords_ram_read_addr( coords_ram_addr ), 
-	.coords_ram_read_data( coords_ram_output ), 
+	.coords_ram_read_data( { 7'd0, redPixelHIndex[0], 6'd0, redPixelVIndex[0] } ), // replace with coords_ram_output
 	.coords_ram_write_data( thresholds_ram_input ), 
 	.coords_ram_write_addr( thresholds_ram_addr )
 );
@@ -497,7 +497,7 @@ ram_32b coords_ram_0 (
 	.data( coords_ram_input ),
 	.wraddress( update_counter ),
 	.wrclock( VGA_CLK ),
-	.wren( 1'b1 ),
+	.wren( VGA_CLK ),
 
 	.rdaddress( coords_ram_addr ),
 	.rdclock( CLOCK2_50 ),
