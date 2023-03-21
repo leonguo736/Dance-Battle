@@ -84,11 +84,13 @@ language.settings.xml
 *.flock
 *.exe
 
-# esp-fw
-credentials.lua
-
 # nios eclipse
 .history
 .plugins
 RemoteSystemsTempFiles
 .safetable
+# esp fw
+credentials.lua
+
+# eclipse metadata
+.metadata
