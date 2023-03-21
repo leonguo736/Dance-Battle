@@ -18,7 +18,8 @@ work/
 db/
 incremental_db/
 simulation/
-# output_files/
+output_files/
+!output_files/*.sof
 
 # Prerequisites
 *.d
@@ -28,6 +29,7 @@ simulation/
 *.ko
 *.obj
 *.elf
+*.objdump
 
 # Linker output
 *.ilk
@@ -84,4 +86,15 @@ language.settings.xml
 *.flock
 *.exe
 
+# nios eclipse
+.history
+.plugins
+RemoteSystemsTempFiles
+.safetable
+debugger/
+
+# esp fw
 credentials.lua
+
+# eclipse metadata
+.metadata
