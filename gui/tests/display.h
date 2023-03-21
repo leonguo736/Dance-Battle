@@ -32,6 +32,7 @@
 // Draws the vertical line
 void drawVLine(void) {
     video_line(50, BORDER, 50, HEIGHT - BORDER, COLOR_VLINE);
+    video_line(270, BORDER, 270, HEIGHT - BORDER, COLOR_VLINE);
 }
 
 // Draws the horizontal lines
