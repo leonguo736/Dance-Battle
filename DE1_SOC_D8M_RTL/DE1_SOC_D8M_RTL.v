@@ -478,10 +478,14 @@ always @(posedge VGA_CLK) begin
 	// crHigh <= thresholds_ram_output[23:16];
 	// cbLow <= thresholds_ram_output[15:8]; 
 	// cbHigh <= thresholds_ram_output[7:0];
-	crLow <= 8'd120; 
-	crHigh <= 8'd130;
-	cbLow <= 8'd120;
-	cbHigh <= 8'd130;
+	// crLow <= 8'd120; 
+	// crHigh <= 8'd130;
+	// cbLow <= 8'd120;
+	// cbHigh <= 8'd130;
+	crLow <= thresholds_ram_data[31:24];
+	crHigh <= thresholds_ram_data[23:16];
+	cbLow <= thresholds_ram_data[15:8];
+	cbHigh <= thresholds_ram_data[7:0];
 end
 
 coords_ram thresholds_ram_0 (
@@ -490,7 +494,7 @@ coords_ram thresholds_ram_0 (
 	.rdclock( VGA_CLK ),
 	.wraddress( thresholds_ram_addr ),
 	.wrclock( CLOCK2_50 ),
-	.wren( VGA_CLK ),
+	.wren( CLOCK2_50 ),
 	.q( thresholds_ram_output )
 );
 

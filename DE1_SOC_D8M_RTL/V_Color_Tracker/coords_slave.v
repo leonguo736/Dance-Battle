@@ -39,11 +39,13 @@ module coords_slave (
     assign avs_s0_waitrequest = 1'b0;
     reg [4:0] stored_read_addr; 
     reg [4:0] stored_write_addr;
+    reg [31:0] stored_write_data;
     reg write_request; 
 
     assign write_addr = stored_write_addr;
     assign read_addr = stored_read_addr;
     assign avs_s0_readdata = read_data;
+    assign write_data = stored_write_data;
 
     always @(posedge clock_clk) begin
         write_request <= 0;
@@ -55,7 +57,7 @@ module coords_slave (
                 stored_read_addr <= avs_s0_address;
             end else if (avs_s0_write) begin
                 stored_write_addr <= avs_s0_address;
-                write_data <= avs_s0_writedata;
+                stored_write_data <= avs_s0_writedata;
                 write_request <= 1; 
             end
         end

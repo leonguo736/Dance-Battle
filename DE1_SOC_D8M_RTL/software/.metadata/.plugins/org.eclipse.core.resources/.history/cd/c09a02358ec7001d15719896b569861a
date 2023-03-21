@@ -83,8 +83,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <termios.h>
-#include <unistd.h>
 
 #define NUM_POINT_FINDERS 1
 volatile uint32_t *camera_base = COORDS_SLAVE_0_BASE;
@@ -132,13 +130,6 @@ void printCoords()
 	free(arr);
 }
 
-void printThresholds(int i)
-{
-    printf("Thresholds: crLow=%d crHigh=%d cbLow=%d cbHigh=%d\n",
-        (thresholds[i] >> 24) & 0xFF, (thresholds[i] >> 16) & 0xFF,
-        (thresholds[i] >> 8) & 0xFF, thresholds[i] & 0xFF);
-}
-
 void writeThresholds(int i)
 {
 	*(camera_base + i) = thresholds[i];
@@ -147,18 +138,9 @@ void writeThresholds(int i)
 int main()
 {
 	printf("Program start 1\n");
-	uint8_t cbLow = 111, cbHigh = 133, crLow = 112, crHigh = 134;
-	thresholds[0] = (crLow << 24) | (crHigh << 16) | (cbLow << 8) | cbHigh;
-	writeThresholds(0);
 //	printCoords();
-
-//	int index = 0;
-//	int c;
-//	while (1) {
-//		printThresholds(i);
-//		c = getch();
-//		printf("c: %c\n", c);
-//	}
+	thresholds[0] = (120 << 24) | (130 << 16) | (120 << 8) | 130;
+	writeThresholds(0);
 	return 0;
 }
 
