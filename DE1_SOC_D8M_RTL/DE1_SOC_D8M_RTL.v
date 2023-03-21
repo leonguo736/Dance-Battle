@@ -396,41 +396,14 @@ always @(*) begin
 	end
 end
 
-// Increment / Decrement Thresholds Logic
-// reg [3:0] KEY_OLD; 
-// always @(posedge VGA_CLK) begin
-// 	if (~KEY[0]) begin
-// 		KEY_OLD <= 4'b1111;
-// 		crLow = 8'd0; 
-// 		crHigh = 8'd255;
-// 		cbLow = 8'd0;
-// 		cbHigh = 8'd255;
-// 	end else begin
-// 		if (KEY_OLD != KEY) begin
-// 			if (~KEY[1]) begin
-// 				if (~SW[1] && ~SW[0]) cbLow = SW[2] ? cbLow + 10 : cbLow + 1;
-// 				if (~SW[1] &&  SW[0]) cbHigh = SW[2] ? cbHigh + 10 : cbHigh + 1;
-// 				if ( SW[1] && ~SW[0]) crLow = SW[2] ? crLow + 10 : crLow + 1;
-// 				if ( SW[1] &&  SW[0]) crHigh = SW[2] ? crHigh + 10 : crHigh + 1;
-// 			end else if (~KEY[2]) begin
-// 				if (~SW[1] && ~SW[0]) cbLow = SW[2] ? cbLow - 10 : cbLow - 1;
-// 				if (~SW[1] &&  SW[0]) cbHigh = SW[2] ? cbHigh - 10 : cbHigh - 1;
-// 				if ( SW[1] && ~SW[0]) crLow = SW[2] ? crLow - 10 : crLow - 1;
-// 				if ( SW[1] &&  SW[0]) crHigh = SW[2] ? crHigh - 10 : crHigh - 1;
-// 			end
-// 			KEY_OLD <= KEY;
-// 		end
-// 	end
-// end
-
 // Camera and Image Processing Logic
-ball_detector  ball_u1( 
+ball_detector  ball_detector_0( 
    .reset( KEY[0] ),
    .iVideo12bRgb( { RED, GREEN, BLUE } ),
    .iPixelAddress( VGA_ADDRESS ),
    .iVgaRequest( READ_Request ),
    .iVgaClk( VGA_CLK ),
-   .iVgaHRequest( READ_Request ),  // Can use H_active_area or READ_Request here.
+   .iVgaHRequest( READ_Request ), 
    .iVgaVRequest( V_active_area ),
    .oVideo8bRgb( { R_to_vga, G_to_vga, B_to_vga } ),
    .iVideoSelect( SW[9] ),
@@ -455,13 +428,13 @@ nios2_system nios2_system_0 (
 	.esp_uart_txd( GPIO[35] ),
 	.reset_reset_n( KEY[0] ), 
 	.coords_ram_read_addr( coords_ram_addr ), 
-	.coords_ram_read_data( {7'd0, redPixelHIndex, 6'd0, redPixelVIndex} ), 
+	.coords_ram_read_data( coords_ram_data ), 
 	.coords_ram_write_data( thresholds_ram_data ), 
 	.coords_ram_write_addr( thresholds_ram_addr )
 );
 
 // Point Coordinates Logic
-coords_ram coords_ram_0 (
+ram_32b coords_ram_0 (
 	.data( { 7'd0, redPixelHIndex, 6'd0, redPixelVIndex } ),
 	.rdaddress( coords_ram_addr ),
 	.rdclock( CLOCK2_50 ),
@@ -474,21 +447,12 @@ coords_ram coords_ram_0 (
 // Thresholds Logic
 wire [31:0] thresholds_ram_output; // {crLow, crHigh, cbLow, cbHigh}
 always @(posedge VGA_CLK) begin
-	// crLow <= thresholds_ram_output[31:24];
-	// crHigh <= thresholds_ram_output[23:16];
-	// cbLow <= thresholds_ram_output[15:8]; 
-	// cbHigh <= thresholds_ram_output[7:0];
-	// crLow <= 8'd120; 
-	// crHigh <= 8'd130;
-	// cbLow <= 8'd120;
-	// cbHigh <= 8'd130;
-	crLow <= thresholds_ram_data[31:24];
-	crHigh <= thresholds_ram_data[23:16];
-	cbLow <= thresholds_ram_data[15:8];
-	cbHigh <= thresholds_ram_data[7:0];
+	crLow <= thresholds_ram_output[31:24];
+	crHigh <= thresholds_ram_output[23:16];
+	cbLow <= thresholds_ram_output[15:8]; 
+	cbHigh <= thresholds_ram_output[7:0];
 end
-
-coords_ram thresholds_ram_0 (
+ram_32b thresholds_ram_0 (
 	.data( thresholds_ram_data ),
 	.rdaddress( 0 ),
 	.rdclock( VGA_CLK ),

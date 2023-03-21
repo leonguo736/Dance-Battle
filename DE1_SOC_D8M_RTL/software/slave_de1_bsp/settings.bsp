@@ -2,8 +2,8 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>20-Mar-2023 8:34:53 PM</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1679369693250</BspGeneratedUnixTimeStamp>
+        <BspGeneratedTimeStamp>20-Mar-2023 10:07:56 PM</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1679375276645</BspGeneratedUnixTimeStamp>
         <BspGeneratedLocation>C:\Users\kerry\repos\l2b-34-elur\DE1_SOC_D8M_RTL\software\slave_de1_bsp</BspGeneratedLocation>
         <BspSettingsFile>settings.bsp</BspSettingsFile>
         <SopcDesignFile>..\..\nios2_system.sopcinfo</SopcDesignFile>
@@ -924,8 +924,8 @@
         </Setting>
         <MemoryMap>
                 <slaveDescriptor>onchip_memory2_0</slaveDescriptor>
-                <addressRange>0x00020000 - 0x0003387F</addressRange>
-                <addressSpan>80000</addressSpan>
+                <addressRange>0x00020000 - 0x0003F3FF</addressRange>
+                <addressSpan>128000</addressSpan>
                 <attributes>memory</attributes>
         </MemoryMap>
         <MemoryMap>
