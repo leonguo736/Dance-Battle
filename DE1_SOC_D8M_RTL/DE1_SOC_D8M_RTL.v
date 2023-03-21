@@ -426,7 +426,7 @@ always @(posedge CLOCK2_50) begin
 	end
 end
 
-ball_detector  ball_u1( 
+ball_detector  ball_detector_0( 
    .reset( KEY[0] ),
    .iVideo12bRgb( { RED, GREEN, BLUE } ),
    .iPixelAddress( VGA_ADDRESS ),
@@ -444,6 +444,26 @@ ball_detector  ball_u1(
    .iCbHigh( cbHigh[0] ),
    .oRedPixelHIndex( redPixelHIndex[0] ),
    .oRedPixelVIndex( redPixelVIndex[0] )
+ );
+ 
+ball_detector  ball_detector_1( 
+   .reset( KEY[0] ),
+   .iVideo12bRgb( { RED, GREEN, BLUE } ),
+   .iPixelAddress( VGA_ADDRESS ),
+   .iVgaRequest( READ_Request ),
+   .iVgaClk( VGA_CLK ),
+   .iVgaHRequest( READ_Request ),  // Can use H_active_area or READ_Request here.
+   .iVgaVRequest( V_active_area ),
+   .oVideo8bRgb(  ),
+   .iVideoSelect( SW[9] ),
+   .iFreezeRam( SW[8] ),
+   .iFilterOn( SW[7] ), 
+   .iCrLow( crLow[1] ),
+   .iCrHigh( crHigh[1] ),
+   .iCbLow( cbLow[1] ),
+   .iCbHigh( cbHigh[1] ),
+   .oRedPixelHIndex( redPixelHIndex[1] ),
+   .oRedPixelVIndex( redPixelVIndex[1] )
  );
 
 wire [4:0] coords_ram_addr; 
