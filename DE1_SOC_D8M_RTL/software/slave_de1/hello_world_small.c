@@ -144,27 +144,78 @@ void writeThresholds(int i)
 	*(camera_base + i) = thresholds[i];
 }
 
+char getInputLetter() {
+    char c;
+    while ((c = getchar()) == '\n'); // consume newline characters
+    while (getchar() != '\n'); // clear input buffer
+    return c;
+}
+
+void updateThresholds() {
+	char c;
+	int index = 0;
+	while (1) {
+	    printf("Modifying point %i, press a button on keyboard", index);
+		c = getInputLetter();
+		printf("%c\n", c); 
+		switch (c) {
+			case 'b': return; // break
+			case 'B': return; // break
+			case 't': index = (index + 1) % NUM_POINT_FINDERS; break; // increment index
+			case 'g': index = (index - 1) % NUM_POINT_FINDERS; break; // decrement index
+			case 'q': thresholds[index] += 1 << 8; break; // increment cbLow
+			case 'w': thresholds[index] += 1; break; // increment cbHigh
+			case 'e': thresholds[index] += 1 << 24; break; // increment crLow
+			case 'r': thresholds[index] += 1 << 16; break; // increment crHigh
+			case 'a': thresholds[index] -= 1 << 8; break; // decrement cbLow
+			case 's': thresholds[index] -= 1; break; // decrement cbHigh
+			case 'd': thresholds[index] -= 1 << 24; break; // decrement crLow
+			case 'f': thresholds[index] -= 1 << 16; break; // decrement crHigh
+			case '1': thresholds[index] += 5 << 8; break; // increment cbLow
+			case '2': thresholds[index] += 5; break; // increment cbHigh
+			case '3': thresholds[index] += 5 << 24; break; // increment crLow
+			case '4': thresholds[index] += 5 << 16; break; // increment crHigh
+			case 'z': thresholds[index] -= 5 << 8; break; // decrement cbLow
+			case 'x': thresholds[index] -= 5; break; // decrement cbHigh
+			case 'c': thresholds[index] -= 5 << 24; break; // decrement crLow
+			case 'v': thresholds[index] -= 5 << 16; break; // decrement crHigh
+			case '!': thresholds[index] += 50 << 8; break; // increment cbLow
+			case '@': thresholds[index] += 50; break; // increment cbHigh
+			case '#': thresholds[index] += 50 << 24; break; // increment crLow
+			case '$': thresholds[index] += 50 << 16; break; // increment crHigh
+			case 'Z': thresholds[index] -= 50 << 8; break; // decrement cbLow
+			case 'X': thresholds[index] -= 50; break; // decrement cbHigh
+			case 'C': thresholds[index] -= 50 << 24; break; // decrement crLow
+			case 'V': thresholds[index] -= 50 << 16; break; // decrement crHigh
+			case 'Q': thresholds[index] += 10 << 8; break; // increment cbLow
+			case 'W': thresholds[index] += 10; break; // increment cbHigh
+			case 'E': thresholds[index] += 10 << 24; break; // increment crLow
+			case 'R': thresholds[index] += 10 << 16; break; // increment crHigh
+			case 'A': thresholds[index] -= 10 << 8; break; // decrement cbLow
+			case 'S': thresholds[index] -= 10; break; // decrement cbHigh
+			case 'D': thresholds[index] -= 10 << 24; break; // decrement crLow
+			case 'F': thresholds[index] -= 10 << 16; break; // decrement crHigh
+			default: break;
+		}
+		writeThresholds(index);
+		printThresholds(index);
+	}
+}
+
 int main()
 {
-	printf("Program start 1\n");
+	const int __programNumber__ = 420;
+	printf("Program start number: %i\n", __programNumber__);
+
 	//	printCoords();
 
-	uint8_t cbLow = 120, cbHigh = 130, crLow = 120, crHigh = 130;
+	uint8_t cbLow = 121, cbHigh = 130, crLow = 120, crHigh = 130;
 	thresholds[0] = (crLow << 24) | (crHigh << 16) | (cbLow << 8) | cbHigh;
 	writeThresholds(0);
 
-	int index = 0;
-//	int c;
-	while (1) {
-	    char c;
-	    printf("Press a key on your keyboard: ");
-	    while ((c = getchar()) == '\n'); // consume newline characters
-	    if (c == 'q') {
-	    	break;
-	    }
-	    printf("You pressed the '%c' key.\n", c);
-	    while (getchar() != '\n'); // clear input buffer
-	}
+	updateThresholds();
+
+	printf("Program end number: %i\n", __programNumber__);
 	return 0;
 }
 
