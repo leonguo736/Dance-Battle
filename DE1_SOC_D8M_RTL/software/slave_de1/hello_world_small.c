@@ -203,6 +203,8 @@ int main()
 {
 	const int __programNumber__ = 420;
 	printf("Program start number: %i\n", __programNumber__);
+
+	*(camera_base + 0) = (111 << 24) | (123 << 16) | (122 << 8) | 133;
     while (1) {
     	printCoords();
     }
