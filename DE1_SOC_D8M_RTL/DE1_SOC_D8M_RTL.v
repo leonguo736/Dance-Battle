@@ -443,23 +443,8 @@ ball_detector  ball_u1(
    .oRedPixelVIndex( redPixelVIndex[0] )
  );
 
-// nios2_system nios2_system_0 (
-// 	.clk_clk ( CLOCK2_50 ),
-// 	.esp_uart_rxd ( GPIO[34] ),
-// 	.esp_uart_txd ( GPIO[35] ),
-// 	.reset_reset_n ( KEY[0] )
-// );
-
-// module nios2_system (
-// 		input  wire       clk_clk,         //        clk.clk
-// 		output wire [4:0] coords_ram_addr, // coords_ram.addr
-// 		input  wire       esp_uart_rxd,    //   esp_uart.rxd
-// 		output wire       esp_uart_txd,    //           .txd
-// 		input  wire       reset_reset_n    //      reset.reset_n
-// 	);
-
 wire [4:0] coords_ram_addr; 
-wire [31:0] coords_ram_data;
+wire [31:0] coords_ram_data; 
 
 nios2_system ni2s (
 	.clk_clk ( CLOCK2_50 ),

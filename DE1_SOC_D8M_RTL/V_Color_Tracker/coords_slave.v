@@ -24,10 +24,8 @@ module coords_slave (
 
     assign avs_s0_waitrequest = 1'b0;
 
-    always @(posedge clock_clk) begin
-        addr <= avs_s0_address;
-    end
-
+    // Read Coords
+    assign addr = avs_s0_address; 
     assign avs_s0_readdata = data;
 
 endmodule
