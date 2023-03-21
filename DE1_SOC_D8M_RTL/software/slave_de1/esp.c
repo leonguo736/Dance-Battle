@@ -8,7 +8,7 @@
 #include "commands.h"
 #include "const.h"
 
-#define SERVER_IP "192.168.0.198:8080"
+#define SERVER_IP "192.168.137.65:8080"
 
 struct Pose {
   double beat;
@@ -108,6 +108,16 @@ void esp_run(int argc, char** argv) {
     // uart_write_data('\r');
 
     unsigned int len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
+    printf("[%d] %s\n", len, recvBuffer);
+
+    len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
+    printf("[%d] %s\n", len, recvBuffer);
+
+    // len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
+    // printf("[%d] %s\n", len, recvBuffer);
+
+    // len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
+    // printf("[%d] %s\n", len, recvBuffer);
 
     // recvPtr = recvBuffer;
     // while (*recvPtr != '\n') {
@@ -119,7 +129,6 @@ void esp_run(int argc, char** argv) {
     //     recvPtr++;
     // }
     // *recvPtr = '\0';
-    printf("[%d] %s\n", len, recvBuffer);
     count++;
   }
 

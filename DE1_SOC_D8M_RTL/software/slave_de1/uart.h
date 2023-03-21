@@ -30,7 +30,7 @@
 #define UART_EOP_MASK 0x1000
 
 /* control register */
-#define UART_CONTROL_OFFSET 0x012
+#define UART_CONTROL_OFFSET 0x12
 #define UART_CONTROL_MASK 0xFFFF
 #define UART_IPE_MASK 0x1
 #define UART_IFE_MASK 0x2

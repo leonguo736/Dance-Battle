@@ -80,8 +80,8 @@
 
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
+//#include <stdlib.h>
+// #include <unistd.h>
 
 #include "esp.h"
 #include "system.h"
@@ -106,10 +106,10 @@ void getFrame(uint32_t *arr, int *len) {
   for (int i = 0; i < NUM_POINT_FINDERS; i++) {
     raw_coords = *(camera_base + i);
     arr[i] = raw_coords;
-    //	  uint16_t smallUpBigDown = raw_coords >> 16;
-    //	  uint16_t smallLeftBigRight = raw_coords & 0xFFFF;
-    //	  printf("smallUpBigDown: %i, smallLeftBigRight: %i\n", smallUpBigDown,
-    // smallLeftBigRight);
+	  uint16_t smallUpBigDown = raw_coords >> 16;
+	  uint16_t smallLeftBigRight = raw_coords & 0xFFFF;
+	  printf("smallUpBigDown: %i, smallLeftBigRight: %i\n", smallUpBigDown,
+     smallLeftBigRight);
   }
 }
 
@@ -123,7 +123,7 @@ void printCoords() {
       uint32_t raw_coords = arr[i];
       uint16_t x = raw_coords & 0xFFFF;
       uint16_t y = raw_coords >> 16;
-      printf("x: %i, y: %i\n", x, y);
+//      printf("x: %i, y: %i\n", x, y);
     }
   }
   free(arr);
@@ -151,19 +151,18 @@ int main(int argc, char **argv) {
   uart_output();
   esp_run(argc, argv);
 
-  //	int c;
-  while (1) {
-    char c;
-    printf("Press a key on your keyboard: ");
-    while ((c = getchar()) == '\n')
-      ;  // consume newline characters
-    if (c == 'q') {
-      break;
-    }
-    printf("You pressed the '%c' key.\n", c);
-    while (getchar() != '\n')
-      ;  // clear input buffer
-  }
+  // printCoords();
+//	 char c;
+//	 printf("Press a key on your keyboard: ");
+//	 while ((c = getchar()) == '\n')
+//	   ;  // consume newline characters
+//	 if (c == 'q') {
+//	   break;
+//	 }
+//	 printf("You pressed the '%c' key.\n", c);
+//	 while (getchar() != '\n')
+//	   ;  // clear input buffer
+//	}
   return 0;
 }
 
