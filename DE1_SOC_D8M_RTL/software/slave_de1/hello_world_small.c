@@ -146,7 +146,7 @@ void writeThresholds(int i)
 
 char getInputLetter() {
     char c;
-    while ((c = getchar()) == '\n'); // consume newline characters
+    while ((c = getchar()) == '\n'); // wait for input
     while (getchar() != '\n'); // clear input buffer
     return c;
 }
@@ -157,7 +157,7 @@ void updateThresholds() {
 	while (1) {
 	    printf("Modifying point %i, press a button on keyboard", index);
 		c = getInputLetter();
-		printf("%c\n", c); 
+		// printf("%c\n", c); 
 		switch (c) {
 			case 'b': return; // break
 			case 'B': return; // break
