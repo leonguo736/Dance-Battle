@@ -64,7 +64,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="tests/gamescreen.c|tests/final/fonts.c|tests/audio.c|intelfpgaup/examples|Debug/intelfpgaup/examples|tests/vgatestdriver.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="tests/gamescreen.c|tests/audio.c|intelfpgaup/examples|Debug/intelfpgaup/examples|tests/vgatestdriver.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -112,7 +112,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="tests/gamescreen.c|tests/final/fonts.c|tests/audio.c|intelfpgaup/examples|Debug/intelfpgaup/examples|tests/vgatestdriver.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="tests/gamescreen.c|tests/audio.c|intelfpgaup/examples|Debug/intelfpgaup/examples|tests/vgatestdriver.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

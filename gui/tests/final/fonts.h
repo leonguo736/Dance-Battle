@@ -7,8 +7,8 @@
 #define FONT_WIDTH 7
 #define FONT_HEIGHT 9
 
-int basicFont[NUM_CHARS][FONT_WIDTH][FONT_HEIGHT];
-int italicFont[NUM_CHARS][FONT_WIDTH][FONT_HEIGHT];
+extern int basicFont[NUM_CHARS][FONT_WIDTH][FONT_HEIGHT];
+extern int italicFont[NUM_CHARS][FONT_WIDTH][FONT_HEIGHT];
 
 
 //int basicFont[123][7][9] = {{ { 0, 0, 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0, 0, 0, 0 } },
