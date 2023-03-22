@@ -10,8 +10,8 @@ module red_frame (
    input iVgaHRequest,
    input iVgaVRequest,
    output reg oIsPixelRed,
-   output reg [8:0] oRedPixelHIndex,   // passes up the value of the number of the horizontal line of the center of the red object.
-   output reg [9:0] oRedPixelVIndex,
+   output reg [15:0] oRedPixelHIndex,   // passes up the value of the number of the horizontal line of the center of the red object.
+   output reg [15:0] oRedPixelVIndex,
    input iFilterOn, 
    input [7:0] iCrLow, 
    input [7:0] iCrHigh, 

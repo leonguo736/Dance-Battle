@@ -18,15 +18,19 @@ module ball_detector (
    input [7:0] iCrHigh, 
    input [7:0] iCbLow,
    input [7:0] iCbHigh, 
-   output [8:0] oRedPixelHIndex,   // passes up the value of the number of the horizontal line of the center of the red object.
-   output [9:0] oRedPixelVIndex    // passes up the value of the number of the vertical line of the center of the red object.
+   output [15:0] oRedPixelHIndex,   // passes up the value of the number of the horizontal line of the center of the red object.
+   output [15:0] oRedPixelVIndex,     // passes up the value of the number of the vertical line of the center of the red object.
+   output [15:0] oHIndex,          // passes up the value of the number of the horizontal line of the current pixel.
+   output [15:0] oVIndex          // passes up the value of the number of the vertical line of the current pixel.
 );
 
 assign oRedPixelHIndex = RedPixelHIndex;
 assign oRedPixelVIndex = RedPixelVIndex;
+assign oHIndex = hIndex;
+assign oVIndex = vIndex;
 
-wire [8:0] RedPixelHIndex;  // row of red middle.
-wire [9:0] RedPixelVIndex;  // column of red middle.
+wire [15:0] RedPixelHIndex;  // row of red middle.
+wire [15:0] RedPixelVIndex;  // column of red middle.
 
 wire isPixelRed;
 wire [11:0] RED;
@@ -34,8 +38,8 @@ wire [11:0] GREEN;
 wire [11:0] BLUE;
 
 wire ram_seems_red;   // stored value of isPixelRed in the ball_ram.
-wire [9:0] hIndex; // current horizontal pixel location.
-wire [8:0] vIndex; // current vertical pixel location.
+wire [15:0] hIndex; // current horizontal pixel location.
+wire [15:0] vIndex; // current vertical pixel location.
 
 assign RED = iVideo12bRgb[35:24]; // 12-bit R
 assign GREEN = iVideo12bRgb[23:12];
@@ -62,19 +66,21 @@ red_frame u1 (
 // Mux. Combinatorial logic to select the camera video, or, the red ball detector video frame.
 always @(*) begin
    if( iVideoSelect == 1'b0 ) begin
-         if( (hIndex == RedPixelVIndex) || (vIndex == RedPixelHIndex) )
-            oVideo8bRgb = { 8'b1111_1111, 8'b1111_1111, 8'b1111_1111 };
-         else
-            oVideo8bRgb = { RED[7:0], GREEN[7:0], BLUE[7:0] };
+      if( (hIndex == RedPixelVIndex) || (vIndex == RedPixelHIndex) )
+         oVideo8bRgb = { 8'd0, 8'd0, 8'd255 }; // location of point
+      else if ( (hIndex == 320 || vIndex == 240) ) begin
+         oVideo8bRgb = { 8'd255, 8'd0, 8'd0 }; // center of screen
+      end else 
+         oVideo8bRgb = { RED[7:0], GREEN[7:0], BLUE[7:0] };
       end
    else begin
       if( (hIndex == RedPixelVIndex) || (vIndex == RedPixelHIndex) )
-         oVideo8bRgb = { 8'd255, 8'd255, 8'd255 }; 
+         oVideo8bRgb = { 8'd0, 8'd0, 8'd255 }; // location of point
       else
          if ( ram_seems_red == 1'b1 )
-            oVideo8bRgb = { 8'd0, 8'd255, 8'd0 }; // green
+            oVideo8bRgb = { 8'd0, 8'd255, 8'd0 }; // passed filter
          else
-            oVideo8bRgb = { 8'd0, 8'd0, 8'd0 }; // black
+            oVideo8bRgb = { 8'd0, 8'd0, 8'd0 }; // failed filter
       end
    end   
 

@@ -235,7 +235,7 @@ control_interface  u_control_interface (
         .LOAD_MODE(load_mode),
         .SADDR(saddr),
         .REF_REQ(ref_req),
-				.INIT_REQ(init_req),
+		.INIT_REQ(init_req),
         .CMD_ACK(CMDACK) );
 
 command  u_command (
