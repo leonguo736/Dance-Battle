@@ -126,9 +126,9 @@ wire [12:0] VGA_H_CNT;
 wire [12:0] VGA_V_CNT;	
 wire [19:0] VGA_ADDR; 
 
-reg [7:0] R_to_vga; 
-reg [7:0] G_to_vga;
-reg [7:0] B_to_vga;
+reg [9:0] R_to_vga; 
+reg [9:0] G_to_vga;
+reg [9:0] B_to_vga;
 wire H_active_area; 
 wire V_active_area;
 
@@ -292,8 +292,8 @@ FOCUS_ADJ adl(
                       .AUTO_FOC      ( SW[6] & AUTO_FOC ), 
                       .SW_Y          ( 0 ),
                       .SW_H_FREQ     ( 0 ),   
-                      .SW_FUC_LINE   ( SW[4] ),   
-                      .SW_FUC_ALL_CEN( SW[4] ),
+                      .SW_FUC_LINE   ( SW[3] ),   
+                      .SW_FUC_ALL_CEN( SW[3] ),
                       .VIDEO_HS      ( VGA_HS ),
                       .VIDEO_VS      ( VGA_VS ),
                       .VIDEO_CLK     ( VGA_CLK ),
@@ -390,23 +390,17 @@ int16_to_hex6 int16_to_hex6_0(
 );
 
 always @(*) begin
-	if (SW[3]) begin
-		displayInt = Cb; 
-	end else if (SW[4]) begin
-		displayInt = Cr;
-	end else begin
-		if (SW[1]) begin
-			if (SW[0]) begin
-				displayInt = crHigh[0];
-			end else begin
-				displayInt = crLow[0];
-			end
+	if (SW[1]) begin
+		if (SW[0]) begin
+			displayInt = crHigh[0];
 		end else begin
-			if (SW[0]) begin
-				displayInt = cbHigh[0];
-			end else begin
-				displayInt = cbLow[0];
-			end
+			displayInt = crLow[0];
+		end
+	end else begin
+		if (SW[0]) begin
+			displayInt = cbHigh[0];
+		end else begin
+			displayInt = cbLow[0];
 		end
 	end
 end
@@ -442,12 +436,12 @@ always @(posedge CLOCK2_50) begin
 			{cbLow[thresholds_ram_write_addr], cbHigh[thresholds_ram_write_addr], crLow[thresholds_ram_write_addr], crHigh[thresholds_ram_write_addr]} <= thresholds_ram_write_data;
 		end
 		if (~KEY[3]) begin
-			cbLow[SW[8:5]] <= Cb - 8 >= 0 ? Cb - 8 : 0;
-			cbHigh[SW[8:5]] <= Cb + 8 <= 255 ? Cb + 8 : 255;
-			crLow[SW[8:5]] <= Cr - 8 >= 0 ? Cr - 8 : 0;
-			crHigh[SW[8:5]] <= Cr + 8 <= 255 ? Cr + 8 : 255;
+			cbLow[SW[8:5]] <= Cb - 10 >= 0 ? Cb - 10 : 0;
+			cbHigh[SW[8:5]] <= Cb + 10 <= 255 ? Cb + 10 : 255;
+			crLow[SW[8:5]] <= Cr - 10 >= 0 ? Cr - 10 : 0;
+			crHigh[SW[8:5]] <= Cr + 10 <= 255 ? Cr + 10 : 255;
 		end		
-		if (hIndex[0] == 320 && vIndex[0] == 240) begin
+		if (hIndex == 320 && vIndex == 240) begin
 			RED_cached <= RED;
 			GREEN_cached <= GREEN;
 			BLUE_cached <= BLUE;
@@ -457,10 +451,22 @@ end
 
 wire [23:0] oVideo8bRgb [0:5];
 always @(*) begin
-	{ R_to_vga, G_to_vga, B_to_vga } = oVideo8bRgb[SW[8:5]];
+	if (SW[4]) begin
+		if (hIndex == redPixelHIndex[0] || vIndex == redPixelVIndex[0]) begin
+			{ R_to_vga, G_to_vga, B_to_vga } = { 10'd255, 10'd0, 10'd0 };
+		end else if (hIndex == redPixelHIndex[1] || vIndex == redPixelVIndex[1]) begin
+			{ R_to_vga, G_to_vga, B_to_vga } = { 10'd255, 10'd0, 10'd0 };
+		end else begin
+			{ R_to_vga, G_to_vga, B_to_vga } = { RED[11:4], GREEN[11:4], BLUE[11:4] };
+		end
+	end else begin
+		// { R_to_vga, G_to_vga, B_to_vga } = oVideo8bRgb[SW[8:5]];
+		{ R_to_vga, G_to_vga, B_to_vga } = { 2'd0, oVideo8bRgb[SW[8:5]][23:16], 2'd0, oVideo8bRgb[SW[8:5]][15:8], 2'd0, oVideo8bRgb[SW[8:5]][7:0] };
+	end
 end
-wire [15:0] hIndex [0:5];
-wire [15:0] vIndex [0:5];
+
+wire [15:0] hIndex; 
+wire [15:0] vIndex;
 
 ball_detector  ball_detector_0( 
    .reset( KEY[0] ),
@@ -480,8 +486,8 @@ ball_detector  ball_detector_0(
    .iCbHigh( cbHigh[0] ),
    .oRedPixelHIndex( redPixelHIndex[0] ),
    .oRedPixelVIndex( redPixelVIndex[0] ), 
-   .oHIndex( hIndex[0] ),
-   .oVIndex( vIndex[0] )
+   .oHIndex( hIndex ), // same accross all ball detectors
+   .oVIndex( vIndex )
  );
  
 ball_detector  ball_detector_1( 
@@ -502,8 +508,8 @@ ball_detector  ball_detector_1(
    .iCbHigh( cbHigh[1] ),
    .oRedPixelHIndex( redPixelHIndex[1] ),
    .oRedPixelVIndex( redPixelVIndex[1] ), 
-   .oHIndex( hIndex[1] ),
-   .oVIndex( vIndex[1] )
+   .oHIndex(  ),
+   .oVIndex(  )
  );
 
 wire [4:0] coords_ram_addr; 
