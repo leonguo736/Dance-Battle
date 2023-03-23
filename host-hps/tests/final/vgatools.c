@@ -1,9 +1,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-// #include <intelfpgaup/video.h>
 
+#ifdef GCC
 #include "video.h"
+#else
+#include <intelfpgaup/video.h>
+#endif
 
 #include "vgatools.h"
 
