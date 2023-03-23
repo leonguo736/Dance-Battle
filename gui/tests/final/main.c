@@ -1,15 +1,17 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <pthread.h>
-// #include <intelfpgaup/video.h>
-// #include <intelfpgaup/KEY.h>
-// #include <intelfpgaup/SW.h>
-// #include <intelfpgaup/audio.h>
-
-#include "video.h"
+#ifdef GCC
 #include "KEY.h"
 #include "SW.H"
 #include "audio.h"
+#include "video.h"
+#else
+#include <intelfpgaup/KEY.h>
+#include <intelfpgaup/SW.h>
+#include <intelfpgaup/audio.h>
+#include <intelfpgaup/video.h>
+#endif
 
 #include "fonts.h"
 #include "song.h"
