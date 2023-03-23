@@ -107,16 +107,17 @@ int main(int argc, char** argv)
 	const int __programNumber__ = 420;
 	printf("\n === Program start number: %i === \n", __programNumber__);
 
-  uart_init();
-  uart_output();
-
-  if (!esp_init(argc, argv)) {
-    while(1)
-      ;
-    return;
-  };
-
-  esp_run();
+//  uart_init();
+//  uart_output();
+//
+//  if (!esp_init(argc, argv))
+//  {
+//    while (1)
+//      ;
+//    return 1;
+//  };
+//
+//  esp_run();
   // pid_t pid = fork();
 
   // if (pid == -1) {
