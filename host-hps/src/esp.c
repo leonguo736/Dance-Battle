@@ -9,7 +9,7 @@
 #include "const.h"
 #include "hex.h"
 
-#define SERVER_IP "192.168.0.198:8080"
+//#define SERVER_IP "192.168.0.198:8080"
 
 struct Pose {
   double beat;
