@@ -12,7 +12,7 @@ c5_pin_model_dump.txt
 # *.qsf
 # *.qpf
 *.qws
-*.sof
+# *.sof
 *.bak
 work/
 db/
@@ -83,3 +83,9 @@ language.settings.xml
 
 *.flock
 *.exe
+
+# esp fw
+credentials.lua
+
+# eclipse metadata
+.metadata
