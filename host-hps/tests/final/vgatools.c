@@ -27,9 +27,6 @@ void drawBackground(void) {
 void drawChar(int font[NUM_CHARS][FONT_WIDTH][FONT_HEIGHT], int c, int tlx, int tly, short color, int scale) {
     for (int x = 0; x < FONT_WIDTH; x++) {
         for (int y = 0; y < FONT_HEIGHT; y++) {
-            if (c == 100) {
-                printf("Value of d at [%d][%d]: %d\n", x, y, font[c][x][y]);
-            }
             if (font[c][x][y]) {
                 for (int x2 = 0; x2 < scale; x2++) {
                     for (int y2 = 0; y2 < scale; y2++) {

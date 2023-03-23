@@ -87,9 +87,9 @@ void initGraphics(int screen) {
       drawBackground();
       drawString(italicFont, "dance", 50, 30, COLOR_INIT_DANCE, 3, 2);
       drawString(italicFont, "battle", 218, 60, COLOR_INIT_BATTLE, 2, 2);
-      drawString(basicFont, "waiting for server connection", 30, 240,
+      drawString(basicFont, "waiting for server connection", 30, 200,
                  COLOR_INIT_STATUS, 1, 1);
-      video_pixel(50, 50, COLOR_GAME_HLINE);
+    //   video_pixel(50, 50, COLOR_GAME_HLINE);
       printf("Drew words\n");
     } else if (screen == 1) {  // Lobby
       drawBackground();
