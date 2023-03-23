@@ -7,4 +7,7 @@
 #define FONT_WIDTH 7
 #define FONT_HEIGHT 9
 
+extern int basicFont[NUM_CHARS][FONT_WIDTH][FONT_HEIGHT];
+extern int italicFont[NUM_CHARS][FONT_WIDTH][FONT_HEIGHT];
+
 #endif

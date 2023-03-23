@@ -37,7 +37,6 @@
 								</option>
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.636886503" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="soc_cv_av"/>
-									<listOptionValue builtIn="false" value="SERVER_IP=192.168.0.198:8080"/>
 									<listOptionValue builtIn="false" value="GCC"/>
 									<listOptionValue builtIn="false" value="DEBUG"/>
 								</option>
