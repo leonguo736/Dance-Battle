@@ -80,224 +80,76 @@
 
 #include <stdint.h>
 #include <stdio.h>
-// #include <stdlib.h>
-//  #include <unistd.h>
+#include <stdlib.h>
+#include <termios.h>
+#include <unistd.h>
 
-#include "esp.h"
+#include "sys/alt_stdio.h"
 #include "system.h"
-#include "uart.h"
+#include "esp.h"
 
-#define NUM_POINT_FINDERS 1
+#define NUM_POINT_FINDERS 2
+uint32_t coords[NUM_POINT_FINDERS];
 volatile uint32_t *camera_base = (uint32_t *)COORDS_SLAVE_0_BASE;
-static uint32_t thresholds[NUM_POINT_FINDERS];
 
-/* arr is mutated to contain the coordinates the points
- * len is set to the size of arr
- *
- * (x,y) = (0,0) is at top left of VGA monitor
- * x = arr[i] & 0xFFFF;
- * y = arr[i] >> 16;
- */
-void getFrame(uint32_t *arr, int *len) {
-  arr = (uint32_t *)malloc(NUM_POINT_FINDERS * sizeof(uint32_t));
-  *len = NUM_POINT_FINDERS;
+void writeThresholds(int i, uint8_t cbLow, uint8_t cbHigh, uint8_t crLow,
+                     uint8_t crHigh) {
+  *(camera_base + i) = (cbLow << 24) | (cbHigh << 16) | (crLow << 8) | crHigh;
+}
 
-  volatile uint32_t raw_coords;
+void updateCoords() {
   for (int i = 0; i < NUM_POINT_FINDERS; i++) {
-    raw_coords = *(camera_base + i);
-    arr[i] = raw_coords;
-    //	  uint16_t smallUpBigDown = raw_coords >> 16;
-    //	  uint16_t smallLeftBigRight = raw_coords & 0xFFFF;
-    //	  printf("smallUpBigDown: %i, smallLeftBigRight: %i\n", smallUpBigDown,
-    //smallLeftBigRight);
+    coords[i] = *(camera_base + i);
   }
 }
-
-void printCoords() {
-  int len;
-  uint32_t *arr = NULL;
-  getFrame(arr, &len);
-  for (int i = 0; i < len; i++) {
-    uint32_t raw_coords = arr[i];
-    uint16_t x = raw_coords & 0xFFFF;
-    uint16_t y = raw_coords >> 16;
-    printf("Point %i at x: %i, y: %i\n", i, x, y);
-  }
-  free(arr);
-}
-
-void printThresholds(int i) {
-  printf("cbLow: %lu, cbHigh: %lu, crLow: %lu, crHigh: %lu\n",
-         (thresholds[i] >> 24) & 0xFF, (thresholds[i] >> 16) & 0xFF,
-         (thresholds[i] >> 8) & 0xFF, thresholds[i] & 0xFF);
-}
-
-void writeThresholds(int i) { *(camera_base + i) = thresholds[i]; }
 
 int main(int argc, char **argv) {
-  printf("Program start 1\n");
-  uint8_t cbLow = 111, cbHigh = 133, crLow = 112, crHigh = 134;
-  thresholds[0] = (crLow << 24) | (crHigh << 16) | (cbLow << 8) | cbHigh;
-  writeThresholds(0);
-  //	printCoords();
+  const int __programNumber__ = 420;
+  printf("\n === Program start number: %i === \n", __programNumber__);
 
-  char getInputLetter() {
-    char c;
-    while ((c = getchar()) == '\n')
-      ;  // wait for input
-    while (getchar() != '\n')
-      ;  // clear input buffer
-    return c;
-  }
+  writeThresholds(0, 0, 255, 0, 255);
+  writeThresholds(0, 146, 160, 61, 85);  // Leon's Blue
+  writeThresholds(1, 64, 93, 156, 175);  // Kerry's Dark Red
 
-  void updateThresholds() {
-    char c;
-    int i = 0;
-    while (1) {
-      printf("Modifying point %i's thresholds, press a button on keyboard", i);
-      c = getInputLetter();
-      // printf("%c\n", c);
-      switch (c) {
-        case 'b':
-          return;  // break
-        case 'B':
-          return;  // break
-        case ' ':
-          break;  // do nothing
-        case 't':
-          i = (i + 1) % NUM_POINT_FINDERS;
-          break;  // increment index
-        case 'g':
-          i = (i - 1) % NUM_POINT_FINDERS;
-          break;  // decrement index
-        case '!':
-          thresholds[i] += 50 << 24;
-          break;  // increment cbLow
-        case '@':
-          thresholds[i] += 50 << 16;
-          break;  // increment cbHigh
-        case '#':
-          thresholds[i] += 50 << 8;
-          break;  // increment crLow
-        case '$':
-          thresholds[i] += 50;
-          break;  // increment crHigh
-        case 'Q':
-          thresholds[i] += 10 << 24;
-          break;  // increment cbLow
-        case 'W':
-          thresholds[i] += 10 << 16;
-          break;  // increment cbHigh
-        case 'E':
-          thresholds[i] += 10 << 8;
-          break;  // increment crLow
-        case 'R':
-          thresholds[i] += 10;
-          break;  // increment crHigh
-        case '1':
-          thresholds[i] += 5 << 24;
-          break;  // increment cbLow
-        case '2':
-          thresholds[i] += 5 << 16;
-          break;  // increment cbHigh
-        case '3':
-          thresholds[i] += 5 << 8;
-          break;  // increment crLow
-        case '4':
-          thresholds[i] += 5;
-          break;  // increment crHigh
-        case 'q':
-          thresholds[i] += 1 << 24;
-          break;  // increment cbLow
-        case 'w':
-          thresholds[i] += 1 << 16;
-          break;  // increment cbHigh
-        case 'e':
-          thresholds[i] += 1 << 8;
-          break;  // increment crLow
-        case 'r':
-          thresholds[i] += 1;
-          break;  // increment crHigh
+  uart_init();
+  uart_output();
 
-        case 'Z':
-          thresholds[i] -= 50 << 24;
-          break;  // decrement cbLow
-        case 'X':
-          thresholds[i] -= 50 << 16;
-          break;  // decrement cbHigh
-        case 'C':
-          thresholds[i] -= 50 << 8;
-          break;  // decrement crLow
-        case 'V':
-          thresholds[i] -= 50;
-          break;  // decrement crHigh
-        case 'A':
-          thresholds[i] -= 10 << 24;
-          break;  // decrement cbLow
-        case 'S':
-          thresholds[i] -= 10 << 16;
-          break;  // decrement cbHigh
-        case 'D':
-          thresholds[i] -= 10 << 8;
-          break;  // decrement crLow
-        case 'F':
-          thresholds[i] -= 10;
-          break;  // decrement crHigh
-        case 'z':
-          thresholds[i] -= 5 << 24;
-          break;  // decrement cbLow
-        case 'x':
-          thresholds[i] -= 5 << 16;
-          break;  // decrement cbHigh
-        case 'c':
-          thresholds[i] -= 5 << 8;
-          break;  // decrement crLow
-        case 'v':
-          thresholds[i] -= 5;
-          break;  // decrement crHigh
-        case 'a':
-          thresholds[i] -= 1 << 24;
-          break;  // decrement cbLow
-        case 's':
-          thresholds[i] -= 1 << 16;
-          break;  // decrement cbHigh
-        case 'd':
-          thresholds[i] -= 1 << 8;
-          break;  // decrement crLow
-        case 'f':
-          thresholds[i] -= 1;
-          break;  // decrement crHigh
-        default:
-          break;
-      }
-      writeThresholds(i);
-      printThresholds(i);
-      printCoords();
-    }
-  }
+  if (!esp_init(argc, argv)) {
+    while(1)
+      ;
+    return;
+  };
 
-  int main(int argc, char **argv) {
-    const int __programNumber__ = 420;
-    printf("Program start number: %i\n", __programNumber__);
+  esp_run();
+  // pid_t pid = fork();
 
-    uart_init();
-    uart_output();
+  // if (pid == -1) {
+  //   printf("Fork failed\n");
+  //   while(1)
+  //     ;
+  //   return 1;
+  // } else if (pid == 0) {
+  //   esp_run();
+  // } else {
+  //   printf("Parent Process\n");
+  //   while (1) {
+  //     updateCoords();
+  //     for (int i = 0; i < NUM_POINT_FINDERS; i++) {
+  //       uint32_t raw_coords = coords[i];
+  //       uint16_t smallUpBigDown = raw_coords >> 16;
+  //       uint16_t smallLeftBigRight = raw_coords & 0xFFFF;
+  //       printf("%i: (%i, %i), ", i, smallLeftBigRight, smallUpBigDown);
+  //     }
+  //     printf("\n");
+  //   }
+  // }
 
-    esp_init(argc, argv);
+  printf("\n === Program end number: %i === \n", __programNumber__);
+  while (1)
+    ;
+  return 0;
+}
 
-    pthread_create(esp_run)
-
-		uint8_t cbLow = 120,
-		cbHigh = 130, crLow = 120, crHigh = 130;
-    thresholds[0] = (cbLow << 24) | (cbHigh << 16) | (crLow << 8) | crHigh;
-    writeThresholds(0);
-
-    updateThresholds();
-
-    printf("Program end number: %i\n", __programNumber__);
-    return 0;
-  }
-
-  // Top right: 120, 430
-  // Top left 100, 200
-  // Bottom right: 300, 430
+// Top right: 120, 430
+// Top left 100, 200
+// Bottom right: 300, 430

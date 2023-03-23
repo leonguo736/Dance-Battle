@@ -1,9 +1,9 @@
 
 #include "uart.h"
 
-#include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "altera_avalon_uart_regs.h"
 #include "system.h"
@@ -16,7 +16,8 @@ volatile uint16_t *UART_CONTROL_REG;
 
 // Private Function Prototypes
 // uint16_t uart_read_command(volatile uint16_t *reg, uint16_t mask);
-// void uart_write_command(volatile uint16_t *reg, uint16_t mask, uint16_t value);
+// void uart_write_command(volatile uint16_t *reg, uint16_t mask, uint16_t
+// value);
 
 // // Private Function Definitions
 // uint16_t uart_read_command(volatile uint16_t *reg, uint16_t mask) {
@@ -30,19 +31,17 @@ volatile uint16_t *UART_CONTROL_REG;
 // }
 
 int uart_read_byte(uint8_t *data) {
-  if (DEBUG) {
-    printf("uart_read_byte - %x \n",
-           IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE));
-  }
+#ifdef DEBUG_SEVERE
+  printf("uart_read_byte - %x \n", IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE));
+#endif
 
   if ((IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE) & UART_ROE_MASK) == 1) {
     // if (uart_read_command(UART_STATUS_REG, UART_ROE_MASK) != 0) {
     printf("uart_read_data - ROE\n");
   }
-    // Poll until the previous bit has been shifted
-  while ((IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE) & UART_RRDY_MASK) == 0) {
-    usleep(1);
-  }
+  // Poll until the previous bit has been shifted
+  while ((IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE) & UART_RRDY_MASK) == 0)
+    ;
   // while (uart_read_command(UART_STATUS_REG, UART_RRDY_MASK) == 0);
 
   // Read the data from the data register
@@ -58,15 +57,14 @@ int uart_read_byte(uint8_t *data) {
 }
 
 void uart_write_byte(uint8_t value) {
-  if (DEBUG) {
-    printf("uart_write_byte - %c | %x\n", value,
-           IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE));
-  }
+#ifdef DEBUG_SEVERE
+  printf("uart_write_byte - %c | %x\n", value,
+         IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE));
+#endif
 
   // Poll until the previous bit has been shifted
-  while ((IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE) & UART_TRDY_MASK) == 0) {
-    usleep(1);
-  }
+  while ((IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE) & UART_TRDY_MASK) == 0)
+    ;
   // while (uart_read_command(UART_STATUS_REG, UART_TRDY_MASK) == 0);
 
   // Write the data to the data register
@@ -77,16 +75,16 @@ void uart_write_byte(uint8_t value) {
 // Global Function Definitions
 void uart_init(void) {
   // Set the control register to enable the UART
-  UART_RXDATA_REG   =  (uint16_t *)IOADDR_ALTERA_AVALON_UART_RXDATA(UART_0_BASE);     
-  UART_TXDATA_REG   =  (uint16_t *)IOADDR_ALTERA_AVALON_UART_TXDATA(UART_0_BASE);     
-  UART_STATUS_REG   =  (uint16_t *)IOADDR_ALTERA_AVALON_UART_STATUS(UART_0_BASE);     
-  UART_CONTROL_REG  =  (uint16_t *)IOADDR_ALTERA_AVALON_UART_CONTROL(UART_0_BASE);
+  UART_RXDATA_REG = (uint16_t *)IOADDR_ALTERA_AVALON_UART_RXDATA(UART_0_BASE);
+  UART_TXDATA_REG = (uint16_t *)IOADDR_ALTERA_AVALON_UART_TXDATA(UART_0_BASE);
+  UART_STATUS_REG = (uint16_t *)IOADDR_ALTERA_AVALON_UART_STATUS(UART_0_BASE);
+  UART_CONTROL_REG = (uint16_t *)IOADDR_ALTERA_AVALON_UART_CONTROL(UART_0_BASE);
 
-  // UART_RXDATA_REG   =  (volatile uint16_t *)UART_0_BASE + UART_RXDATA_OFFSET;     
+  // UART_RXDATA_REG   =  (volatile uint16_t *)UART_0_BASE + UART_RXDATA_OFFSET;
   // UART_TXDATA_REG   =  (volatile uint16_t *)UART_0_BASE + UART_TXDATA_OFFSET;
   // UART_STATUS_REG   =  (volatile uint16_t *)UART_0_BASE + UART_STATUS_OFFSET;
-  // UART_CONTROL_REG  =  (volatile uint16_t *)UART_0_BASE + UART_CONTROL_OFFSET;
-  // Clear status register
+  // UART_CONTROL_REG  =  (volatile uint16_t *)UART_0_BASE +
+  // UART_CONTROL_OFFSET; Clear status register
   IOWR_ALTERA_AVALON_UART_STATUS(UART_0_BASE, 0);
   // *UART_STATUS_REG = 0;
 
@@ -104,19 +102,14 @@ void uart_write_data(char *str) {
 int uart_read_data(char *str, int len) {
   unsigned int actualLen = 0;
 
-  // Clear buffer
-  for (unsigned int i = 0; i < len; i++) {
-    str[i] = '\0';
-  }
-
   // Read from UART and store in buffer
   while (*str != '\n' && actualLen < len) {
-    uart_read_byte((uint8_t*)str);
+    uart_read_byte((uint8_t *)str);
     str += *str != '\n';
     actualLen += *str != '\n';
   }
 
-  *str = '\0';
+  *(str - (actualLen == len)) = '\0';
 
   if (actualLen < len) {
     return actualLen;
@@ -126,20 +119,22 @@ int uart_read_data(char *str, int len) {
   }
 }
 
-char* uart_wait_for_messages(char **messages, unsigned int numMessages) {
-  if (DEBUG) {
-    printf("Waiting for messages: ");
-    for (unsigned int i = 0; i < numMessages; i++) {
-      printf("%s, ", messages[i]);
-    }
-    printf("\n");
+char *uart_wait_for_messages(char **messages, unsigned int numMessages) {
+#ifdef DEBUG
+  printf("Waiting for messages: ");
+  for (unsigned int i = 0; i < numMessages; i++) {
+    printf("%s, ", messages[i]);
   }
+  printf("\n");
+#endif
+
   char recvBuffer[UART_BUFFER_SIZE];
-  char* yieldedMessage = NULL;
+  char *yieldedMessage = NULL;
   do {
     uart_read_data(recvBuffer, UART_BUFFER_SIZE);
     for (unsigned int i = 0; i < numMessages && !yieldedMessage; i++) {
-      yieldedMessage = strcmp(recvBuffer, messages[i]) == 0 ? messages[i] : NULL;
+      yieldedMessage =
+          strcmp(recvBuffer, messages[i]) == 0 ? messages[i] : NULL;
     }
   } while (!yieldedMessage);
   return yieldedMessage;
@@ -147,42 +142,42 @@ char* uart_wait_for_messages(char **messages, unsigned int numMessages) {
 
 void uart_send_command(char *cmd, char **args, unsigned int numArgs) {
   char sendBuffer[UART_BUFFER_SIZE];
-  if (DEBUG) {
-    printf("Parsing Command: %s |", cmd);
-  }
+#ifdef DEBUG
+  printf("Parsing Command: %s |", cmd);
+#endif
   sprintf(sendBuffer, "%s", cmd);
   for (unsigned int i = 0; i < numArgs; i++) {
-    if (DEBUG) {
-      printf(" %s,", args[i]);
-    }
+#ifdef DEBUG
+    printf(" %s,", args[i]);
+#endif
     sprintf(sendBuffer, "%s%s ", sendBuffer, args[i]);
   }
 
-  if (DEBUG) {
-    printf("\nSending Command: %s\n", sendBuffer);
-  }
+#ifdef DEBUG
+  printf("\nSending Command: %s\n", sendBuffer);
+#endif
   uart_write_data(sendBuffer);
 }
 
 void uart_output(void) {
-  if (DEBUG) {
-    printf("----- UART REG ADDRS -----\n");
-    printf("%p | %p | %p | %p\n", UART_RXDATA_REG, UART_TXDATA_REG,
-          UART_STATUS_REG, UART_CONTROL_REG);
+#ifdef DEBUG
+  printf("----- UART REG ADDRS -----\n");
+  printf("%p | %p | %p | %p\n", UART_RXDATA_REG, UART_TXDATA_REG,
+         UART_STATUS_REG, UART_CONTROL_REG);
 
-    printf("----- UART REGS -----\n");
-    printf("%x | %x | %x | %x\n", *UART_RXDATA_REG, *UART_TXDATA_REG,
-          *UART_STATUS_REG, *UART_CONTROL_REG);
+  printf("----- UART REGS -----\n");
+  printf("%x | %x | %x | %x\n", *UART_RXDATA_REG, *UART_TXDATA_REG,
+         *UART_STATUS_REG, *UART_CONTROL_REG);
 
-    printf("----- UART REGS COMMANDS -----\n");
-    printf("%x | %x | %x | %x\n", IORD_ALTERA_AVALON_UART_RXDATA(UART_0_BASE),
-           IORD_ALTERA_AVALON_UART_TXDATA(UART_0_BASE),
-           IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE),
-           IORD_ALTERA_AVALON_UART_CONTROL(UART_0_BASE) 
-          );
-    // printf("%x | %x | %x | %x\n", uart_read_command(UART_RXDATA_REG, UART_RXDATA_MASK),
-    //       uart_read_command(UART_TXDATA_REG, UART_TXDATA_MASK),
-    //       uart_read_command(UART_STATUS_REG, UART_STATUS_MASK),
-    //       uart_read_command(UART_CONTROL_REG, UART_CONTROL_MASK));
-  }
+  printf("----- UART REGS COMMANDS -----\n");
+  printf("%x | %x | %x | %x\n", IORD_ALTERA_AVALON_UART_RXDATA(UART_0_BASE),
+         IORD_ALTERA_AVALON_UART_TXDATA(UART_0_BASE),
+         IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE),
+         IORD_ALTERA_AVALON_UART_CONTROL(UART_0_BASE));
+  // printf("%x | %x | %x | %x\n", uart_read_command(UART_RXDATA_REG,
+  // UART_RXDATA_MASK),
+  //       uart_read_command(UART_TXDATA_REG, UART_TXDATA_MASK),
+  //       uart_read_command(UART_STATUS_REG, UART_STATUS_MASK),
+  //       uart_read_command(UART_CONTROL_REG, UART_CONTROL_MASK));
+#endif
 }

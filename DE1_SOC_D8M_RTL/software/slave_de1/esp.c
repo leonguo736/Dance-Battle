@@ -3,12 +3,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 
 #include "commands.h"
 #include "const.h"
 
-#define SERVER_IP "192.168.137.65:8080"
+#define SERVER_IP "192.168.48.227:8080"
 
 struct Pose {
   double beat;
@@ -38,12 +37,13 @@ bool init_connection(char* serverIP) {
   return true;
 }
 
-void esp_init(int argc, char** argv) {
-  if (DEBUG) {
+bool esp_init(int argc, char** argv) {
+  #ifdef DEBUG
     printf("ESP Init\n");
-  }
+  #endif
+  
+  reset_esp();
 
-  unsigned int count = 0;
   unsigned int failCount = 0;
   bool connected = false;
 
@@ -55,23 +55,31 @@ void esp_init(int argc, char** argv) {
       printf("Failed to connect to backend %d/10 times. Retrying ...\n",
              failCount);
     }
+
   } while (!connected && failCount < 10);
 
+  #ifdef DEBUG
   if (!connected) {
     printf("ESP Failed to connect to backend. Quitting ...\n");
-    return;
+  } else {
+    printf("Connected to backend\n");
   }
+  #endif
 
-  printf("Connected to backend\n");
+  return connected;
 }
 
 void esp_run(void) {
-  if (DEBUG) {
+  #ifdef DEBUG
     printf("Running ESP\n");
-  }
+  #endif
 
   char recvBuffer[UART_BUFFER_SIZE];
   char sendBuffer[UART_BUFFER_SIZE];
+  unsigned int count = 0;
+  struct Pose pose;
+
+  uart_send_command(ESP_TYPE_COMMAND, (char*[]){"c"}, 1);
 
   while (count < 10) {
 
@@ -87,17 +95,18 @@ void esp_run(void) {
     unsigned int len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
     printf("[%d] %s\n", len, recvBuffer);
 
-    // len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
-    // printf("[%d] %s\n", len, recvBuffer);
+    len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
+    printf("[%d] %s\n", len, recvBuffer);
 
-    // len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
-    // printf("[%d] %s\n", len, recvBuffer);
+    len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
+    printf("[%d] %s\n", len, recvBuffer);
 
-    // len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
-    // printf("[%d] %s\n", len, recvBuffer);
+    len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
+    printf("[%d] %s\n", len, recvBuffer);
 
-    // recvPtr = recvBuffer;
     count++;
+
+    usleep(1000000);
   }
 
   while (1) {
