@@ -77,7 +77,7 @@ parameter HW								= 7; // Frame height's address width
 parameter MDW								= 15; // Avalon master's datawidth
 
 parameter DEFAULT_BUFFER_ADDRESS		= 32'd134217728;
-parameter DEFAULT_BACK_BUF_ADDRESS	= 32'd134217728;
+parameter DEFAULT_BACK_BUF_ADDRESS	= 32'd134283264;
 
 parameter ADDRESSING_BITS				= 16'd2057;
 parameter COLOR_BITS						= 4'd15;

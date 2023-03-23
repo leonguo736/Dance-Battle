@@ -2259,7 +2259,7 @@
   <parameter name="captureEdge" value="true" />
   <parameter name="clockRate" value="100000000" />
   <parameter name="direction" value="Input" />
-  <parameter name="edgeType" value="FALLING" />
+  <parameter name="edgeType" value="RISING" />
   <parameter name="generateIRQ" value="true" />
   <parameter name="irqType" value="EDGE" />
   <parameter name="resetValue" value="0" />

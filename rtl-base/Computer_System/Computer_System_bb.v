@@ -5,10 +5,13 @@ module Computer_System (
 	audio_BCLK,
 	audio_DACDAT,
 	audio_DACLRCK,
+	audio_pll_clk_clk,
 	audio_pll_ref_clk_clk,
 	audio_pll_ref_reset_reset,
 	av_config_SDAT,
 	av_config_SCLK,
+	esp_uart_rxd,
+	esp_uart_txd,
 	hex3_hex0_export,
 	hex5_hex4_export,
 	hps_io_hps_io_emac1_inst_TX_CLK,
@@ -118,20 +121,20 @@ module Computer_System (
 	video_in_TD_RESET,
 	video_in_overflow_flag,
 	video_pll_ref_clk_clk,
-	video_pll_ref_reset_reset,
-	esp_uart_rxd,
-	esp_uart_txd,
-	audio_pll_clk_clk);	
+	video_pll_ref_reset_reset);	
 
 	input		audio_ADCDAT;
 	input		audio_ADCLRCK;
 	input		audio_BCLK;
 	output		audio_DACDAT;
 	input		audio_DACLRCK;
+	output		audio_pll_clk_clk;
 	input		audio_pll_ref_clk_clk;
 	input		audio_pll_ref_reset_reset;
 	inout		av_config_SDAT;
 	output		av_config_SCLK;
+	input		esp_uart_rxd;
+	output		esp_uart_txd;
 	output	[31:0]	hex3_hex0_export;
 	output	[15:0]	hex5_hex4_export;
 	output		hps_io_hps_io_emac1_inst_TX_CLK;
@@ -242,7 +245,4 @@ module Computer_System (
 	output		video_in_overflow_flag;
 	input		video_pll_ref_clk_clk;
 	input		video_pll_ref_reset_reset;
-	input		esp_uart_rxd;
-	output		esp_uart_txd;
-	output		audio_pll_clk_clk;
 endmodule

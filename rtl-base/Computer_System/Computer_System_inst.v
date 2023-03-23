@@ -4,10 +4,13 @@
 		.audio_BCLK                      (<connected-to-audio_BCLK>),                      //                     .BCLK
 		.audio_DACDAT                    (<connected-to-audio_DACDAT>),                    //                     .DACDAT
 		.audio_DACLRCK                   (<connected-to-audio_DACLRCK>),                   //                     .DACLRCK
+		.audio_pll_clk_clk               (<connected-to-audio_pll_clk_clk>),               //        audio_pll_clk.clk
 		.audio_pll_ref_clk_clk           (<connected-to-audio_pll_ref_clk_clk>),           //    audio_pll_ref_clk.clk
 		.audio_pll_ref_reset_reset       (<connected-to-audio_pll_ref_reset_reset>),       //  audio_pll_ref_reset.reset
 		.av_config_SDAT                  (<connected-to-av_config_SDAT>),                  //            av_config.SDAT
 		.av_config_SCLK                  (<connected-to-av_config_SCLK>),                  //                     .SCLK
+		.esp_uart_rxd                    (<connected-to-esp_uart_rxd>),                    //             esp_uart.rxd
+		.esp_uart_txd                    (<connected-to-esp_uart_txd>),                    //                     .txd
 		.hex3_hex0_export                (<connected-to-hex3_hex0_export>),                //            hex3_hex0.export
 		.hex5_hex4_export                (<connected-to-hex5_hex4_export>),                //            hex5_hex4.export
 		.hps_io_hps_io_emac1_inst_TX_CLK (<connected-to-hps_io_hps_io_emac1_inst_TX_CLK>), //               hps_io.hps_io_emac1_inst_TX_CLK
@@ -117,9 +120,6 @@
 		.video_in_TD_RESET               (<connected-to-video_in_TD_RESET>),               //                     .TD_RESET
 		.video_in_overflow_flag          (<connected-to-video_in_overflow_flag>),          //                     .overflow_flag
 		.video_pll_ref_clk_clk           (<connected-to-video_pll_ref_clk_clk>),           //    video_pll_ref_clk.clk
-		.video_pll_ref_reset_reset       (<connected-to-video_pll_ref_reset_reset>),       //  video_pll_ref_reset.reset
-		.esp_uart_rxd                    (<connected-to-esp_uart_rxd>),                    //             esp_uart.rxd
-		.esp_uart_txd                    (<connected-to-esp_uart_txd>),                    //                     .txd
-		.audio_pll_clk_clk               (<connected-to-audio_pll_clk_clk>)                //        audio_pll_clk.clk
+		.video_pll_ref_reset_reset       (<connected-to-video_pll_ref_reset_reset>)        //  video_pll_ref_reset.reset
 	);
 

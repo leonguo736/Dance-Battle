@@ -5,10 +5,13 @@
 			audio_BCLK                      : in    std_logic                     := 'X';             -- BCLK
 			audio_DACDAT                    : out   std_logic;                                        -- DACDAT
 			audio_DACLRCK                   : in    std_logic                     := 'X';             -- DACLRCK
+			audio_pll_clk_clk               : out   std_logic;                                        -- clk
 			audio_pll_ref_clk_clk           : in    std_logic                     := 'X';             -- clk
 			audio_pll_ref_reset_reset       : in    std_logic                     := 'X';             -- reset
 			av_config_SDAT                  : inout std_logic                     := 'X';             -- SDAT
 			av_config_SCLK                  : out   std_logic;                                        -- SCLK
+			esp_uart_rxd                    : in    std_logic                     := 'X';             -- rxd
+			esp_uart_txd                    : out   std_logic;                                        -- txd
 			hex3_hex0_export                : out   std_logic_vector(31 downto 0);                    -- export
 			hex5_hex4_export                : out   std_logic_vector(15 downto 0);                    -- export
 			hps_io_hps_io_emac1_inst_TX_CLK : out   std_logic;                                        -- hps_io_emac1_inst_TX_CLK
@@ -118,10 +121,7 @@
 			video_in_TD_RESET               : out   std_logic;                                        -- TD_RESET
 			video_in_overflow_flag          : out   std_logic;                                        -- overflow_flag
 			video_pll_ref_clk_clk           : in    std_logic                     := 'X';             -- clk
-			video_pll_ref_reset_reset       : in    std_logic                     := 'X';             -- reset
-			esp_uart_rxd                    : in    std_logic                     := 'X';             -- rxd
-			esp_uart_txd                    : out   std_logic;                                        -- txd
-			audio_pll_clk_clk               : out   std_logic                                         -- clk
+			video_pll_ref_reset_reset       : in    std_logic                     := 'X'              -- reset
 		);
 	end component Computer_System;
 
@@ -132,10 +132,13 @@
 			audio_BCLK                      => CONNECTED_TO_audio_BCLK,                      --                     .BCLK
 			audio_DACDAT                    => CONNECTED_TO_audio_DACDAT,                    --                     .DACDAT
 			audio_DACLRCK                   => CONNECTED_TO_audio_DACLRCK,                   --                     .DACLRCK
+			audio_pll_clk_clk               => CONNECTED_TO_audio_pll_clk_clk,               --        audio_pll_clk.clk
 			audio_pll_ref_clk_clk           => CONNECTED_TO_audio_pll_ref_clk_clk,           --    audio_pll_ref_clk.clk
 			audio_pll_ref_reset_reset       => CONNECTED_TO_audio_pll_ref_reset_reset,       --  audio_pll_ref_reset.reset
 			av_config_SDAT                  => CONNECTED_TO_av_config_SDAT,                  --            av_config.SDAT
 			av_config_SCLK                  => CONNECTED_TO_av_config_SCLK,                  --                     .SCLK
+			esp_uart_rxd                    => CONNECTED_TO_esp_uart_rxd,                    --             esp_uart.rxd
+			esp_uart_txd                    => CONNECTED_TO_esp_uart_txd,                    --                     .txd
 			hex3_hex0_export                => CONNECTED_TO_hex3_hex0_export,                --            hex3_hex0.export
 			hex5_hex4_export                => CONNECTED_TO_hex5_hex4_export,                --            hex5_hex4.export
 			hps_io_hps_io_emac1_inst_TX_CLK => CONNECTED_TO_hps_io_hps_io_emac1_inst_TX_CLK, --               hps_io.hps_io_emac1_inst_TX_CLK
@@ -245,9 +248,6 @@
 			video_in_TD_RESET               => CONNECTED_TO_video_in_TD_RESET,               --                     .TD_RESET
 			video_in_overflow_flag          => CONNECTED_TO_video_in_overflow_flag,          --                     .overflow_flag
 			video_pll_ref_clk_clk           => CONNECTED_TO_video_pll_ref_clk_clk,           --    video_pll_ref_clk.clk
-			video_pll_ref_reset_reset       => CONNECTED_TO_video_pll_ref_reset_reset,       --  video_pll_ref_reset.reset
-			esp_uart_rxd                    => CONNECTED_TO_esp_uart_rxd,                    --             esp_uart.rxd
-			esp_uart_txd                    => CONNECTED_TO_esp_uart_txd,                    --                     .txd
-			audio_pll_clk_clk               => CONNECTED_TO_audio_pll_clk_clk                --        audio_pll_clk.clk
+			video_pll_ref_reset_reset       => CONNECTED_TO_video_pll_ref_reset_reset        --  video_pll_ref_reset.reset
 		);
 
