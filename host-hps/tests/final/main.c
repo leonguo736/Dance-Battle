@@ -11,9 +11,20 @@
 #include "SW.H"
 #include "audio.h"
 
+// Communications
+#include "esp.h"
+#include "regs.h"
+
+
+// Audio / Frontend
 #include "fonts.h"
 #include "song.h"
 #include "sampledata.h"
+
+
+// Function Prototypes
+
+// Global Variables
 
 int started = 0;
 int screen = 0; // 0 for init, 1 for lobby, 2 for game, 3 for results
@@ -63,6 +74,8 @@ struct ResultsScreenState resultsScreenStates[2] = {
     { }
 };
 
+// Function Definitions
+// Frontend
 void writeAudio(int l, int r, int skip) {
     if (!skip) audio_wait_write();
     audio_write_left(l);
@@ -123,15 +136,24 @@ void * outputThread(void *vargp) {
     }
 }
 
-int main(void) {
+// Main
+int main(int argc, char **argv) {
+    void* virtual_base;
 
     if (!audio_open()) return 1;
     if (!video_open()) return 1;
     if (!SW_open()) return 1;
     if (!KEY_open()) return 1;
+    if (!regs_init(&virtual_base)) return 1;
 
+    // Comms
+    uart_init(virtual_base);
+    pthread_t espThread_id;
+    pthread_create(&espThread_id, NULL, esp_run, argv);
+
+    // Frontend
     pthread_t outputThread_id;
-    pthread_create(&outputThread_id, NULL, outputThread, NULL);
+    // pthread_create(&outputThread_id, NULL, outputThread, NULL);
 
     int swState = 0;
     int keyState = 0;
@@ -146,6 +168,7 @@ int main(void) {
         else if (keyState == 4) switchScreen(2);
     }
 
+    regs_close(virtual_base);
     audio_close();
     video_close();
     SW_close();
