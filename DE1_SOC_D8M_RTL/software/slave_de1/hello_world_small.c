@@ -80,15 +80,15 @@
 
 #include <stdint.h>
 #include <stdio.h>
-//#include <stdlib.h>
-// #include <unistd.h>
+// #include <stdlib.h>
+//  #include <unistd.h>
 
 #include "esp.h"
 #include "system.h"
 #include "uart.h"
 
 #define NUM_POINT_FINDERS 1
-volatile uint32_t *camera_base = COORDS_SLAVE_0_BASE;
+volatile uint32_t *camera_base = (uint32_t *)COORDS_SLAVE_0_BASE;
 static uint32_t thresholds[NUM_POINT_FINDERS];
 
 /* arr is mutated to contain the coordinates the points
@@ -102,35 +102,32 @@ void getFrame(uint32_t *arr, int *len) {
   arr = (uint32_t *)malloc(NUM_POINT_FINDERS * sizeof(uint32_t));
   *len = NUM_POINT_FINDERS;
 
-  uint32_t raw_coords;
+  volatile uint32_t raw_coords;
   for (int i = 0; i < NUM_POINT_FINDERS; i++) {
     raw_coords = *(camera_base + i);
     arr[i] = raw_coords;
-	  uint16_t smallUpBigDown = raw_coords >> 16;
-	  uint16_t smallLeftBigRight = raw_coords & 0xFFFF;
-	  printf("smallUpBigDown: %i, smallLeftBigRight: %i\n", smallUpBigDown,
-     smallLeftBigRight);
+    //	  uint16_t smallUpBigDown = raw_coords >> 16;
+    //	  uint16_t smallLeftBigRight = raw_coords & 0xFFFF;
+    //	  printf("smallUpBigDown: %i, smallLeftBigRight: %i\n", smallUpBigDown,
+    //smallLeftBigRight);
   }
 }
 
-// sample code for Bell
 void printCoords() {
   int len;
   uint32_t *arr = NULL;
-  while (1) {
-    getFrame(arr, &len);
-    for (int i = 0; i < len; i++) {
-      uint32_t raw_coords = arr[i];
-      uint16_t x = raw_coords & 0xFFFF;
-      uint16_t y = raw_coords >> 16;
-//      printf("x: %i, y: %i\n", x, y);
-    }
+  getFrame(arr, &len);
+  for (int i = 0; i < len; i++) {
+    uint32_t raw_coords = arr[i];
+    uint16_t x = raw_coords & 0xFFFF;
+    uint16_t y = raw_coords >> 16;
+    printf("Point %i at x: %i, y: %i\n", i, x, y);
   }
   free(arr);
 }
 
 void printThresholds(int i) {
-  printf("Thresholds: crLow=%d crHigh=%d cbLow=%d cbHigh=%d\n",
+  printf("cbLow: %lu, cbHigh: %lu, crLow: %lu, crHigh: %lu\n",
          (thresholds[i] >> 24) & 0xFF, (thresholds[i] >> 16) & 0xFF,
          (thresholds[i] >> 8) & 0xFF, thresholds[i] & 0xFF);
 }
@@ -144,28 +141,163 @@ int main(int argc, char **argv) {
   writeThresholds(0);
   //	printCoords();
 
-  int index = 0;
-  int c;
+  char getInputLetter() {
+    char c;
+    while ((c = getchar()) == '\n')
+      ;  // wait for input
+    while (getchar() != '\n')
+      ;  // clear input buffer
+    return c;
+  }
 
-  uart_init();
-  uart_output();
-  esp_run(argc, argv);
+  void updateThresholds() {
+    char c;
+    int i = 0;
+    while (1) {
+      printf("Modifying point %i's thresholds, press a button on keyboard", i);
+      c = getInputLetter();
+      // printf("%c\n", c);
+      switch (c) {
+        case 'b':
+          return;  // break
+        case 'B':
+          return;  // break
+        case ' ':
+          break;  // do nothing
+        case 't':
+          i = (i + 1) % NUM_POINT_FINDERS;
+          break;  // increment index
+        case 'g':
+          i = (i - 1) % NUM_POINT_FINDERS;
+          break;  // decrement index
+        case '!':
+          thresholds[i] += 50 << 24;
+          break;  // increment cbLow
+        case '@':
+          thresholds[i] += 50 << 16;
+          break;  // increment cbHigh
+        case '#':
+          thresholds[i] += 50 << 8;
+          break;  // increment crLow
+        case '$':
+          thresholds[i] += 50;
+          break;  // increment crHigh
+        case 'Q':
+          thresholds[i] += 10 << 24;
+          break;  // increment cbLow
+        case 'W':
+          thresholds[i] += 10 << 16;
+          break;  // increment cbHigh
+        case 'E':
+          thresholds[i] += 10 << 8;
+          break;  // increment crLow
+        case 'R':
+          thresholds[i] += 10;
+          break;  // increment crHigh
+        case '1':
+          thresholds[i] += 5 << 24;
+          break;  // increment cbLow
+        case '2':
+          thresholds[i] += 5 << 16;
+          break;  // increment cbHigh
+        case '3':
+          thresholds[i] += 5 << 8;
+          break;  // increment crLow
+        case '4':
+          thresholds[i] += 5;
+          break;  // increment crHigh
+        case 'q':
+          thresholds[i] += 1 << 24;
+          break;  // increment cbLow
+        case 'w':
+          thresholds[i] += 1 << 16;
+          break;  // increment cbHigh
+        case 'e':
+          thresholds[i] += 1 << 8;
+          break;  // increment crLow
+        case 'r':
+          thresholds[i] += 1;
+          break;  // increment crHigh
 
-  // printCoords();
-//	 char c;
-//	 printf("Press a key on your keyboard: ");
-//	 while ((c = getchar()) == '\n')
-//	   ;  // consume newline characters
-//	 if (c == 'q') {
-//	   break;
-//	 }
-//	 printf("You pressed the '%c' key.\n", c);
-//	 while (getchar() != '\n')
-//	   ;  // clear input buffer
-//	}
-  return 0;
-}
+        case 'Z':
+          thresholds[i] -= 50 << 24;
+          break;  // decrement cbLow
+        case 'X':
+          thresholds[i] -= 50 << 16;
+          break;  // decrement cbHigh
+        case 'C':
+          thresholds[i] -= 50 << 8;
+          break;  // decrement crLow
+        case 'V':
+          thresholds[i] -= 50;
+          break;  // decrement crHigh
+        case 'A':
+          thresholds[i] -= 10 << 24;
+          break;  // decrement cbLow
+        case 'S':
+          thresholds[i] -= 10 << 16;
+          break;  // decrement cbHigh
+        case 'D':
+          thresholds[i] -= 10 << 8;
+          break;  // decrement crLow
+        case 'F':
+          thresholds[i] -= 10;
+          break;  // decrement crHigh
+        case 'z':
+          thresholds[i] -= 5 << 24;
+          break;  // decrement cbLow
+        case 'x':
+          thresholds[i] -= 5 << 16;
+          break;  // decrement cbHigh
+        case 'c':
+          thresholds[i] -= 5 << 8;
+          break;  // decrement crLow
+        case 'v':
+          thresholds[i] -= 5;
+          break;  // decrement crHigh
+        case 'a':
+          thresholds[i] -= 1 << 24;
+          break;  // decrement cbLow
+        case 's':
+          thresholds[i] -= 1 << 16;
+          break;  // decrement cbHigh
+        case 'd':
+          thresholds[i] -= 1 << 8;
+          break;  // decrement crLow
+        case 'f':
+          thresholds[i] -= 1;
+          break;  // decrement crHigh
+        default:
+          break;
+      }
+      writeThresholds(i);
+      printThresholds(i);
+      printCoords();
+    }
+  }
 
-// Top right: 120, 430
-// Top left 100, 200
-// Bottom right: 300, 430
+  int main(int argc, char **argv) {
+    const int __programNumber__ = 420;
+    printf("Program start number: %i\n", __programNumber__);
+
+    uart_init();
+    uart_output();
+
+    esp_init(argc, argv);
+
+    pthread_create(esp_run)
+
+		uint8_t cbLow = 120,
+		cbHigh = 130, crLow = 120, crHigh = 130;
+    thresholds[0] = (cbLow << 24) | (cbHigh << 16) | (crLow << 8) | crHigh;
+    writeThresholds(0);
+
+    updateThresholds();
+
+    printf("Program end number: %i\n", __programNumber__);
+    return 0;
+  }
+
+  // Top right: 120, 430
+  // Top left 100, 200
+  // Bottom right: 300, 430
