@@ -119,9 +119,9 @@ wire        D8M_CK_HZ ;
 wire        D8M_CK_HZ2 ; 
 wire        D8M_CK_HZ3 ; 
 
-wire [11:0] RED   ; 
-wire [11:0] GREEN  ; 
-wire [11:0] BLUE 		 ; 
+wire [11:0] RED12b; 
+wire [11:0] GREEN12b; 
+wire [11:0] BLUE12b; 
 wire [12:0] VGA_H_CNT;			
 wire [12:0] VGA_V_CNT;	
 wire [19:0] VGA_ADDR; 
@@ -272,9 +272,9 @@ RAW2RGB_J				u4	(
                      .VGA_VS       ( VGA_VS ),	
 							.VGA_HS       ( VGA_HS ) , 
 	                  			
-							.oRed         ( RED  ),
-							.oGreen       ( GREEN),
-							.oBlue        ( BLUE )
+							.oRed         ( RED12b[7:0]  ),
+							.oGreen       ( GREEN12b[7:0]) ,
+							.oBlue        ( BLUE12b[7:0] )
 							);		 
 //------AOTO FOCUS ENABLE  --
 AUTO_FOCUS_ON  vd( 
@@ -364,16 +364,25 @@ assign LEDR = { D8M_CK_HZ ,D8M_CK_HZ2,D8M_CK_HZ3 , KEY, 1'h0,CAMERA_MIPI_RELAESE
 Switches Manifest
 SW[9] toggles filter on/off
 SW[8:5] toggles which filter is active
-SW[4] shows redPixelVIndex[0] for filter 0
-SW[3] shows redPixelHIndex[0] for filter 0
 SW[2] multiples KEY[2:1] increment/decrement by 10
-SW[1:0] selects between cbLow, cbHigh, crLow, crHigh for filter 0
+SW[1:0] selects between cbLow, cbHigh, crLow, crHigh
 
 Keys Manifest
 KEY[0] is reset
 KEY[1] is increment cbLow, cbHigh, crLow, crHigh
 KEY[2] is decrement cbLow, cbHigh, crLow, crHigh
 KEY[3] unused
+
+TODO: 
+Screens Discussion
+0-0000 3x3 square for every point on the screen, with dimmed background
+0-0001 3x3 square for point 1 on the screen, with dimmed background
+1-0000 raw camera feed
+1-0001 3x3 square for point 1 on the screen, with crosshairs
+
+Display the respective cbLow, cbHIgh, crLow, crHigh for a filter
+
+
 */
 reg [7:0] crLow [0:5];
 reg [7:0] crHigh [0:5];
@@ -414,9 +423,9 @@ always @(posedge CLOCK2_50) begin
 		crHigh[0] <= 8'd255;
 		cbLow[0] <= 8'd0;
 		cbHigh[0] <= 8'd255;
-		RED_cached <= 8'd0;
-		GREEN_cached <= 8'd0;
-		BLUE_cached <= 8'd0;
+		RED8b_cached <= 8'd0;
+		GREEN8b_cached <= 8'd0;
+		BLUE8b_cached <= 8'd0;
 	end else begin
 		if (KEY_OLD != KEY) begin
 			if (~KEY[1]) begin
@@ -442,9 +451,9 @@ always @(posedge CLOCK2_50) begin
 			crHigh[SW[8:5]] <= Cr + 10 <= 255 ? Cr + 10 : 255;
 		end		
 		if (hIndex == 320 && vIndex == 240) begin
-			RED_cached <= RED;
-			GREEN_cached <= GREEN;
-			BLUE_cached <= BLUE;
+			RED8b_cached <= RED12b[7:0]; 
+			GREEN8b_cached <= GREEN12b[7:0]; 
+			BLUE8b_cached <= BLUE12b[7:0]; 
 		end
 	end
 end
@@ -452,16 +461,17 @@ end
 wire [23:0] oVideo8bRgb [0:5];
 always @(*) begin
 	if (SW[4]) begin
-		if (hIndex == redPixelHIndex[0] || vIndex == redPixelVIndex[0]) begin
-			{ R_to_vga, G_to_vga, B_to_vga } = { 10'd255, 10'd0, 10'd0 };
-		end else if (hIndex == redPixelHIndex[1] || vIndex == redPixelVIndex[1]) begin
-			{ R_to_vga, G_to_vga, B_to_vga } = { 10'd255, 10'd0, 10'd0 };
-		end else begin
-			{ R_to_vga, G_to_vga, B_to_vga } = { RED[11:4], GREEN[11:4], BLUE[11:4] };
-		end
+		// if (hIndex == redPixelHIndex[0] || vIndex == redPixelVIndex[0]) begin
+		// 	{ R_to_vga, G_to_vga, B_to_vga } = { 10'd255, 10'd0, 10'd0 };
+		// end else if (hIndex == redPixelHIndex[1] || vIndex == redPixelVIndex[1]) begin
+		// 	{ R_to_vga, G_to_vga, B_to_vga } = { 10'd255, 10'd0, 10'd0 };
+		// end else begin
+		// 	{ R_to_vga, G_to_vga, B_to_vga } = { RED12b[11:4], GREEN12b[11:4], BLUE12b[11:4] };
+		// end
+		{ R_to_vga, G_to_vga, B_to_vga } = { 2'd0, oVideo8bRgb[SW[8:5]][23:16], 2'd0, oVideo8bRgb[SW[8:5]][15:8], 2'd0, oVideo8bRgb[SW[8:5]][7:0] };
 	end else begin
 		// { R_to_vga, G_to_vga, B_to_vga } = oVideo8bRgb[SW[8:5]];
-		{ R_to_vga, G_to_vga, B_to_vga } = { 2'd0, oVideo8bRgb[SW[8:5]][23:16], 2'd0, oVideo8bRgb[SW[8:5]][15:8], 2'd0, oVideo8bRgb[SW[8:5]][7:0] };
+		{ R_to_vga, G_to_vga, B_to_vga } = { 2'd0, RED12b[7:0], 2'd0, GREEN12b[7:0], 2'd0, BLUE12b[7:0] }; 
 	end
 end
 
@@ -470,7 +480,7 @@ wire [15:0] vIndex;
 
 ball_detector  ball_detector_0( 
    .reset( KEY[0] ),
-   .iVideo12bRgb( { RED, GREEN, BLUE } ),
+   .iVideo12bRgb( { RED12b, GREEN12b, BLUE12b } ),
    .iPixelAddress( VGA_ADDRESS ),
    .iVgaRequest( READ_Request ),
    .iVgaClk( VGA_CLK ),
@@ -492,7 +502,7 @@ ball_detector  ball_detector_0(
  
 ball_detector  ball_detector_1( 
    .reset( KEY[0] ),
-   .iVideo12bRgb( { RED, GREEN, BLUE } ),
+   .iVideo12bRgb( { RED12b, GREEN12b, BLUE12b } ),
    .iPixelAddress( VGA_ADDRESS ),
    .iVgaRequest( READ_Request ),
    .iVgaClk( VGA_CLK ),
@@ -531,11 +541,11 @@ nios2_system ni2s (
 );
 
 wire [7:0] Y, Cb, Cr;
-reg [7:0] RED_cached, GREEN_cached, BLUE_cached; 
+reg [7:0] RED8b_cached, GREEN8b_cached, BLUE8b_cached; 
 rgb_to_ycbcr rgb_to_ycbcr_0( 
-   .iR( RED_cached ),
-   .iG( GREEN_cached ),
-   .iB( BLUE_cached ),
+   .iR( RED8b_cached ),
+   .iG( GREEN8b_cached ),
+   .iB( BLUE8b_cached ),
    .oY( Y ),
    .oCb( Cb ),
    .oCr( Cr )

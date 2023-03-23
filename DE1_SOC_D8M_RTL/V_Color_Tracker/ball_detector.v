@@ -48,7 +48,7 @@ assign BLUE = iVideo12bRgb[11:0];
 red_frame u1 ( 
    .iVgaClk( iVgaClk ),
    .reset( reset ),
-   .iPixel12bRgb( {RED, GREEN, BLUE} ), // convert to 8-bit RGB
+   .iPixel12bRgb( {RED, GREEN, BLUE} ), 
    .iVgaHRequest( iVgaHRequest ),
    .iVgaVRequest( iVgaVRequest ),
    .iHIndex( hIndex ),
