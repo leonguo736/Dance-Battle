@@ -142,7 +142,9 @@ ACDS_VERSION := 18.1
 ELF := slave_de1.elf
 
 # Paths to C, C++, and assembly source files.
-C_SRCS := hello_world_small.c
+C_SRCS += hello_world_small.c
+C_SRCS += uart.c
+C_SRCS += esp.c
 CXX_SRCS :=
 ASM_SRCS :=
 

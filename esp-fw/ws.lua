@@ -30,20 +30,26 @@
 -- end
  
 ws = websocket.createClient()
-ws:connect("ws://192.168.137.111:8080")
 
-ws:on("connection", function(ws)
-    gpio.write(led, gpio.LOW)
-    uart.write(0, "connected\n")
-end)
+function ws_connect(ip) 
+    if (DEBUG) then
+        print("Connecting to IP: " .. ip)
+    end
+    ws:connect("ws://" .. ip)
 
-ws:on("receive", function(_, msg, opcode)    
-    gpio.write(led, gpio.HIGH)
-    uart.write(0, msg .. "\n")
-    gpio.write(led, gpio.LOW)
-end)
+    ws:on("connection", function(ws)
+        gpio.write(led, gpio.LOW)
+        uart.write(0, "r\n")
+    end)
 
-ws:on("close", function(_, status)
-    uart.write(0, "close\n")
-    gpio.write(led, gpio.HIGH)
-end)
+    ws:on("receive", function(_, msg, opcode)    
+        gpio.write(led, gpio.HIGH)
+        uart.write(0, msg .. "\n")
+        gpio.write(led, gpio.LOW)
+    end)
+
+    ws:on("close", function(_, status)
+        uart.write(0, "c\n")
+        gpio.write(led, gpio.HIGH)
+    end)
+end

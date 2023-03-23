@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?><intel_fpga_monitor_program_sample_program version="1.0">
+	<sample_text>
+		<sample_title>ADC Example</sample_title>
+		<sample_description>This program demonstrates use of the Analog-to-Digital Converter in the Computer Systems</sample_description>
+		<sample_details>
+			It performs the following:
+			1. performs a conversion operation on all eight channels of the ADC
+			2. displays the converted values on the terminal window
+		</sample_details>
+	</sample_text>
+	<arch_version>
+		<architecture>ARM Cortex-A9</architecture>
+		<associated_sample_systems>
+			<associated_sample_system>DE0-Nano-SoC Computer for ARM Cortex-A9</associated_sample_system>
+			<associated_sample_system>DE1-SoC Computer for ARM Cortex-A9</associated_sample_system>
+			<associated_sample_system>DE10-Nano Computer for ARM Cortex-A9</associated_sample_system>
+			<associated_sample_system>DE10-Standard Computer for ARM Cortex-A9</associated_sample_system>
+		</associated_sample_systems>
+		<system_overrides>
+			<terminal>Semihosting</terminal>
+		</system_overrides>
+		<linker_sections_type>Basic</linker_sections_type>
+		<program>
+			<type>C Program</type>
+			<source_files>
+				<source_file filepath="true">arm/c/adc_example/adc_example.c</source_file>
+			</source_files>
+			<options>
+				<compiler_flags>-g -O1</compiler_flags>
+				<emulate_unimpl_instructions>false</emulate_unimpl_instructions>
+				<use_small_c_library>false</use_small_c_library>
+			</options>
+		</program>
+	</arch_version>
+	<arch_version>
+		<architecture>Nios II</architecture>
+		<associated_sample_systems>
+			<associated_sample_system>DE0-Nano-SoC Computer for Nios II</associated_sample_system>
+			<associated_sample_system>DE1-SoC Computer for Nios II</associated_sample_system>
+			<associated_sample_system>DE10-Nano Computer for Nios II</associated_sample_system>
+			<associated_sample_system>DE10-Standard Computer for Nios II</associated_sample_system>
+		</associated_sample_systems>
+		<linker_sections_type>Basic</linker_sections_type>
+		<program>
+			<type>C Program</type>
+			<source_files>
+				<source_file filepath="true">nios2/c/adc_example/adc_example.c</source_file>
+			</source_files>
+			<options>
+	   		 	<compiler_flags>-g -O1 -ffunction-sections -fverbose-asm -fno-inline -mno-cache-volatile -mcustom-fpu-cfg=60-2</compiler_flags>
+				<emulate_unimpl_instructions>true</emulate_unimpl_instructions>
+				<use_small_c_library>false</use_small_c_library>
+			</options>
+		</program>
+	</arch_version>
+</intel_fpga_monitor_program_sample_program>

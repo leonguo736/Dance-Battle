@@ -7,18 +7,21 @@ C_SRCS += \
 ../esp.c \
 ../hex.c \
 ../main.c \
+../regs.c \
 ../uart.c 
 
 OBJS += \
 ./esp.o \
 ./hex.o \
 ./main.o \
+./regs.o \
 ./uart.o 
 
 C_DEPS += \
 ./esp.d \
 ./hex.d \
 ./main.d \
+./regs.d \
 ./uart.d 
 
 
@@ -26,7 +29,7 @@ C_DEPS += \
 %.o: ../%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C Compiler 10.3.1 [arm-none-linux-gnueabihf]'
-	arm-none-linux-gnueabihf-gcc.exe -Dsoc_cv_av -I"C:\Users\Haxrox\Documents\UBC\CPEN-391\l2b-34-elur\esp-hps\hwlib\include" -I"C:\Users\Haxrox\Documents\UBC\CPEN-391\l2b-34-elur\esp-hps\hwlib\include\soc_cv_av" -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -o "$@" "$<"
+	arm-none-linux-gnueabihf-gcc.exe -std=c99 -Dsoc_cv_av -DDEBUG -I"C:\Users\Haxrox\Documents\UBC\CPEN-391\l2b-34-elur\esp-hps\hwlib\include" -I"C:\Users\Haxrox\Documents\UBC\CPEN-391\l2b-34-elur\esp-hps\intelfpgaup\include" -I"C:\Users\Haxrox\Documents\UBC\CPEN-391\l2b-34-elur\esp-hps\hwlib\include\soc_cv_av" -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
