@@ -6,6 +6,7 @@
 #include "const.h"
 #include "uart.h"
 
-void esp_run(void *vargp);
+bool esp_init(int argc, char** argv);
+void esp_run(void);
 
 #endif

@@ -142,12 +142,15 @@ int main(int argc, char **argv) {
 
   // Comms
   uart_init(virtual_base);
+
+  if (!esp_init(argc, argv)) return 1;
+ 
   pthread_t espThread_id;
   pthread_create(&espThread_id, NULL, esp_run, argv);
 
   // Frontend
   pthread_t outputThread_id;
-  // pthread_create(&outputThread_id, NULL, outputThread, NULL);
+  pthread_create(&outputThread_id, NULL, outputThread, NULL);
 
   int swState = 0;
   int keyState = 0;
