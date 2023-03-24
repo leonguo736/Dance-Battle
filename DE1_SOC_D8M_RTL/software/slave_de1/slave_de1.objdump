@@ -1076,8 +1076,8 @@ void startCamera()
    2054c:	01801744 	movi	r6,93
    20550:	01401004 	movi	r5,64
    20554:	002005c0 	call	2005c <writeThresholds>
-  writeDeviceNumber(0);
-   20558:	0009883a 	mov	r4,zero
+  writeDeviceNumber(6);
+   20558:	01000184 	movi	r4,6
    2055c:	00200b40 	call	200b4 <writeDeviceNumber>
 #ifdef DEBUG
   while (1)

@@ -46,10 +46,9 @@ void startUart(int argc, char **argv)
 
 void startCamera()
 {
-//  writeThresholds(0, 0, 255, 0, 255);
   writeThresholds(0, 146, 160, 61, 85); // Leon's Blue
   writeThresholds(1, 64, 93, 156, 175); // Kerry's Dark Red
-  writeDeviceNumber(0);
+  writeDeviceNumber(6);
 #ifdef DEBUG
   while (1)
   {
