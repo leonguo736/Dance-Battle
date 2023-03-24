@@ -479,9 +479,9 @@ always @(*) begin
     //   // display a square with radius 3 around the center of the object
     //   if (hIndex <= RedPixelVIndex + radius && hIndex >= RedPixelVIndex - radius && vIndex <= RedPixelHIndex + radius && vIndex >= RedPixelHIndex - radius) begin // apparently changing this to be vIndex vs RedPixelVIndex causes shitty display
 		if (hIndex <= redPixelVIndex[0] + radius && hIndex >= redPixelVIndex[0] - radius && vIndex <= redPixelHIndex[0] + radius && vIndex >= redPixelHIndex[0] - radius) begin
-			{ R_to_vga, G_to_vga, B_to_vga } = { 10'd255, 10'd0, 10'd0 }; 
+			{ R_to_vga, G_to_vga, B_to_vga } = { 10'd0, 10'd255, 10'd255 }; 
 		end else if (hIndex <= redPixelVIndex[1] + radius && hIndex >= redPixelVIndex[1] - radius && vIndex <= redPixelHIndex[1] + radius && vIndex >= redPixelHIndex[1] - radius) begin
-			{ R_to_vga, G_to_vga, B_to_vga } = { 10'd255, 10'd0, 10'd0 }; 
+			{ R_to_vga, G_to_vga, B_to_vga } = { 10'd0, 10'd255, 10'd255 }; 
 		end else if (SW[9] && (hIndex == 320 || vIndex == 240)) begin
 			{ R_to_vga, G_to_vga, B_to_vga } = { 10'd255, 10'd0, 10'd0 }; 
 		end

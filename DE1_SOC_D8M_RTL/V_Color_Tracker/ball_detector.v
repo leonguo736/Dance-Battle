@@ -79,7 +79,7 @@ always @(*) begin
       if (hIndex <= RedPixelVIndex + radius && hIndex >= RedPixelVIndex - radius && vIndex <= RedPixelHIndex + radius && vIndex >= RedPixelHIndex - radius) begin // apparently changing this to be vIndex vs RedPixelVIndex causes shitty display
          oVideo8bRgb = { 8'd0, 8'd0, 8'd255 }; // dot on point
       end else if ( ram_seems_red == 1'b1 ) begin
-         oVideo8bRgb = { 8'd0, 8'd255, 8'd0 }; // passed filter
+         oVideo8bRgb = { 8'd0, 8'd127, 8'd0 }; // passed filter
       end else begin
          oVideo8bRgb = { 8'd0, 8'd0, 8'd0 }; // failed filter
       end
