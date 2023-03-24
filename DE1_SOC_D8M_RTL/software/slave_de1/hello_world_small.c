@@ -1,11 +1,16 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "system.h"
 #include "esp.h"
 #include "uart.h"
 #include "camera.h"
 #include "const.h"
+
+#ifdef DEBUG
+#include "cameraTest.h"
+#endif
 
 void startUart(int argc, char **argv)
 {
@@ -48,7 +53,14 @@ void startCamera()
 {
   writeThresholds(0, 146, 160, 61, 85); // Leon's Blue
   writeThresholds(1, 64, 93, 156, 175); // Kerry's Dark Red
+  for (int i = 1; i < NUM_POINT_FINDERS; i++)
+  {
+    writeThresholds(i, 64, 93, 156, 175); // Kerry's Dark Red
+  }
   writeDeviceNumber(6);
+
+  struct CameraInterface *cameraInterface =  CameraInterface_new();
+
 #ifdef DEBUG
   while (1)
   {
@@ -68,15 +80,17 @@ void startCamera()
 int main(int argc, char **argv)
 {
 #ifdef DEBUG
-  const int __programNumber__ = 420;
-  printf("\n === Program start number: %i === \n", __programNumber__);
+  srand(time(NULL)); 
+  const int __programId__ = rand() % 100; 
+  printf("\n === Program start id: %i === \n", __programId__);
 #endif
 
-//  startUart(argc, argv);
-  startCamera();
+  //  startUart(argc, argv);
+  // startCamera();
+  cameraTest();
 
 #ifdef DEBUG
-  printf("\n === Program end number: %i === \n", __programNumber__);
+  printf("\n === Program end id: %i === \n", __programId__);
 #endif
 
   return 0;
