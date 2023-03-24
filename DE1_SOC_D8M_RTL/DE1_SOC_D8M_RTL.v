@@ -450,7 +450,7 @@ always @(posedge CLOCK2_50) begin
 			KEY_OLD <= KEY;
 		end
 		if (thresholds_ram_write_en) begin
-			if (thresholds_ram_write_addr == 32) begin
+			if (thresholds_ram_write_addr == 31) begin
 				deviceNumber <= thresholds_ram_write_data[3:0]; 
 			end else begin
 				{cbLow[thresholds_ram_write_addr], cbHigh[thresholds_ram_write_addr], crLow[thresholds_ram_write_addr], crHigh[thresholds_ram_write_addr]} <= thresholds_ram_write_data;
@@ -489,10 +489,10 @@ always @(*) begin
 	// end else begin
 	// 	{ R_to_vga, G_to_vga, B_to_vga } = { 2'd0, oVideo8bRgb[SW[8:5]][23:16], 2'd0, oVideo8bRgb[SW[8:5]][15:8], 2'd0, oVideo8bRgb[SW[8:5]][7:0] };
 	// end
-	if (SW[4]) begin
-		{ R_to_vga, G_to_vga, B_to_vga } = { 2'd0, oVideo8bRgb[SW[8:5]][23:16], 2'd0, oVideo8bRgb[SW[8:5]][15:8], 2'd0, oVideo8bRgb[SW[8:5]][7:0] };
-	end else begin
+	if (SW[8:5] == 4'b1111) begin
 		{ R_to_vga, G_to_vga, B_to_vga } = { 2'd0, RED12b[7:0], 2'd0, GREEN12b[7:0], 2'd0, BLUE12b[7:0] }; 
+	end else begin
+		{ R_to_vga, G_to_vga, B_to_vga } = { 2'd0, oVideo8bRgb[SW[8:5]][23:16], 2'd0, oVideo8bRgb[SW[8:5]][15:8], 2'd0, oVideo8bRgb[SW[8:5]][7:0] };
 	end
 end
 

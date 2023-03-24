@@ -49,7 +49,7 @@ void startCamera()
 //  writeThresholds(0, 0, 255, 0, 255);
   writeThresholds(0, 146, 160, 61, 85); // Leon's Blue
   writeThresholds(1, 64, 93, 156, 175); // Kerry's Dark Red
-  writeDeviceNumber(8);
+  writeDeviceNumber(0);
 #ifdef DEBUG
   while (1)
   {

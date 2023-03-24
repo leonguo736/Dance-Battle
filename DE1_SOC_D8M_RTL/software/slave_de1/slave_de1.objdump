@@ -555,9 +555,9 @@ void writeDeviceNumber(uint8_t deviceNumber)
    200c8:	00220881 	jmpi	22088 <puts>
     return;
   }
-  *(camera_base + 32) = (uint32_t) deviceNumber; 
+  *(camera_base + 31) = (uint32_t) deviceNumber;
    200cc:	d0a00017 	ldw	r2,-32768(gp)
-   200d0:	11002015 	stw	r4,128(r2)
+   200d0:	11001f15 	stw	r4,124(r2)
    200d4:	f800283a 	ret
 
 000200d8 <reset_esp>:
@@ -1076,8 +1076,8 @@ void startCamera()
    2054c:	01801744 	movi	r6,93
    20550:	01401004 	movi	r5,64
    20554:	002005c0 	call	2005c <writeThresholds>
-  writeDeviceNumber(8);
-   20558:	01000204 	movi	r4,8
+  writeDeviceNumber(0);
+   20558:	0009883a 	mov	r4,zero
    2055c:	00200b40 	call	200b4 <writeDeviceNumber>
 #ifdef DEBUG
   while (1)
