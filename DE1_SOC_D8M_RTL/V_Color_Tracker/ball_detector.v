@@ -75,7 +75,8 @@ always @(*) begin
          oVideo8bRgb = { RED[7:0], GREEN[7:0], BLUE[7:0] }; // camera video
       end
    end else begin
-      if (hIndex + radius <= RedPixelHIndex && hIndex - radius >= RedPixelHIndex && vIndex + radius <= RedPixelVIndex && vIndex - radius >= RedPixelVIndex) begin
+      // display a square with radius 3 around the center of the object
+      if (hIndex <= RedPixelVIndex + radius && hIndex >= RedPixelVIndex - radius && vIndex <= RedPixelHIndex + radius && vIndex >= RedPixelHIndex - radius) begin
          oVideo8bRgb = { 8'd0, 8'd0, 8'd255 }; // dot on point
       end else if ( ram_seems_red == 1'b1 ) begin
          oVideo8bRgb = { 8'd0, 8'd255, 8'd0 }; // passed filter
