@@ -9,6 +9,14 @@ void writeThresholds(int i, uint8_t cbLow, uint8_t cbHigh, uint8_t crLow, uint8_
 	*(camera_base + i) = (cbLow << 24) | (cbHigh << 16) | (crLow << 8) | crHigh;
 }
 
+void getCoordsFromHW(int detectorNum, int* x, int* y) {
+    uint32_t raw_coords = *(camera_base + detectorNum);
+    uint16_t smallUpBigDown = (raw_coords >> 16) & 0xFFFF;
+    uint16_t smallLeftBigRight = raw_coords & 0xFFFF;
+    *x = smallLeftBigRight;
+    *y = smallUpBigDown;
+}
+
 void updateCoords() {	
 	for (int i = 0; i < NUM_POINT_FINDERS; i++) {
 		coords[i] = *(camera_base + i);
@@ -25,8 +33,8 @@ void writeDeviceNumber(uint8_t deviceNumber)
   *(camera_base + 31) = (uint32_t) deviceNumber;
 }
 
-float fetchCameraData(int i) {
-    return (float)(rand() % 1000);
+int getRandomData(int _) {
+    return (int)(rand() % 1000);
 }
 
 struct CameraInterface* CameraInterface_new() {
@@ -37,20 +45,21 @@ struct CameraInterface* CameraInterface_new() {
 
 void update(struct CameraInterface* cam) {
     for (int i = 0; i < NUM_DETECTORS; i++) {
-        cam->buf[i][cam->buf_idx][0] = fetchCameraData(i);
-        cam->buf[i][cam->buf_idx][1] = fetchCameraData(i);
+        // cam->buf[i][cam->buf_idx][0] = getRandomData(i);
+        // cam->buf[i][cam->buf_idx][1] = getRandomData(i);
+        getCoordsFromHW(i, &cam->buf[i][cam->buf_idx][0], &cam->buf[i][cam->buf_idx][1]);
     }
     cam->buf_idx = (cam->buf_idx + 1) % BUFFER_SIZE;
 }
 
-void getMedian(struct CameraInterface* cam, float* median) {
+void getMedian(struct CameraInterface* cam, int* median) {
     for (int i = 0; i < NUM_DETECTORS; i++) {
         for (int j = 0; j < DIMENSIONS; j++) {
-            float values[BUFFER_SIZE];
+            int values[BUFFER_SIZE];
             for (int k = 0; k < BUFFER_SIZE; k++) {
                 values[k] = cam->buf[i][k][j];
             }
-            float temp;
+            int temp;
             for (int k = 0; k < BUFFER_SIZE; k++) {
                 for (int l = k + 1; l < BUFFER_SIZE; l++) {
                     if (values[k] > values[l]) {

@@ -85,8 +85,8 @@ int main(int argc, char **argv)
   printf("\n === Program start id: %i === \n", __programId__);
 #endif
 
-  //  startUart(argc, argv);
-  // startCamera();
+//    startUart(argc, argv);
+//   startCamera();
   cameraTest();
 
 #ifdef DEBUG
