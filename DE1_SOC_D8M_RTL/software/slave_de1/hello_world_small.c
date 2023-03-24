@@ -16,7 +16,7 @@ void startUart(int argc, char **argv)
   {
     while (1)
       ;
-    return 1;
+    return;
   };
 
   esp_run();
@@ -74,7 +74,7 @@ int main(int argc, char **argv)
 #endif
 
   startUart(argc, argv);
-  startCamera();
+//  startCamera();
 
 #ifdef DEBUG
   printf("\n === Program end number: %i === \n", __programNumber__);

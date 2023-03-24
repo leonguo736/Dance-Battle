@@ -55,11 +55,8 @@ volatile uint16_t *UART_STATUS_REG;
 volatile uint16_t *UART_CONTROL_REG;
 
 void uart_write_data(char *data);
-int uart_read_data(char *data, int len);
 int uart_read_byte(uint8_t *data);
 void uart_write_byte(uint8_t data);
-char *uart_wait_for_messages(char **messages, unsigned int numMessages);
-void uart_send_command(char *cmd, char **args, unsigned int numArgs);
 
 // Private Function Prototypes
 // uint16_t uart_read_command(volatile uint16_t *reg, uint16_t mask);
