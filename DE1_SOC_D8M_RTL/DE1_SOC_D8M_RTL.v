@@ -491,6 +491,11 @@ always @(*) begin
 	// end
 	if (SW[8:5] == 4'b1111) begin
 		{ R_to_vga, G_to_vga, B_to_vga } = { 2'd0, RED12b[7:0], 2'd0, GREEN12b[7:0], 2'd0, BLUE12b[7:0] }; 
+		if (hIndex == redPixelHIndex[0] || vIndex == redPixelVIndex[0]) begin
+			{ R_to_vga, G_to_vga, B_to_vga } = { 10'd255, 10'd0, 10'd0 };
+		end else if (hIndex == redPixelHIndex[1] || vIndex == redPixelVIndex[1]) begin
+			{ R_to_vga, G_to_vga, B_to_vga } = { 10'd255, 10'd0, 10'd0 };
+		end
 	end else begin
 		{ R_to_vga, G_to_vga, B_to_vga } = { 2'd0, oVideo8bRgb[SW[8:5]][23:16], 2'd0, oVideo8bRgb[SW[8:5]][15:8], 2'd0, oVideo8bRgb[SW[8:5]][7:0] };
 	end
