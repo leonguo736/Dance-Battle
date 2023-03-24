@@ -274,8 +274,9 @@ int main(int argc, char** argv) {
         KEY_read(&keyState);
         
         if (keyState == 1) initGraphics(0);
-        else if (keyState == 2) initGraphics(1);
-        else if (keyState == 4) initGraphics(2);
+        // else if (keyState == 2) initGraphics(1);
+        // else if (keyState == 4) initGraphics(2);
+        if (esp_connected) initGraphics(2);
     }
 
     audio_close();

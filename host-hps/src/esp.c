@@ -1,7 +1,6 @@
 #include "esp.h"
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "commands.h"
@@ -9,11 +8,7 @@
 
 #define SERVER_IP "192.168.48.227:8080"
 
-struct Pose {
-  double beat;
-  double hourAngle;
-  double minuteAngle;
-};
+bool esp_connected = false;
 
 void reset_esp(void);
 bool init_connection(char* serverIP);
@@ -46,28 +41,27 @@ bool esp_init(int argc, char** argv) {
   reset_esp();
 
   unsigned int failCount = 0;
-  bool connected = false;
 
   do {
-    connected = init_connection(argc > 1 ? argv[1] : SERVER_IP);
-    failCount += !connected;
+    esp_connected = init_connection(argc > 1 ? argv[1] : SERVER_IP);
+    failCount += !esp_connected;
 
-    if (!connected && failCount > 0) {
+    if (!esp_connected && failCount > 0) {
       printf("Failed to connect to backend %d/10 times. Retrying ...\n",
              failCount);
     }
 
-  } while (!connected && failCount < 10);
+  } while (!esp_connected && failCount < 10);
 
 #ifdef DEBUG
-  if (!connected) {
+  if (!esp_connected) {
     printf("ESP Failed to connect to backend. Quitting ...\n");
   } else {
-    printf("Connected to backend\n");
+    printf("esp_connected to backend\n");
   }
 #endif
 
-  return connected;
+  return esp_connected;
 }
 
 void esp_run(void) {
@@ -77,8 +71,6 @@ void esp_run(void) {
 
   char recvBuffer[UART_BUFFER_SIZE];
   char sendBuffer[UART_BUFFER_SIZE];
-  unsigned int count = 0;
-  struct Pose pose;
 
   uart_send_command(ESP_TYPE_COMMAND, (char*[]){"h"}, 1);
 
