@@ -473,28 +473,15 @@ end
 wire [23:0] oVideo8bRgb [0:5];
 wire [31:0] radius = 3; 
 always @(*) begin
-	// if (SW[8:5] == 4'b1111) begin
-	// 	if (hIndex == redPixelHIndex[0] || vIndex == redPixelVIndex[0]) begin
-	// 		{ R_to_vga, G_to_vga, B_to_vga } = { 10'd255, 10'd0, 10'd0 };
-	// 	end else if (hIndex == redPixelHIndex[1] || vIndex == redPixelVIndex[1]) begin
-	// 		{ R_to_vga, G_to_vga, B_to_vga } = { 10'd255, 10'd0, 10'd0 };
-	// 	end else begin
-	// 		{ R_to_vg	a, G_to_vga, B_to_vga } = { 2'd0, RED12b[7:0], 2'd0, GREEN12b[7:0], 2'd0, BLUE12b[7:0] };	
-	// 	end	
-	// 	if (SW[9]) begin
-	// 		if (hIndex == 320 || vIndex == 240) begin
-	// 			{ R_to_vga, G_to_vga, B_to_vga } = { 10'd255, 10'd0, 10'd0 }; 
-	// 		end
-	// 	end
-	// end else begin
-	// 	{ R_to_vga, G_to_vga, B_to_vga } = { 2'd0, oVideo8bRgb[SW[8:5]][23:16], 2'd0, oVideo8bRgb[SW[8:5]][15:8], 2'd0, oVideo8bRgb[SW[8:5]][7:0] };
-	// end
 	if (SW[8:5] == 4'b1111) begin
 		{ R_to_vga, G_to_vga, B_to_vga } = { 2'd0, RED12b[7:0], 2'd0, GREEN12b[7:0], 2'd0, BLUE12b[7:0] }; 
-		if (hIndex == redPixelHIndex[0] || vIndex == redPixelVIndex[0]) begin
-			{ R_to_vga, G_to_vga, B_to_vga } = { 10'd255, 10'd0, 10'd0 };
-		end else if (hIndex == redPixelHIndex[1] || vIndex == redPixelVIndex[1]) begin
-			{ R_to_vga, G_to_vga, B_to_vga } = { 10'd255, 10'd0, 10'd0 };
+		
+    //   // display a square with radius 3 around the center of the object
+    //   if (hIndex <= RedPixelVIndex + radius && hIndex >= RedPixelVIndex - radius && vIndex <= RedPixelHIndex + radius && vIndex >= RedPixelHIndex - radius) begin // apparently changing this to be vIndex vs RedPixelVIndex causes shitty display
+		if (hIndex <= redPixelVIndex[0] + radius && hIndex >= redPixelVIndex[0] - radius && vIndex <= redPixelHIndex[0] + radius && vIndex >= redPixelHIndex[0] - radius) begin
+			{ R_to_vga, G_to_vga, B_to_vga } = { 10'd255, 10'd0, 10'd0 }; 
+		end else if (hIndex <= redPixelVIndex[1] + radius && hIndex >= redPixelVIndex[1] - radius && vIndex <= redPixelHIndex[1] + radius && vIndex >= redPixelHIndex[1] - radius) begin
+			{ R_to_vga, G_to_vga, B_to_vga } = { 10'd255, 10'd0, 10'd0 }; 
 		end else if (SW[9] && (hIndex == 320 || vIndex == 240)) begin
 			{ R_to_vga, G_to_vga, B_to_vga } = { 10'd255, 10'd0, 10'd0 }; 
 		end

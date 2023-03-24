@@ -1050,7 +1050,6 @@ void startUart(int argc, char **argv)
 void startCamera()
 {
    20518:	defffe04 	addi	sp,sp,-8
-//  writeThresholds(0, 0, 255, 0, 255);
   writeThresholds(0, 146, 160, 61, 85); // Leon's Blue
    2051c:	00801544 	movi	r2,85
    20520:	d8800015 	stw	r2,0(sp)
@@ -1065,7 +1064,6 @@ void startCamera()
 void startCamera()
 {
    20534:	dfc00115 	stw	ra,4(sp)
-//  writeThresholds(0, 0, 255, 0, 255);
   writeThresholds(0, 146, 160, 61, 85); // Leon's Blue
    20538:	002005c0 	call	2005c <writeThresholds>
   writeThresholds(1, 64, 93, 156, 175); // Kerry's Dark Red

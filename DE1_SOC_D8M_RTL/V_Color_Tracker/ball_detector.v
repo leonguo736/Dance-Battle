@@ -64,7 +64,7 @@ red_frame u1 (
 );
 
 // Mux. Combinatorial logic to select the camera video, or, the red ball detector video frame.
-wire [31:0] radius = 3; // radius of the marker
+wire [31:0] radius = 8; // radius of the marker
 always @(*) begin
    if( iVideoSelect == 1'b1 ) begin      
       if( (hIndex == RedPixelVIndex) || (vIndex == RedPixelHIndex) ) begin
@@ -76,7 +76,7 @@ always @(*) begin
       end
    end else begin
       // display a square with radius 3 around the center of the object
-      if (hIndex <= RedPixelVIndex + radius && hIndex >= RedPixelVIndex - radius && vIndex <= RedPixelHIndex + radius && vIndex >= RedPixelHIndex - radius) begin
+      if (hIndex <= RedPixelVIndex + radius && hIndex >= RedPixelVIndex - radius && vIndex <= RedPixelHIndex + radius && vIndex >= RedPixelHIndex - radius) begin // apparently changing this to be vIndex vs RedPixelVIndex causes shitty display
          oVideo8bRgb = { 8'd0, 8'd0, 8'd255 }; // dot on point
       end else if ( ram_seems_red == 1'b1 ) begin
          oVideo8bRgb = { 8'd0, 8'd255, 8'd0 }; // passed filter
