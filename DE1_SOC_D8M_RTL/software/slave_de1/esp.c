@@ -1,11 +1,11 @@
-#include "esp.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "uart.h"
 #include "commands.h"
 #include "const.h"
+#include "esp.h"
 
 #define SERVER_IP "192.168.48.227:8080"
 

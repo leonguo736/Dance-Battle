@@ -145,6 +145,7 @@ ELF := slave_de1.elf
 C_SRCS += hello_world_small.c
 C_SRCS += uart.c
 C_SRCS += esp.c
+C_SRCS += camera.c
 CXX_SRCS :=
 ASM_SRCS :=
 
