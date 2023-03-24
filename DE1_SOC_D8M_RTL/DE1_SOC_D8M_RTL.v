@@ -289,7 +289,7 @@ FOCUS_ADJ adl(
                       .CLK_50        ( CLOCK2_50 ) , 
                       .RESET_N       ( I2C_RELEASE ), 
                       .RESET_SUB_N   ( I2C_RELEASE ), 
-                      .AUTO_FOC      ( SW[6] & AUTO_FOC ), 
+                      .AUTO_FOC      ( SW[4] & AUTO_FOC ), 
                       .SW_Y          ( 0 ),
                       .SW_H_FREQ     ( 0 ),   
                       .SW_FUC_LINE   ( SW[3] ),   
@@ -380,9 +380,6 @@ Screens Discussion
 1-0000 raw camera feed
 1-0001 3x3 square for point 1 on the screen, with crosshairs
 
-Display the respective cbLow, cbHIgh, crLow, crHigh for a filter
-
-
 */
 reg [7:0] crLow [0:5];
 reg [7:0] crHigh [0:5];
@@ -393,29 +390,39 @@ wire [15:0] redPixelHIndex [0:5]; // Live value
 wire [15:0] redPixelVIndex [0:5]; 
 
 reg [15:0] displayInt;
+wire [41:0] hexOutput0; 
+wire [41:0] hexOutput1;
 int16_to_hex6 int16_to_hex6_0(
 	.i(displayInt),
-	.o({HEX5, HEX4, HEX3, HEX2, HEX1, HEX0})
+	// .o({7'd0, HEX4, HEX3, HEX2, HEX1, HEX0})
+	.o(hexOutput0)
 );
+assign {HEX4, HEX3, HEX2, HEX1, HEX0} = hexOutput0[34:0]; 
+int16_to_hex6 int16_to_hex6_1(
+	.i(deviceNumber),
+	.o(hexOutput1)
+);
+assign HEX5 = hexOutput1[6:0];
 
 always @(*) begin
 	if (SW[1]) begin
 		if (SW[0]) begin
-			displayInt = crHigh[0];
+			displayInt = crHigh[SW[8:5]];
 		end else begin
-			displayInt = crLow[0];
+			displayInt = crLow[SW[8:5]];
 		end
 	end else begin
 		if (SW[0]) begin
-			displayInt = cbHigh[0];
+			displayInt = cbHigh[SW[8:5]];
 		end else begin
-			displayInt = cbLow[0];
+			displayInt = cbLow[SW[8:5]];
 		end
 	end
 end
 
 // Increment / Decrement
 reg [3:0] KEY_OLD; 
+reg [3:0] deviceNumber; 
 always @(posedge CLOCK2_50) begin
 	if (~KEY[0]) begin
 		KEY_OLD <= 4'b1111;
@@ -426,6 +433,7 @@ always @(posedge CLOCK2_50) begin
 		RED8b_cached <= 8'd0;
 		GREEN8b_cached <= 8'd0;
 		BLUE8b_cached <= 8'd0;
+		deviceNumber <= 4'd9; 
 	end else begin
 		if (KEY_OLD != KEY) begin
 			if (~KEY[1]) begin
@@ -442,7 +450,11 @@ always @(posedge CLOCK2_50) begin
 			KEY_OLD <= KEY;
 		end
 		if (thresholds_ram_write_en) begin
-			{cbLow[thresholds_ram_write_addr], cbHigh[thresholds_ram_write_addr], crLow[thresholds_ram_write_addr], crHigh[thresholds_ram_write_addr]} <= thresholds_ram_write_data;
+			if (thresholds_ram_write_addr == 32) begin
+				deviceNumber <= thresholds_ram_write_data[3:0]; 
+			end else begin
+				{cbLow[thresholds_ram_write_addr], cbHigh[thresholds_ram_write_addr], crLow[thresholds_ram_write_addr], crHigh[thresholds_ram_write_addr]} <= thresholds_ram_write_data;
+			end
 		end
 		if (~KEY[3]) begin
 			cbLow[SW[8:5]] <= Cb - 10 >= 0 ? Cb - 10 : 0;
@@ -459,18 +471,27 @@ always @(posedge CLOCK2_50) begin
 end
 
 wire [23:0] oVideo8bRgb [0:5];
+wire [31:0] radius = 3; 
 always @(*) begin
+	// if (SW[8:5] == 4'b1111) begin
+	// 	if (hIndex == redPixelHIndex[0] || vIndex == redPixelVIndex[0]) begin
+	// 		{ R_to_vga, G_to_vga, B_to_vga } = { 10'd255, 10'd0, 10'd0 };
+	// 	end else if (hIndex == redPixelHIndex[1] || vIndex == redPixelVIndex[1]) begin
+	// 		{ R_to_vga, G_to_vga, B_to_vga } = { 10'd255, 10'd0, 10'd0 };
+	// 	end else begin
+	// 		{ R_to_vg	a, G_to_vga, B_to_vga } = { 2'd0, RED12b[7:0], 2'd0, GREEN12b[7:0], 2'd0, BLUE12b[7:0] };	
+	// 	end	
+	// 	if (SW[9]) begin
+	// 		if (hIndex == 320 || vIndex == 240) begin
+	// 			{ R_to_vga, G_to_vga, B_to_vga } = { 10'd255, 10'd0, 10'd0 }; 
+	// 		end
+	// 	end
+	// end else begin
+	// 	{ R_to_vga, G_to_vga, B_to_vga } = { 2'd0, oVideo8bRgb[SW[8:5]][23:16], 2'd0, oVideo8bRgb[SW[8:5]][15:8], 2'd0, oVideo8bRgb[SW[8:5]][7:0] };
+	// end
 	if (SW[4]) begin
-		// if (hIndex == redPixelHIndex[0] || vIndex == redPixelVIndex[0]) begin
-		// 	{ R_to_vga, G_to_vga, B_to_vga } = { 10'd255, 10'd0, 10'd0 };
-		// end else if (hIndex == redPixelHIndex[1] || vIndex == redPixelVIndex[1]) begin
-		// 	{ R_to_vga, G_to_vga, B_to_vga } = { 10'd255, 10'd0, 10'd0 };
-		// end else begin
-		// 	{ R_to_vga, G_to_vga, B_to_vga } = { RED12b[11:4], GREEN12b[11:4], BLUE12b[11:4] };
-		// end
 		{ R_to_vga, G_to_vga, B_to_vga } = { 2'd0, oVideo8bRgb[SW[8:5]][23:16], 2'd0, oVideo8bRgb[SW[8:5]][15:8], 2'd0, oVideo8bRgb[SW[8:5]][7:0] };
 	end else begin
-		// { R_to_vga, G_to_vga, B_to_vga } = oVideo8bRgb[SW[8:5]];
 		{ R_to_vga, G_to_vga, B_to_vga } = { 2'd0, RED12b[7:0], 2'd0, GREEN12b[7:0], 2'd0, BLUE12b[7:0] }; 
 	end
 end
@@ -488,7 +509,7 @@ ball_detector  ball_detector_0(
    .iVgaVRequest( V_active_area ),
    .oVideo8bRgb( oVideo8bRgb[0] ),
    .iVideoSelect( SW[9] ),
-   .iFreezeRam(  ),
+   .iFreezeRam(  ), 
    .iFilterOn(  ), 
    .iCrLow( crLow[0] ),
    .iCrHigh( crHigh[0] ),

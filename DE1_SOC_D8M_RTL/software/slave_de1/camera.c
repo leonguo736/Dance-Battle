@@ -22,5 +22,5 @@ void writeDeviceNumber(uint8_t deviceNumber)
     printf("Device number must be between 0 and 9 inclusive\n");
     return;
   }
-  *(camera_base + 32) = (uint32_t) deviceNumber; 
+  *(camera_base + 31) = (uint32_t) deviceNumber;
 }

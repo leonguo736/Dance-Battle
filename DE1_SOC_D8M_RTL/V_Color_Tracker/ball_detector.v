@@ -64,25 +64,26 @@ red_frame u1 (
 );
 
 // Mux. Combinatorial logic to select the camera video, or, the red ball detector video frame.
+wire [31:0] radius = 3; // radius of the marker
 always @(*) begin
-   if( iVideoSelect == 1'b0 ) begin
-      if( (hIndex == RedPixelVIndex) || (vIndex == RedPixelHIndex) )
-         oVideo8bRgb = { 8'd0, 8'd0, 8'd255 }; // location of point
-      else if ( (hIndex == 320 || vIndex == 240) ) begin
+   if( iVideoSelect == 1'b1 ) begin      
+      if( (hIndex == RedPixelVIndex) || (vIndex == RedPixelHIndex) ) begin
+         oVideo8bRgb = { 8'd0, 8'd0, 8'd255 }; // crosshair on point
+      end else if ( (hIndex == 320 || vIndex == 240) ) begin
          oVideo8bRgb = { 8'd255, 8'd0, 8'd0 }; // center of screen
-      end else 
-         oVideo8bRgb = { RED[7:0], GREEN[7:0], BLUE[7:0] };
+      end else begin
+         oVideo8bRgb = { RED[7:0], GREEN[7:0], BLUE[7:0] }; // camera video
       end
-   else begin
-      if( (hIndex == RedPixelVIndex) || (vIndex == RedPixelHIndex) )
-         oVideo8bRgb = { 8'd0, 8'd0, 8'd255 }; // location of point
-      else
-         if ( ram_seems_red == 1'b1 )
-            oVideo8bRgb = { 8'd0, 8'd255, 8'd0 }; // passed filter
-         else
-            oVideo8bRgb = { 8'd0, 8'd0, 8'd0 }; // failed filter
+   end else begin
+      if (hIndex + radius <= RedPixelHIndex && hIndex - radius >= RedPixelHIndex && vIndex + radius <= RedPixelVIndex && vIndex - radius >= RedPixelVIndex) begin
+         oVideo8bRgb = { 8'd0, 8'd0, 8'd255 }; // dot on point
+      end else if ( ram_seems_red == 1'b1 ) begin
+         oVideo8bRgb = { 8'd0, 8'd255, 8'd0 }; // passed filter
+      end else begin
+         oVideo8bRgb = { 8'd0, 8'd0, 8'd0 }; // failed filter
       end
    end   
+end
 
 // Create a two-port RAM (ball_ram)). 1x640x480 bits.
 // Input = Camera image, but red-detected and low-pass filtered by red_frame.v.

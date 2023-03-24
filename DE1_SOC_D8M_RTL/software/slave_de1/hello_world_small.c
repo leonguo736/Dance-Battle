@@ -46,7 +46,7 @@ void startUart(int argc, char **argv)
 
 void startCamera()
 {
-  writeThresholds(0, 0, 255, 0, 255);
+//  writeThresholds(0, 0, 255, 0, 255);
   writeThresholds(0, 146, 160, 61, 85); // Leon's Blue
   writeThresholds(1, 64, 93, 156, 175); // Kerry's Dark Red
   writeDeviceNumber(8);
@@ -73,8 +73,8 @@ int main(int argc, char **argv)
   printf("\n === Program start number: %i === \n", __programNumber__);
 #endif
 
-  startUart(argc, argv);
-//  startCamera();
+//  startUart(argc, argv);
+  startCamera();
 
 #ifdef DEBUG
   printf("\n === Program end number: %i === \n", __programNumber__);
