@@ -62,25 +62,21 @@ void startCamera()
   writeDeviceNumber(6);
 
   struct CameraInterface *cameraInterface = CameraInterface_new(6);
-    
-  initTimer100ms();
-  unsigned long long timer100ms = getTimer100ms(); 
+
+  unsigned long long timer100ms = getTimer100ms();
 
   while (1)
   {
+    CameraInterface_updateCoords(cameraInterface); 
     if (getTimer100ms() > timer100ms + 3) // every 3 * 100ms = 300ms
     {
       timer100ms = getTimer100ms();
 
-      CameraInterface_updateCoords(cameraInterface);
-
-      unsigned int median[CAMERA_NUM_DETECTORS][CAMERA_DIMENSIONS];
-      CameraInterface_getMedian(cameraInterface, (unsigned int *)median);
-
+      CameraInterface_updateMedian(cameraInterface); 
       printf("Medians: ");
       for (int i = 0; i < CAMERA_NUM_DETECTORS; i++)
       {
-        printf("%u: (%u, %u), ", i, median[i][0], median[i][1]);
+        printf("%u: (%u, %u), ", i, cameraInterface->median[i][0], cameraInterface->median[i][1]);
       }
       printf("\n");
     }
@@ -95,10 +91,10 @@ int main(int argc, char **argv)
   printf("\n === Program start id: %i === \n", __programId__);
 #endif
 
-//  startUart(argc, argv);
-     startCamera();
+  //  startUart(argc, argv);
+  startCamera();
   //  cameraTest();
-//  testTimer();
+  //  testTimer();
 
 #ifdef DEBUG
   printf("\n === Program end id: %i === \n", __programId__);

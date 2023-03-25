@@ -16,12 +16,15 @@ void writeDeviceNumber(uint8_t deviceNumber);
 #define CAMERA_DIMENSIONS 2
 
 typedef struct CameraInterface {
-    unsigned int buf[CAMERA_NUM_DETECTORS][CAMERA_BUFFER_SIZE][CAMERA_DIMENSIONS];
-    unsigned int bufIndex; 
-    uint8_t devId; 
+    unsigned int _buf[CAMERA_NUM_DETECTORS][CAMERA_BUFFER_SIZE][CAMERA_DIMENSIONS];
+    unsigned int _bufIndex; 
+    unsigned int median[CAMERA_NUM_DETECTORS][CAMERA_DIMENSIONS];
+    uint8_t _devId; 
 } CameraInterface; 
+
 CameraInterface* CameraInterface_new(uint8_t devId);
 void CameraInterface_updateCoords(CameraInterface* cam); 
 void CameraInterface_getMedian(CameraInterface* cam, unsigned int* median); 
+void CameraInterface_updateMedian(CameraInterface* cam); 
 
 #endif

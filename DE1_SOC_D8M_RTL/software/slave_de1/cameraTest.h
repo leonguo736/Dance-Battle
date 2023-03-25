@@ -14,7 +14,7 @@ int cameraTest() {
     printf("Buffer:\n");
     for (int i = 0; i < CAMERA_NUM_DETECTORS; i++) {
         for (int j = 0; j < CAMERA_BUFFER_SIZE; j++) {
-            printf("%i %i\n", camera_interface->buf[i][j][0], camera_interface->buf[i][j][1]);
+            printf("%i %i\n", camera_interface->_buf[i][j][0], camera_interface->_buf[i][j][1]);
         }
     }
     unsigned int median[CAMERA_NUM_DETECTORS * CAMERA_DIMENSIONS];
