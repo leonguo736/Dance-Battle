@@ -3,7 +3,7 @@
 
 #include "camera.h"
 
-void initCameraTimer(int devId); 
+void initCameraTimer(CameraInterface *_cameraInterface); 
 CameraInterface * getTimerCameraInterface(void); 
 
 #endif

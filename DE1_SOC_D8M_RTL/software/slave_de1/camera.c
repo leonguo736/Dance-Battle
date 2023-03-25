@@ -7,9 +7,9 @@
 
 volatile uint32_t *camera_base = (uint32_t*)COORDS_SLAVE_0_BASE;
 
-void writeThresholds(unsigned int i, uint8_t cbLow, uint8_t cbHigh, uint8_t crLow, uint8_t crHigh)
+void writeThresholds(unsigned int detectorNum, uint8_t cbLow, uint8_t cbHigh, uint8_t crLow, uint8_t crHigh)
 {
-	*(camera_base + i) = (cbLow << 24) | (cbHigh << 16) | (crLow << 8) | crHigh;
+	*(camera_base + detectorNum) = (cbLow << 24) | (cbHigh << 16) | (crLow << 8) | crHigh;
 }
 
 void getCoordsFromHW(unsigned int detectorNum, unsigned int* x, unsigned int* y) {
@@ -41,7 +41,7 @@ void writeDeviceNumber(uint8_t devId)
 }
 
 CameraInterface* CameraInterface_new(uint8_t devId) {
-    CameraInterface* cam = (CameraInterface*) malloc(sizeof(CameraInterface));
+    CameraInterface* cam = (CameraInterface*) alt_uncached_malloc(sizeof(CameraInterface));
     cam->_bufIndex = 0;
     cam->_devId = devId;
     writeDeviceNumber(devId);

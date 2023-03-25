@@ -60,17 +60,20 @@ void startCamera()
     writeThresholds(i, 64, 93, 156, 175); // Kerry's Dark Red
   }
 
-  initCameraTimer(6); // param is devId (DE1 slave number displayed on HEX)
+  CameraInterface* cameraInterface = CameraInterface_new(6); // param is devId (DE1 slave number displayed on HEX)
+  initCameraTimer(cameraInterface);
+  // initCameraTimer(6); // param is devId (DE1 slave number displayed on HEX)
 #ifdef DEBUG
   while (1)
   {
-    CameraInterface* cameraInterface = getTimerCameraInterface(); 
+    // CameraInterface* cameraInterface = getTimerCameraInterface(); 
     CameraInterface_updateMedian(cameraInterface); 
     char json_str[500]; 
     CameraInterface_getJson(cameraInterface, json_str);
     printf("%s\n", json_str);
-    usleep(1000000);
+    usleep(100000);
   }
+  free(cameraInterface);
 #endif
 }
 
