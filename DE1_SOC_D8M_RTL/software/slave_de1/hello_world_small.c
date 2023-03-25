@@ -6,13 +6,12 @@
 #include "system.h"
 #include "esp.h"
 #include "uart.h"
-#include "camera.h"
 #include "const.h"
 #include "timer.h"
+#include "camera.h"
 
 #ifdef DEBUG
 #include "cameraTest.h"
-#include "timerTesting.h"
 #endif
 
 void startUart(int argc, char **argv)
@@ -61,7 +60,7 @@ void startCamera()
     writeThresholds(i, 64, 93, 156, 175); // Kerry's Dark Red
   }
 
-  initCameraTimer(6); 
+  initCameraTimer(6); // param is devId (DE1 slave number displayed on HEX)
 #ifdef DEBUG
   while (1)
   {
@@ -70,7 +69,7 @@ void startCamera()
     char json_str[500]; 
     CameraInterface_getJson(cameraInterface, json_str);
     printf("%s\n", json_str);
-    usleep(100000);
+    usleep(1000000);
   }
 #endif
 }
