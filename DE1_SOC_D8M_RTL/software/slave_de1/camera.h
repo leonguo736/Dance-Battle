@@ -11,7 +11,7 @@ void writeThresholds(unsigned int i, uint8_t cbLow, uint8_t cbHigh, uint8_t crLo
 void writeDeviceNumber(uint8_t deviceNumber); 
 
 #define CAMERA_HW_MODULES 2
-#define CAMERA_NUM_DETECTORS 2 // if CAMERA_NUM_DETECRORS > CAMERA_HW_MODULES, then the coords will be random
+#define CAMERA_NUM_DETECTORS 8 // if CAMERA_NUM_DETECRORS > CAMERA_HW_MODULES, then the coords will be random
 #define CAMERA_BUFFER_SIZE 3
 #define CAMERA_DIMENSIONS 2
 
@@ -24,7 +24,7 @@ typedef struct CameraInterface {
 
 CameraInterface* CameraInterface_new(uint8_t devId);
 void CameraInterface_updateCoords(CameraInterface* cam); 
-void CameraInterface_getMedian(CameraInterface* cam, unsigned int* median); 
 void CameraInterface_updateMedian(CameraInterface* cam); 
+void CameraInterface_getJson(CameraInterface* ci, char* json_str); 
 
 #endif

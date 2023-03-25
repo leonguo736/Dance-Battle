@@ -73,12 +73,16 @@ void startCamera()
       timer100ms = getTimer100ms();
 
       CameraInterface_updateMedian(cameraInterface); 
-      printf("Medians: ");
-      for (int i = 0; i < CAMERA_NUM_DETECTORS; i++)
-      {
-        printf("%u: (%u, %u), ", i, cameraInterface->median[i][0], cameraInterface->median[i][1]);
-      }
-      printf("\n");
+      char json_str[500]; 
+      CameraInterface_getJson(cameraInterface, json_str);
+      printf("%s\n", json_str);
+      
+      // printf("Medians: ");
+      // for (int i = 0; i < CAMERA_NUM_DETECTORS; i++)
+      // {
+      //   printf("%u: (%u, %u), ", i, cameraInterface->median[i][0], cameraInterface->median[i][1]);
+      // }
+      // printf("\n");
     }
   }
 }
@@ -92,8 +96,8 @@ int main(int argc, char **argv)
 #endif
 
   //  startUart(argc, argv);
-  startCamera();
-  //  cameraTest();
+   startCamera();
+//   cameraTest();
   //  testTimer();
 
 #ifdef DEBUG

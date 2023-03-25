@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "camera.h"
 #include "system.h"
 #include "const.h"
@@ -18,7 +19,7 @@ void getCoordsFromHW(unsigned int detectorNum, unsigned int* x, unsigned int* y)
         uint16_t smallLeftBigRight = raw_coords & 0xFFFF;
         if (smallLeftBigRight > 640 || smallUpBigDown > 480) {
             #ifdef DEBUG
-            printf("Warning `getCoordsFromHW`: unrealistic coords on detector %i, raw: %x, x: %u, y: %u\n", detectorNum, raw_coords, smallLeftBigRight, smallUpBigDown);
+            printf("Warning `getCoordsFromHW`: unrealistic coords on detector %i, raw: %lx, x: %u, y: %u\n", detectorNum, raw_coords, smallLeftBigRight, smallUpBigDown);
             #endif
         } else {            
             *x = smallLeftBigRight;
@@ -85,4 +86,16 @@ void CameraInterface_updateMedian(CameraInterface* cam) {
             cam->median[i][1] = yValues[CAMERA_BUFFER_SIZE/2];
         }
     }
+}
+
+void CameraInterface_getJson(CameraInterface* ci, char* json_str) {
+    char median_str[CAMERA_NUM_DETECTORS * CAMERA_DIMENSIONS * 10]; 
+    char row_str[CAMERA_DIMENSIONS * 10];
+    sprintf(median_str, "[[%d,%d]", ci->median[0][0], ci->median[0][1]);
+    for (int i = 1; i < CAMERA_NUM_DETECTORS; i++) {
+        sprintf(row_str, ",[%d,%d]", ci->median[i][0], ci->median[i][1]);
+        strcat(median_str, row_str);
+    }
+    strcat(median_str, "]");
+    sprintf(json_str, "{\"median\":%s,\"devId\":%d}", median_str, ci->_devId);
 }

@@ -17,14 +17,10 @@ int cameraTest() {
             printf("%i %i\n", camera_interface->_buf[i][j][0], camera_interface->_buf[i][j][1]);
         }
     }
-    unsigned int median[CAMERA_NUM_DETECTORS * CAMERA_DIMENSIONS];
-    CameraInterface_getMedian(camera_interface, median);
+    CameraInterface_updateMedian(camera_interface);
     printf("Median:\n");
     for (int i = 0; i < CAMERA_NUM_DETECTORS; i++) {
-        for (int j = 0; j < CAMERA_DIMENSIONS; j++) {
-            printf("%i ", median[i * CAMERA_DIMENSIONS + j]);
-        }
-        printf("\n");
+        printf("%u, %u\n", camera_interface->median[i][0], camera_interface->median[i][1]);
     }
     return 0;
 } 
