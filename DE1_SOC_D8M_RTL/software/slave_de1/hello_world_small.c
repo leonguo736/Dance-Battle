@@ -53,41 +53,42 @@ void startCamera()
 {
   writeThresholds(0, 146, 160, 61, 85); // Leon's Blue
   writeThresholds(1, 64, 93, 156, 175); // Kerry's Dark Red
-  for (int i = 1; i < NUM_POINT_FINDERS; i++)
+  for (int i = 1; i < CAMERA_NUM_DETECTORS; i++)
   {
     writeThresholds(i, 64, 93, 156, 175); // Kerry's Dark Red
   }
   writeDeviceNumber(6);
 
-  struct CameraInterface *cameraInterface =  CameraInterface_new();
-
-#ifdef DEBUG
+  struct CameraInterface *cameraInterface = CameraInterface_new(6);
   while (1)
   {
-    updateCoords();
-    for (int i = 0; i < NUM_POINT_FINDERS; i++)
+    CameraInterface_update(cameraInterface);
+
+    int median[CAMERA_NUM_DETECTORS][CAMERA_DIMENSIONS];
+    CameraInterface_getMedian(cameraInterface, (int *)median);
+
+#ifdef DEBUG
+    printf("Medians: ");
+    for (int i = 0; i < CAMERA_NUM_DETECTORS; i++)
     {
-      uint32_t raw_coords = coords[i];
-      uint16_t smallUpBigDown = raw_coords >> 16;
-      uint16_t smallLeftBigRight = raw_coords & 0xFFFF;
-      printf("%i: (%i, %i), ", i, smallLeftBigRight, smallUpBigDown);
+      printf("%i: (%i, %i), ", i, median[i][0], median[i][1]);
     }
     printf("\n");
-  }
 #endif
+  }
 }
 
 int main(int argc, char **argv)
 {
 #ifdef DEBUG
-  srand(time(NULL)); 
-  const int __programId__ = rand() % 100; 
+  srand(time(NULL));
+  const int __programId__ = rand() % 100;
   printf("\n === Program start id: %i === \n", __programId__);
 #endif
 
-//    startUart(argc, argv);
-//   startCamera();
-  cameraTest();
+//  startUart(argc, argv);
+     startCamera();
+  //  cameraTest();
 
 #ifdef DEBUG
   printf("\n === Program end id: %i === \n", __programId__);
