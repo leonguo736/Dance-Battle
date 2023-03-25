@@ -1,7 +1,9 @@
 #ifndef TIMER_H
 #define TIMER_H
 
-unsigned long long getTimer100ms(void); 
-void initTimer100ms(void);
+#include "camera.h"
+
+void initCameraTimer(int devId); 
+CameraInterface * getTimerCameraInterface(void); 
 
 #endif

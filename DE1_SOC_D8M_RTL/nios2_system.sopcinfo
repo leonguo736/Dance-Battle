@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <EnsembleReport name="nios2_system" kind="nios2_system" version="1.0" fabric="QSYS">
  <!-- Format version 18.1 625 (Future versions may contain additional information.) -->
- <!-- 2023.03.24.22:21:02 -->
+ <!-- 2023.03.25.12:15:34 -->
  <!-- A collection of modules and connections -->
  <parameter name="AUTO_GENERATION_ID">
   <type>java.lang.Integer</type>
-  <value>1679721662</value>
+  <value>1679771734</value>
   <derived>false</derived>
   <enabled>true</enabled>
   <visible>false</visible>
@@ -5871,7 +5871,7 @@ the requested settings for a module instance. -->
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.LOAD_VALUE</name>
-   <value>4999999</value>
+   <value>14999999</value>
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.MULT</name>
@@ -5879,7 +5879,7 @@ the requested settings for a module instance. -->
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.PERIOD</name>
-   <value>100</value>
+   <value>300</value>
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.PERIOD_UNITS</name>
@@ -5895,7 +5895,7 @@ the requested settings for a module instance. -->
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.TICKS_PER_SEC</name>
-   <value>10</value>
+   <value>3</value>
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.TIMEOUT_PULSE_OUTPUT</name>
@@ -5947,7 +5947,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="period">
    <type>java.lang.String</type>
-   <value>100</value>
+   <value>300</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>true</visible>
@@ -6029,7 +6029,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="loadValue">
    <type>java.lang.String</type>
-   <value>4999999</value>
+   <value>14999999</value>
    <derived>true</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -6045,7 +6045,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="ticksPerSec">
    <type>double</type>
-   <value>10.0</value>
+   <value>3.0</value>
    <derived>true</derived>
    <enabled>true</enabled>
    <visible>false</visible>

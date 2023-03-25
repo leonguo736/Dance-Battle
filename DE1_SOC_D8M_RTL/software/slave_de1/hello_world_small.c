@@ -8,6 +8,7 @@
 #include "uart.h"
 #include "camera.h"
 #include "const.h"
+#include "timer.h"
 
 #ifdef DEBUG
 #include "cameraTest.h"
@@ -59,32 +60,19 @@ void startCamera()
   {
     writeThresholds(i, 64, 93, 156, 175); // Kerry's Dark Red
   }
-  writeDeviceNumber(6);
 
-  struct CameraInterface *cameraInterface = CameraInterface_new(6);
-
-  unsigned long long timer100ms = getTimer100ms();
-
+  initCameraTimer(6); 
+#ifdef DEBUG
   while (1)
   {
-    CameraInterface_updateCoords(cameraInterface); 
-    if (getTimer100ms() > timer100ms + 3) // every 3 * 100ms = 300ms
-    {
-      timer100ms = getTimer100ms();
-
-      CameraInterface_updateMedian(cameraInterface); 
-      char json_str[500]; 
-      CameraInterface_getJson(cameraInterface, json_str);
-      printf("%s\n", json_str);
-      
-      // printf("Medians: ");
-      // for (int i = 0; i < CAMERA_NUM_DETECTORS; i++)
-      // {
-      //   printf("%u: (%u, %u), ", i, cameraInterface->median[i][0], cameraInterface->median[i][1]);
-      // }
-      // printf("\n");
-    }
+    CameraInterface* cameraInterface = getTimerCameraInterface(); 
+    CameraInterface_updateMedian(cameraInterface); 
+    char json_str[500]; 
+    CameraInterface_getJson(cameraInterface, json_str);
+    printf("%s\n", json_str);
+    usleep(100000);
   }
+#endif
 }
 
 int main(int argc, char **argv)
