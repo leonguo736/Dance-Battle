@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <pthread.h>
 #include "system.h"
 #include "esp.h"
 #include "uart.h"
@@ -10,6 +11,7 @@
 
 #ifdef DEBUG
 #include "cameraTest.h"
+#include "timerTesting.h"
 #endif
 
 void startUart(int argc, char **argv)
@@ -60,21 +62,28 @@ void startCamera()
   writeDeviceNumber(6);
 
   struct CameraInterface *cameraInterface = CameraInterface_new(6);
+    
+  initTimer100ms();
+  unsigned long long timer100ms = getTimer100ms(); 
+
   while (1)
   {
-    CameraInterface_update(cameraInterface);
-
-    int median[CAMERA_NUM_DETECTORS][CAMERA_DIMENSIONS];
-    CameraInterface_getMedian(cameraInterface, (int *)median);
-
-#ifdef DEBUG
-    printf("Medians: ");
-    for (int i = 0; i < CAMERA_NUM_DETECTORS; i++)
+    if (getTimer100ms() > timer100ms + 3) // every 3 * 100ms = 300ms
     {
-      printf("%i: (%i, %i), ", i, median[i][0], median[i][1]);
+      timer100ms = getTimer100ms();
+
+      CameraInterface_updateCoords(cameraInterface);
+
+      unsigned int median[CAMERA_NUM_DETECTORS][CAMERA_DIMENSIONS];
+      CameraInterface_getMedian(cameraInterface, (unsigned int *)median);
+
+      printf("Medians: ");
+      for (int i = 0; i < CAMERA_NUM_DETECTORS; i++)
+      {
+        printf("%u: (%u, %u), ", i, median[i][0], median[i][1]);
+      }
+      printf("\n");
     }
-    printf("\n");
-#endif
   }
 }
 
@@ -82,13 +91,14 @@ int main(int argc, char **argv)
 {
 #ifdef DEBUG
   srand(time(NULL));
-  const int __programId__ = rand() % 100;
+  const unsigned int __programId__ = rand() % 100;
   printf("\n === Program start id: %i === \n", __programId__);
 #endif
 
 //  startUart(argc, argv);
      startCamera();
   //  cameraTest();
+//  testTimer();
 
 #ifdef DEBUG
   printf("\n === Program end id: %i === \n", __programId__);

@@ -9,7 +9,7 @@ int cameraTest() {
     srand(time(NULL));
     CameraInterface *camera_interface = CameraInterface_new(6);
     for (int i = 0; i < CAMERA_BUFFER_SIZE; i++) {
-        CameraInterface_update(camera_interface);
+        CameraInterface_updateCoords(camera_interface);
     }
     printf("Buffer:\n");
     for (int i = 0; i < CAMERA_NUM_DETECTORS; i++) {
@@ -17,7 +17,7 @@ int cameraTest() {
             printf("%i %i\n", camera_interface->buf[i][j][0], camera_interface->buf[i][j][1]);
         }
     }
-    int median[CAMERA_NUM_DETECTORS * CAMERA_DIMENSIONS];
+    unsigned int median[CAMERA_NUM_DETECTORS * CAMERA_DIMENSIONS];
     CameraInterface_getMedian(camera_interface, median);
     printf("Median:\n");
     for (int i = 0; i < CAMERA_NUM_DETECTORS; i++) {

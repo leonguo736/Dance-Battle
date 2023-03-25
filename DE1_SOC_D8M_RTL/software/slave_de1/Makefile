@@ -146,6 +146,7 @@ C_SRCS += hello_world_small.c
 C_SRCS += uart.c
 C_SRCS += esp.c
 C_SRCS += camera.c
+C_SRCS += timer.c
 CXX_SRCS :=
 ASM_SRCS :=
 
