@@ -3,6 +3,12 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef GCC
+#include "HEX.h"
+#else
+#include <intelfpgaup/HEX.h>
+#endif
+
 #include "commands.h"
 #include "const.h"
 
@@ -47,6 +53,7 @@ bool esp_init(int argc, char** argv) {
     failCount += !esp_connected;
 
     if (!esp_connected && failCount > 0) {
+      HEX_set(failCount);
       printf("Failed to connect to backend %d/10 times. Retrying ...\n",
              failCount);
     }
