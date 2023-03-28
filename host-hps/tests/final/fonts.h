@@ -9,5 +9,6 @@
 
 extern int basicFont[NUM_CHARS][FONT_WIDTH][FONT_HEIGHT];
 extern int italicFont[NUM_CHARS][FONT_WIDTH][FONT_HEIGHT];
+extern int arrowFont[NUM_CHARS][FONT_WIDTH][FONT_HEIGHT];
 
 #endif

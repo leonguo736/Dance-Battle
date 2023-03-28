@@ -29,9 +29,9 @@ class App:
         f.write("int {}[{}][{}][{}] = {{".format(self.name, 122, *self.size))
         for c in range(123):
             if chr(c) in self.allCharData:
-                f.write("{{ {} }}".format(", ".join(["{{ {} }}".format(", ".join([str(self.allCharData[chr(c)][x][y]) for y in range(self.size[1])])) for x in range(self.size[0])])) + ",")
+                f.write("{{ {} }}".format(", ".join(["{{ {} }}".format(", ".join([str(self.allCharData[chr(c)][x][y]) for y in range(self.size[1])])) for x in range(self.size[0])])) + ",\n")
             else:
-                f.write("{{ {} }}".format(", ".join(["{{ {} }}".format(", ".join(['0' for y in range(self.size[1])])) for x in range(self.size[0])])) + ",")
+                f.write("{{ {} }}".format(", ".join(["{{ {} }}".format(", ".join(['0' for y in range(self.size[1])])) for x in range(self.size[0])])) + ",\n")
         f.write(" };")
 
     def loop(self):

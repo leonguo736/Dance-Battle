@@ -6,8 +6,9 @@
 
 #include "vgatools.h"
 
-#define AUDIO_RATE 8000
-#define NUM_SAMPLES 480000
+#define AUDIO_RATE 48000 // If you change this, recalculate SAMPLES_PER_FRAME
+#define NUM_SAMPLES 1000000
+#define VOLUME 0x7FFFFFF
 
 struct Song {
     double samplesPerBeat;

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <stddef.h>
 #include <pthread.h>
 #include <unistd.h>
@@ -16,8 +17,8 @@
 #endif
 
 // Communications
-#include "esp.h"
-#include "regs.h"
+// #include "esp.h"
+// #include "regs.h"
 
 // Audio / Frontend
 #include "fonts.h"
@@ -33,6 +34,11 @@ int switchScreenLock = 0;
 int graphicsUpdateLock = 0;
 int buffer = 0; // 0 or 1
 
+FILE * fp;
+char * sampleLine = NULL;
+size_t sampleLen = 0;
+ssize_t sampleRead;
+
 int titleSlideDone = 0;
 int statusSlideDone = 0;
 const char * init_names[] = {"alex", "bell", "kery", "leon"};
@@ -40,8 +46,15 @@ int init_name_speeds[] = {4, 4, -4, -4};
 int init_name_offsets[] = {0, 0, 40, 40};
 short color_init_names[] = {0xe4a, 0xd19, 0xc641, 0x7859};
 
+int p1Connected = 0;
+int p2Connected = 0;
+int mode = 0;
+int songId = 0;
+int numSongs = 3;
+const char * song_names[] = {"tetris 99 theme", "groovy gray", "super treadmill"};
+
 #define FPS 40
-#define SAMPLES_PER_FRAME 200 // Recalculate if you change the audio rate or frame rate
+#define SAMPLES_PER_FRAME 1200 // Recalculate if you change the audio rate or frame rate
 
 struct InitScreenState {
     double danceX;
@@ -102,9 +115,26 @@ void resetInitState(void) {
     }
 }
 
+void resetLobbyState(void) {
+    for (int i = 0; i < 2; i++) {
+        struct LobbyScreenState state = {
+            0, 0, 0, 0
+        };
+        lobbyScreenStates[i] = state;
+    }
+}
+
 void writeAudio(int l, int r) {
+    //audio_wait_write();
     audio_write_left(l);
     audio_write_right(r);
+}
+
+void playNextAudioSample() {
+    double l, r;
+    l = (getline(&sampleLine, &sampleLen, fp) != -1) ? atof(sampleLine) : 0;
+    r = (getline(&sampleLine, &sampleLen, fp) != -1) ? atof(sampleLine) : 0;
+    writeAudio(l * VOLUME, r * VOLUME);
 }
 
 void switchBuffer(void) {
@@ -118,13 +148,32 @@ void initGraphics(int s) {
     screen = s;
     for (int i = 0; i < 2; i++) { // Put the same thing on both buffers
         if (s == 0) { // Init
+            fp = fopen("tetris.txt", "r");
+            if (fp == NULL) {
+                printf("Song file not found\n");
+                exit(0);
+            }
+
             titleSlideDone = 0;
             statusSlideDone = 0;
             resetInitState();
             drawBackground();
             video_box(BORDER + 1, 110, WIDTH - BORDER - 1, 180, COLOR_INIT_TUBE);
         } else if (s == 1) { // Lobby
+            resetLobbyState();
             drawBackground();
+            video_box(BORDER + 1, 50, WIDTH - BORDER - 1, 100, COLOR_LOBBY_BG2);
+            video_box(BORDER + 1, 140, WIDTH - BORDER - 1, 180, COLOR_LOBBY_BG2);
+            drawString(italicFont, "lobby", LOBBY_TITLE_X, LOBBY_TITLE_Y, COLOR_LOBBY_TITLE, LOBBY_TITLE_SCALE, LOBBY_TITLE_KERNING);
+            video_box(LOBBY_PLAYER_X1, LOBBY_PLAYER_Y, LOBBY_PLAYER_X1 + LOBBY_PLAYER_W, LOBBY_PLAYER_Y + LOBBY_PLAYER_H, COLOR_LOBBY_PLAYER_BORDER);
+            video_box(LOBBY_PLAYER_X2, LOBBY_PLAYER_Y, LOBBY_PLAYER_X2 + LOBBY_PLAYER_W, LOBBY_PLAYER_Y + LOBBY_PLAYER_H, COLOR_LOBBY_PLAYER_BORDER);
+            video_box(LOBBY_PLAYER_X1 + LOBBY_PLAYER_BORDER, LOBBY_PLAYER_Y + LOBBY_PLAYER_BORDER, LOBBY_PLAYER_X1 + LOBBY_PLAYER_W - LOBBY_PLAYER_BORDER, LOBBY_PLAYER_Y + LOBBY_PLAYER_H - LOBBY_PLAYER_BORDER, COLOR_LOBBY_PLAYER_FILL);
+            video_box(LOBBY_PLAYER_X2 + LOBBY_PLAYER_BORDER, LOBBY_PLAYER_Y + LOBBY_PLAYER_BORDER, LOBBY_PLAYER_X2 + LOBBY_PLAYER_W - LOBBY_PLAYER_BORDER, LOBBY_PLAYER_Y + LOBBY_PLAYER_H - LOBBY_PLAYER_BORDER, COLOR_LOBBY_PLAYER_FILL);
+            video_box(LOBBY_MODE_X, LOBBY_MODE_Y, LOBBY_MODE_X + LOBBY_MODE_W, LOBBY_MODE_Y + LOBBY_MODE_H, COLOR_LOBBY_MODE_BORDER);
+            video_box(LOBBY_SONG_X, LOBBY_SONG_Y, LOBBY_SONG_X + LOBBY_SONG_W, LOBBY_SONG_Y + LOBBY_SONG_H, COLOR_LOBBY_SONG_FILL);
+            drawChar(arrowFont, 'a', LOBBY_SONG_X - FONT_WIDTH - 5, 155, COLOR_LOBBY_SONG_ARROW, 1);
+            drawChar(arrowFont, 'b', LOBBY_SONG_X + LOBBY_SONG_W + 5, 155, COLOR_LOBBY_SONG_ARROW, 1);
+
         } else if (s == 2) { // Game
             drawBackground();
 
@@ -165,8 +214,8 @@ void updateGraphics(void) {
             drawHLine(INIT_BATTLE_Y + 5, bx - 55, bx - 4, COLOR_BG);
             drawHLine(INIT_BATTLE_Y + 10, bx - 25, bx - 4, COLOR_BG);
 
-            prevState->danceX = lerp(prevState->danceX, INIT_DANCE_X, INIT_TITLE_LERP);
-            prevState->battleX = lerp(prevState->battleX, INIT_BATTLE_X, INIT_TITLE_LERP);
+            prevState->danceX = lerp(otherState->danceX, INIT_DANCE_X, INIT_TITLE_LERP);
+            prevState->battleX = lerp(otherState->battleX, INIT_BATTLE_X, INIT_TITLE_LERP);
             dx = (int)round(prevState->danceX);
             bx = (int)round(prevState->battleX);
 
@@ -186,7 +235,7 @@ void updateGraphics(void) {
         } else if (!statusSlideDone) {
             int sy = (int)round(prevState->statusY);
             drawString(basicFont, "waiting for server connection", INIT_STATUS_X, sy, COLOR_BG, INIT_STATUS_SCALE, INIT_STATUS_KERNING);
-            prevState->statusY = lerp(prevState->statusY, INIT_STATUS_Y, INIT_TITLE_LERP);
+            prevState->statusY = lerp(otherState->statusY, INIT_STATUS_Y, INIT_TITLE_LERP);
             sy = (int)round(prevState->statusY);
             drawString(basicFont, "waiting for server connection", INIT_STATUS_X, sy, COLOR_INIT_STATUS, INIT_STATUS_SCALE, INIT_STATUS_KERNING);
 
@@ -214,6 +263,48 @@ void updateGraphics(void) {
             }
         }
     } else if (screen == 1) { // Lobby
+        struct LobbyScreenState * prevState = &(lobbyScreenStates[buffer]);
+        //struct LobbyScreenState * otherState = &(lobbyScreenStates[(buffer+1)%2]);
+
+        if (p1Connected != prevState->p1Connected) {
+            if (p1Connected) {
+                drawStringCenter(basicFont, "p1 missing", 107, 75, COLOR_LOBBY_PLAYER_FILL, LOBBY_PLAYER_SCALE, LOBBY_PLAYER_KERNING);
+                drawStringCenter(basicFont, "p1 ready", 107, 75, COLOR_LOBBY_PLAYER_READY, LOBBY_PLAYER_SCALE, LOBBY_PLAYER_KERNING);
+            } else {
+                drawStringCenter(basicFont, "p1 ready", 107, 75, COLOR_LOBBY_PLAYER_FILL, LOBBY_PLAYER_SCALE, LOBBY_PLAYER_KERNING);
+                drawStringCenter(basicFont, "p1 missing", 107, 75, COLOR_LOBBY_PLAYER_MISSING, LOBBY_PLAYER_SCALE, LOBBY_PLAYER_KERNING);
+            }
+            prevState->p1Connected = p1Connected;
+        }
+        if (p2Connected != prevState->p2Connected) {
+            if (p2Connected) {
+                drawStringCenter(basicFont, "p2 missing", 204, 75, COLOR_LOBBY_PLAYER_FILL, LOBBY_PLAYER_SCALE, LOBBY_PLAYER_KERNING);
+                drawStringCenter(basicFont, "p2 ready", 204, 75, COLOR_LOBBY_PLAYER_READY, LOBBY_PLAYER_SCALE, LOBBY_PLAYER_KERNING);
+            } else {
+                drawStringCenter(basicFont, "p2 ready", 204, 75, COLOR_LOBBY_PLAYER_FILL, LOBBY_PLAYER_SCALE, LOBBY_PLAYER_KERNING);
+                drawStringCenter(basicFont, "p2 missing", 204, 75, COLOR_LOBBY_PLAYER_MISSING, LOBBY_PLAYER_SCALE, LOBBY_PLAYER_KERNING);
+            }
+            prevState->p2Connected = p2Connected;
+        }
+        if (mode != prevState->mode) {
+            if (mode) {
+                video_box(LOBBY_MODE_X + LOBBY_MODE_BORDER, LOBBY_MODE_Y + LOBBY_MODE_BORDER, LOBBY_MODE_X + LOBBY_MODE_BORDER + 100, LOBBY_MODE_Y + LOBBY_MODE_H - LOBBY_MODE_BORDER, COLOR_LOBBY_MODE_FILL1);
+                video_box(LOBBY_MODE_X + LOBBY_MODE_BORDER + 100, LOBBY_MODE_Y + LOBBY_MODE_BORDER, LOBBY_MODE_X + LOBBY_MODE_BORDER + 200, LOBBY_MODE_Y + LOBBY_MODE_H - LOBBY_MODE_BORDER, COLOR_LOBBY_MODE_FILL2);
+                drawStringCenter(basicFont, "p1 attacks", LOBBY_MODE_X + LOBBY_MODE_BORDER + 50, 120, COLOR_LOBBY_MODE_TEXT1, 1, 1);
+                drawStringCenter(basicFont, "both defend", LOBBY_MODE_X + LOBBY_MODE_BORDER + 150, 120, COLOR_LOBBY_MODE_TEXT2, 1, 1);
+            } else {
+                video_box(LOBBY_MODE_X + LOBBY_MODE_BORDER, LOBBY_MODE_Y + LOBBY_MODE_BORDER, LOBBY_MODE_X + LOBBY_MODE_BORDER + 100, LOBBY_MODE_Y + LOBBY_MODE_H - LOBBY_MODE_BORDER, COLOR_LOBBY_MODE_FILL2);
+                video_box(LOBBY_MODE_X + LOBBY_MODE_BORDER + 100, LOBBY_MODE_Y + LOBBY_MODE_BORDER, LOBBY_MODE_X + LOBBY_MODE_BORDER + 200, LOBBY_MODE_Y + LOBBY_MODE_H - LOBBY_MODE_BORDER, COLOR_LOBBY_MODE_FILL1);
+                drawStringCenter(basicFont, "p1 attacks", LOBBY_MODE_X + LOBBY_MODE_BORDER + 50, 120, COLOR_LOBBY_MODE_TEXT2, 1, 1);
+                drawStringCenter(basicFont, "both defend", LOBBY_MODE_X + LOBBY_MODE_BORDER + 150, 120, COLOR_LOBBY_MODE_TEXT1, 1, 1);
+            }
+            prevState->mode = mode;
+        }
+        if (songId != prevState->songId) {
+            drawStringCenter(basicFont, (char *)song_names[prevState->songId], 160, 160, COLOR_LOBBY_SONG_FILL, 1, 1);
+            drawStringCenter(basicFont, (char *)song_names[songId], 160, 160, COLOR_LOBBY_SONG_TEXT, 1, 1);
+            prevState->songId = songId;
+        }
 
     } else if (screen == 2) { // Game
 
@@ -236,7 +327,9 @@ void * outputThread(void *vargp) {
     int s = 0;
 
     while (1) {
-        writeAudio(0, 0);
+        if (screen == 0) {
+            playNextAudioSample();
+        }
         s = (s + 1) % SAMPLES_PER_FRAME;
         if (s == 0) {
             while (switchScreenLock);
@@ -246,24 +339,24 @@ void * outputThread(void *vargp) {
 }
 
 int main(int argc, char** argv) {
-    void* virtual_base;
+    // void* virtual_base;
 
     if (!audio_open()) return 1;
     if (!video_open()) return 1;
     if (!SW_open()) return 1;
     if (!KEY_open()) return 1;
-    if (!regs_init(&virtual_base)) return 1;
+    // if (!regs_init(&virtual_base)) return 1;
 
     pthread_t outputThread_id;
     pthread_create(&outputThread_id, NULL, outputThread, NULL);
 
     // Comms
-    uart_init(virtual_base);
+    // uart_init(virtual_base);
 
-    if (!esp_init(argc, argv)) return 1;
+    // if (!esp_init(argc, argv)) return 1;
     
-    pthread_t espThread_id;
-    pthread_create(&espThread_id, NULL, (void*) &esp_run, argv);
+    // pthread_t espThread_id;
+    // pthread_create(&espThread_id, NULL, (void*) &esp_run, argv);
 
     int swState = 0;
     int keyState = 0;
@@ -273,16 +366,34 @@ int main(int argc, char** argv) {
         SW_read(&swState);
         KEY_read(&keyState);
         
-        if (keyState == 1) initGraphics(0);
-        // else if (keyState == 2) initGraphics(1);
+        if (screen == 0) {
+            if (keyState == 2) initGraphics(1);
+            else if (keyState == 4) initGraphics(2);
+        } else if (screen == 1) {
+            while (graphicsUpdateLock);
+            if (keyState == 4) songId = (songId == 0) ? numSongs - 1 : songId - 1;
+            else if (keyState == 8) songId = (songId + 1) % numSongs;
+            mode = swState & 1;
+            p1Connected = (swState >> 1) & 1;
+            p2Connected = (swState >> 2) & 1;
+            
+            if (keyState == 1) initGraphics(0);
+        } else if (screen == 2) {
+            if (keyState == 1) initGraphics(0);
+            else if (keyState == 2) initGraphics(1);
+        }
+
         // else if (keyState == 4) initGraphics(2);
-        if (esp_connected) initGraphics(2);
+        // if (esp_connected) initGraphics(2);
     }
 
     audio_close();
     video_close();
     SW_close();
     KEY_close();
+
+    fclose(fp);
+    free(sampleLine);
 
     return 0;
 }

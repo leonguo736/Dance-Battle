@@ -11,7 +11,7 @@ gcc -std=gnu99 -Wall -pthread -o vgatestdriver vgatestdriver.c -lintelfpgaup -lm
 
 gcc -std=gnu99 -Wall -pthread -o gamescreen gamescreen.c -lintelfpgaup -lm
 
-gcc -std=gnu99 -Wall -pthread -o main main.c song.c vgatools.c -lintelfpgaup -lm
+gcc -std=gnu99 -Wall -pthread -o main main.c song.c fonts.c vgatools.c -lintelfpgaup -lm
 
 When compiling with song info, comment out the use of the samples first as including them takes forever. Only when the rest of the code compiles should you compile with the samples.
 

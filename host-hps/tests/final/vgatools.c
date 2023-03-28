@@ -10,7 +10,7 @@
 
 #include "vgatools.h"
 
-int game_pbar_rect[] = {80, 210, 60, 15};
+int game_pbar_rect[] = {80, 210, 160, 15};
 
 struct ScreenPose convertPose(struct Pose pose, double spb, int so) {
     struct ScreenPose sp = { (int)(pose.beat * spb + so), -1, POSE_HOUR_LENGTH * cos(pose.hourAngle), POSE_HOUR_LENGTH * sin(pose.hourAngle), POSE_MINUTE_LENGTH * cos(pose.minuteAngle), POSE_MINUTE_LENGTH * sin(pose.minuteAngle) };
@@ -54,6 +54,12 @@ void drawString(int font[NUM_CHARS][FONT_WIDTH][FONT_HEIGHT], char s[], int tlx,
         drawChar(font, s[c], tlx + offset, tly, color, scale);
         offset += FONT_WIDTH * scale + kerning;
     }
+}
+
+void drawStringCenter(int font[NUM_CHARS][FONT_WIDTH][FONT_HEIGHT], char s[], int x, int y, short color, int scale, int kerning) {
+    int w = strlen(s) * FONT_WIDTH * scale + (strlen(s) - 1) * kerning;
+    int h = FONT_HEIGHT * scale;
+    drawString(font, s, x - w / 2, y - h / 2, color, scale, kerning);
 }
 
 void drawVLine(int x, int y1, int y2, short color) {
