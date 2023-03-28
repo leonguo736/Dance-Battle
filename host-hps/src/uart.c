@@ -32,6 +32,9 @@ void uart_write_command(volatile uint16_t *reg, uint16_t mask,
 
 int uart_read_byte(uint8_t *data) {
   // printf("uart_read_byte - %x \n", *UART_STATUS_REG);
+  if (uart_read_command(UART_STATUS_REG, UART_ROE_MASK) != 0) {
+    printf("uart_read_data - ROE\n");
+  }
   // Poll until the previous bit has been shifted
   while (uart_read_command(UART_STATUS_REG, UART_RRDY_MASK) == 0);
 

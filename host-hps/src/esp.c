@@ -84,5 +84,12 @@ void esp_run(void) {
   while (1) {
     unsigned int len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
     printf("[%d] %s\n", len, recvBuffer);
+
+    if (strcmp(recvBuffer, "test")) {
+      for (unsigned int i = 0; i < 10; i++) {
+        HEX_set(i);
+        usleep(1000000); 
+      }
+    }
   }
 }
