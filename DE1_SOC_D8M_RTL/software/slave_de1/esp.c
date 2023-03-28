@@ -116,9 +116,11 @@ void esp_run(void) {
     printf("[%d] %s\n", len, recvBuffer);
 
     if (strcmp(recvBuffer, "test")) {
-      for (uint8_t i = 0; i < 10; i++) {
-        writeDeviceNumber(i);
-        usleep(1000000);
+      while (1) {
+        for (uint8_t i = 0; i < 10; i++) {
+          writeDeviceNumber(i);
+          usleep(1000000);
+        }
       }
     }
   }

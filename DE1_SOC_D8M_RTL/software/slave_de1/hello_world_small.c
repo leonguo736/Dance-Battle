@@ -62,6 +62,7 @@ void startUart(int argc, char **argv) {
   };
 
   // Calc diff
+  time_t start_clock = clock();
   gettimeofday(&end, NULL);
   timestamp_end = alt_timestamp();
   ticks_end = alt_nticks();
@@ -90,9 +91,9 @@ void startUart(int argc, char **argv) {
   //              (end1.tv_nsec - start1.tv_nsec) *
   //              NANOSECONDS_TO_MILLISECONDS));
 
+  esp_run();
   while (1)
     ;
-  esp_run();
   // pid_t pid = fork();
 
   // if (pid == -1) {
