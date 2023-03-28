@@ -67,6 +67,7 @@ void startUart(int argc, char **argv) {
   timestamp_end = alt_timestamp();
   ticks_end = alt_nticks();
   // clock_gettime(CLOCK_REALTIME, &end1);
+  printf("Clock: %d\n", start_clock);
   printf("TimeOfDay End: %f ms\n",
          (double)(end.tv_sec * SECONDS_TO_MILLISECONDS +
                   end.tv_usec * MICROSECONDS_TO_MILLISECONDS));
