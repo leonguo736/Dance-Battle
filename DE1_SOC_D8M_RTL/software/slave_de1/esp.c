@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #include "uart.h"
+#include "camera.h"
 #include "commands.h"
 #include "const.h"
 #include "esp.h"
@@ -113,5 +114,12 @@ void esp_run(void) {
   while (1) {
     unsigned int len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
     printf("[%d] %s\n", len, recvBuffer);
+
+    if (strcmp(recvBuffer, "test")) {
+      for (uint8_t i = 0; i < 10; i++) {
+        writeDeviceNumber(i);
+        usleep(1000000);
+      }
+    }
   }
 }
