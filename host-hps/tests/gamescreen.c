@@ -16,11 +16,12 @@
 
 #include "display.h"
 #include "youwantgnomes.h"
+#include "font.h"
 
 // Audio
 
 #define AUDIO_RATE 8000
-#define VOLUME 0x7FFFFFF
+#define VOLUME 0x7FFFFFFF
 
 #define SAMPLES_PER_FRAME 200 // 40 FPS
 #define PIXELS_PER_SAMPLE 0.01375 // Pose movement speed
@@ -68,7 +69,6 @@ void updateProgressBar() {
 }
 
 int getPoseX(struct ScreenPose sp) {
-    printf("SP: %d, SONG: %d\n", sp.sample, song.sampleNo);
     int x = (int)(50 + PIXELS_PER_SAMPLE * (sp.sample - song.sampleNo + song.sampleOffset));
     if (x >= 50 && x <= 270) {
         return x;
@@ -88,8 +88,6 @@ void drawPose(int x, int hx, int hy, int mx, int my, int erase) {
 void updatePoses(void) {
     int oldEarly = gamescreenStates[state].earlyPose;
     int oldLate = gamescreenStates[state].latePose;
-    printf("Early: %d\n", oldEarly);
-    printf("Late: %d\n", oldLate);
     if (oldEarly != -1) {
         for (int p = oldEarly; p <= oldLate; p++) {
             int oldX = gamescreenStates[state].poseXs[p];
@@ -101,18 +99,15 @@ void updatePoses(void) {
     // Advance pose range if necessary
     if (song.earlyPose == -1) {
         if (song.sampleNo >= song.screenPoses[0].sample - POSE_LIFETIME) {
-            printf("Started\n");
             song.earlyPose = 0;
             song.latePose = 0;
         }
     } else {
         if (song.latePose < song.numPoses && song.sampleNo >= song.screenPoses[song.latePose + 1].sample - POSE_LIFETIME) {
             song.latePose++;
-            printf("Song late pose: %d\n", song.latePose);
         }
         if (song.earlyPose < song.numPoses && song.sampleNo >= song.screenPoses[song.earlyPose].sample) {
             song.earlyPose++;
-            printf("Song early pose: %d\n", song.earlyPose);
         }
     }
 
@@ -124,7 +119,6 @@ void updatePoses(void) {
         for (int p = song.earlyPose; p <= song.latePose; p++) {
             struct ScreenPose sp = song.screenPoses[p];
             int x = getPoseX(sp);
-            printf("X of %d: %d\n", p, x);
             sp.x = x;
             gamescreenStates[state].poseXs[p] = x;
             if (x != 0) drawPose(x, sp.hx, sp.hy, sp.mx, sp.my, 0);
@@ -132,9 +126,32 @@ void updatePoses(void) {
     }
 }
 
+void drawLetter(int ascii, int tlx, int tly, short color) {
+    for (int x = tlx; x < tlx + 7; x++) {
+        for (int y = tly; y < tly + 9; y++) {
+            if (font[ascii][x - tlx][y - tly]) {
+                video_pixel(x, y, color);
+            }
+        }
+    }
+}
+
+void drawWord(char word[], int tlx, int tly, int kerning, short color) {
+    int xOff = 0;
+    for (int c = 0; c < strlen(word); c++) {
+        drawLetter(word[c], tlx + xOff, tly, color);
+        xOff += 7 + kerning;
+    }
+}
+
 void updateDisplay() {
     updateProgressBar();
     updatePoses();
+    drawLetter(97, 10, 10, COLOR_PROGRESSFILL);
+    drawLetter(98, 18, 10, COLOR_DOT);
+    drawLetter(99, 26, 10, COLOR_HLINE);
+    drawLetter(100, 34, 10, COLOR_PROGRESSBORDER);
+    drawWord("welcome to dance battle", 70, 25, 1, COLOR_PROGRESSFILL);
     switchScreen();
 }
 
@@ -148,7 +165,7 @@ void * guiThread(void *vargp) {
 
     // Init song data
 
-    int numPoses = 4;
+    int numPoses = 8;
     struct Pose poses[MAX_POSES] = {
         {16, 0, 0.1},
         {18, 0.2, 0.3},

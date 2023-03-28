@@ -1,7 +1,7 @@
 # Converts rgb into 16-bit color
 
 while True:
-    inp = input("Enter your color (r,g,b): ").split(",")
+    inp = input("Enter your color (r,g,b): ").split(", ")
     if len(inp) != 3 or any(not c.isdigit() for c in inp) or any(int(c) < 0 or int(c) > 255 for c in inp):
         print("Bad input")
     else:
