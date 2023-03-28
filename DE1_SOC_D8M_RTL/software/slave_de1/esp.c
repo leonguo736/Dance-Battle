@@ -83,39 +83,40 @@ void esp_run(void) {
 
   uart_send_command(ESP_TYPE_COMMAND, (char*[]){"ca"}, 1);
 
-  while (count < 10) {
+  // while (count < 10) {
 
-    pose.beat = (rand() % 1000) / (rand() % 100 + 1.0);
-    pose.hourAngle = (rand() % 1000) / (rand() % 100 + 1.0);
-    pose.minuteAngle = (rand() % 1000) / (rand() % 100 + 1.0);
+  //   pose.beat = (rand() % 1000) / (rand() % 100 + 1.0);
+  //   pose.hourAngle = (rand() % 1000) / (rand() % 100 + 1.0);
+  //   pose.minuteAngle = (rand() % 1000) / (rand() % 100 + 1.0);
 
-    sprintf(sendBuffer, "%f %f %f", pose.beat, pose.hourAngle,
-            pose.minuteAngle);
+  //   sprintf(sendBuffer, "%f %f %f", pose.beat, pose.hourAngle,
+  //           pose.minuteAngle);
 
-    uart_send_command(ESP_POSE_COMMAND, (char*[]){sendBuffer}, 1);
+  //   uart_send_command(ESP_POSE_COMMAND, (char*[]){sendBuffer}, 1);
 
-    unsigned int len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
-    printf("[%d] %s\n", len, recvBuffer);
+  //   unsigned int len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
+  //   printf("[%d] %s\n", len, recvBuffer);
 
-    len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
-    printf("[%d] %s\n", len, recvBuffer);
+  //   len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
+  //   printf("[%d] %s\n", len, recvBuffer);
 
-    len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
-    printf("[%d] %s\n", len, recvBuffer);
+  //   len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
+  //   printf("[%d] %s\n", len, recvBuffer);
 
-    len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
-    printf("[%d] %s\n", len, recvBuffer);
+  //   len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
+  //   printf("[%d] %s\n", len, recvBuffer);
 
-    count++;
+  //   count++;
 
-    usleep(1000000);
-  }
+  //   usleep(1000000);
+  // }
 
   while (1) {
     unsigned int len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
     printf("[%d] %s\n", len, recvBuffer);
 
-    if (strcmp(recvBuffer, "test")) {
+    if (!strcmp(recvBuffer, "test")) {
+      printf("Counting\n");
       while (1) {
         for (uint8_t i = 0; i < 10; i++) {
           writeDeviceNumber(i);
