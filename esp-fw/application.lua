@@ -23,9 +23,12 @@ stateMachine = switch()
     :case("d", function(command)
         DEBUG = not DEBUG
         print("Debug: " .. tostring(DEBUG))
+    :case("j", function(command, json)
+        print("Sending JSON")
+        ws:send(json)
     end)
     :default(function(command, ...)
-        ws:send(command .. table.concat({...} or {}, ","))
+        ws:send(command .. table.concat({...} or {}, " "))
     end)
 
 uart.on("data", "\r", function(data)
