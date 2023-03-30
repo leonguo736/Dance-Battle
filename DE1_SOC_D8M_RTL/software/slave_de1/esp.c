@@ -1,12 +1,13 @@
+#include "esp.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
-#include "uart.h"
 #include "commands.h"
 #include "const.h"
-#include "esp.h"
+#include "uart.h"
 
 #define SERVER_IP "192.168.48.227:8080"
 
@@ -29,7 +30,8 @@ void reset_esp() {
 bool init_connection(char* serverIP) {
   // Connect to the backend
   uart_send_command(ESP_CONNECT_BACKEND_COMMAND, (char*[]){serverIP}, 1);
-  char* yieldedMessage = uart_wait_for_messages((char*[]){ESP_READY_COMMAND, ESP_CLOSE_COMMAND}, 2);
+  char* yieldedMessage = uart_wait_for_messages(
+      (char*[]){ESP_READY_COMMAND, ESP_CLOSE_COMMAND}, 2);
 
   if (strcmp(yieldedMessage, ESP_CLOSE_COMMAND) == 0) {
     return false;
@@ -39,10 +41,10 @@ bool init_connection(char* serverIP) {
 }
 
 bool esp_init(int argc, char** argv) {
-  #ifdef DEBUG
-    printf("ESP Init\n");
-  #endif
-  
+#ifdef DEBUG
+  printf("ESP Init\n");
+#endif
+
   reset_esp();
 
   unsigned int failCount = 0;
@@ -59,21 +61,35 @@ bool esp_init(int argc, char** argv) {
 
   } while (!connected && failCount < 10);
 
-  #ifdef DEBUG
+#ifdef DEBUG
   if (!connected) {
     printf("ESP Failed to connect to backend. Quitting ...\n");
   } else {
     printf("Connected to backend\n");
   }
-  #endif
+#endif
 
   return connected;
 }
 
+char* esp_read(unsigned int* len) {
+#ifdef DEBUG
+  printf("Reading ESP\n");
+#endif
+
+  char recvBuffer[UART_BUFFER_SIZE];
+  *len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
+
+  char* returnBuffer = (char*)malloc(sizeof(char) * *len);
+  memcpy(returnBuffer, recvBuffer, *len);
+  
+  return returnBuffer;
+}
+
 void esp_run(void) {
-  #ifdef DEBUG
-    printf("Running ESP\n");
-  #endif
+#ifdef DEBUG
+  printf("Running ESP\n");
+#endif
 
   char recvBuffer[UART_BUFFER_SIZE];
   char sendBuffer[UART_BUFFER_SIZE];
@@ -83,7 +99,6 @@ void esp_run(void) {
   uart_send_command(ESP_TYPE_COMMAND, (char*[]){"ca"}, 1);
 
   while (count < 10) {
-
     pose.beat = (rand() % 1000) / (rand() % 100 + 1.0);
     pose.hourAngle = (rand() % 1000) / (rand() % 100 + 1.0);
     pose.minuteAngle = (rand() % 1000) / (rand() % 100 + 1.0);
