@@ -14,43 +14,6 @@
 #include "cameraTest.h"
 #endif
 
-void startUart(int argc, char **argv)
-{
-  uart_init();
-  uart_output();
-
-  if (!esp_init(argc, argv))
-  {
-    while (1)
-      ;
-    return;
-  };
-
-  esp_run();
-  // pid_t pid = fork();
-
-  // if (pid == -1) {
-  //   printf("Fork failed\n");
-  //   while(1)
-  //     ;
-  //   return 1;
-  // } else if (pid == 0) {
-  //   esp_run();
-  // } else {
-  //   printf("Parent Process\n");
-  //   while (1) {
-  //     updateCoords();
-  //     for (int i = 0; i < NUM_POINT_FINDERS; i++) {
-  //       uint32_t raw_coords = coords[i];
-  //       uint16_t smallUpBigDown = raw_coords >> 16;
-  //       uint16_t smallLeftBigRight = raw_coords & 0xFFFF;
-  //       printf("%i: (%i, %i), ", i, smallLeftBigRight, smallUpBigDown);
-  //     }
-  //     printf("\n");
-  //   }
-  // }
-}
-
 void setupCameraThresholds()
 {
   writeThresholds(0, 146, 160, 61, 85); // Leon's Blue
@@ -69,8 +32,15 @@ int main(int argc, char **argv)
   printf("\n === Program start id: %i === \n", __programId__);
 #endif
 
-  // uart setup
-  //  startUart(argc, argv);
+  // esp setup
+  uart_init();
+  if (!esp_init(argc, argv)) {
+    #ifdef DEBUG_ESP
+      printf("ESP Init failed\n");
+      while(1)
+        ;
+    #endif
+  }
 
   // camera setup
   setupCameraThresholds();
@@ -81,8 +51,8 @@ int main(int argc, char **argv)
   while (1)
   {
     int uartReadLen = 420; // -1;
-    char *uartReadData = NULL; // uartRead(&uartReadLen);
-    if (uartReadLen > 0) {
+    char *uartReadData = esp_read(&uartReadLen);
+    if (uartReadData != NULL) {
       (void)uartReadData; // TODO: parse uartReadData
       int uartWriteLen = 500; 
       char *uartWriteBuf = malloc(sizeof(*uartWriteBuf) * uartWriteLen); 

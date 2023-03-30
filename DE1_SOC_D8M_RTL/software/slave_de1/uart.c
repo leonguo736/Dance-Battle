@@ -54,25 +54,36 @@ volatile uint16_t *UART_TXDATA_REG;
 volatile uint16_t *UART_STATUS_REG;
 volatile uint16_t *UART_CONTROL_REG;
 
+// Private Function Prototypes
+/*
+ * Returns whether the UART is ready to read data
+ */
+int uart_read_ready(void);
+
+/*
+ * Writes a string to the UART
+ * data - the string to write
+ */
 void uart_write_data(char *data);
+
+/*
+ * Reads a byte from the UART and stores it in the data pointer.
+ * Blocks until a byte is available
+ * Returns 0 on success, -1 on failure
+ */
 int uart_read_byte(uint8_t *data);
+
+/*
+ * Writes a byte to the UART
+ * Blocks until the transmitter is ready
+ * Returns 0 on success, -1 on failure
+ */
 void uart_write_byte(uint8_t data);
 
-// Private Function Prototypes
-// uint16_t uart_read_command(volatile uint16_t *reg, uint16_t mask);
-// void uart_write_command(volatile uint16_t *reg, uint16_t mask, uint16_t
-// value);
-
-// // Private Function Definitions
-// uint16_t uart_read_command(volatile uint16_t *reg, uint16_t mask) {
-//   return *reg &= mask;
-// }
-
-// void uart_write_command(volatile uint16_t *reg, uint16_t mask,
-//                         uint16_t value) {
-//   uint16_t write_val = *reg & ~mask;
-//   *reg = write_val | value;
-// }
+// Private Function Definitions
+int uart_read_ready(void) {
+  return (IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE) & UART_RRDY_MASK) != 0;
+}
 
 int uart_read_byte(uint8_t *data) {
 #ifdef DEBUG_SEVERE
@@ -83,10 +94,10 @@ int uart_read_byte(uint8_t *data) {
     // if (uart_read_command(UART_STATUS_REG, UART_ROE_MASK) != 0) {
     printf("uart_read_data - ROE\n");
   }
+
   // Poll until the previous bit has been shifted
-  while ((IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE) & UART_RRDY_MASK) == 0)
+  while (!uart_read_ready())
     ;
-  // while (uart_read_command(UART_STATUS_REG, UART_RRDY_MASK) == 0);
 
   // Read the data from the data register
   *data = IORD_ALTERA_AVALON_UART_RXDATA(UART_0_BASE);
@@ -146,20 +157,24 @@ void uart_write_data(char *str) {
 int uart_read_data(char *str, int len) {
   unsigned int actualLen = 0;
 
-  // Read from UART and store in buffer
-  while (*str != '\n' && actualLen < len) {
-    uart_read_byte((uint8_t *)str);
-    str += *str != '\n';
-    actualLen += *str != '\n';
-  }
+  if (uart_read_ready()) {
+    // Read from UART and store in buffer
+    while (*str != '\n' && actualLen < len) {
+      uart_read_byte((uint8_t *)str);
+      str += *str != '\n';
+      actualLen += *str != '\n';
+    }
 
-  *(str - (actualLen == len)) = '\0';
+    *(str - (actualLen == len)) = '\0';
 
-  if (actualLen < len) {
-    return actualLen;
+    if (actualLen < len) {
+      return actualLen;
+    } else {
+      printf("Buffer Overflow - %d\n", actualLen);
+      return -1;
+    }
   } else {
-    printf("Buffer Overflow - %d\n", actualLen);
-    return -1;
+    return 0;
   }
 }
 
