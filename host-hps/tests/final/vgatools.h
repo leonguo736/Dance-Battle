@@ -111,8 +111,6 @@ struct ScreenPose {
     double my;
 };
 
-struct ScreenPose convertPose(struct Pose pose, double spb, int so);
-
 // General Methods
 
 void drawBackground(void);
@@ -138,10 +136,6 @@ void drawLoadWheel(double angle);
 
 void drawPBarOutline(void);
 void drawPBarFill(int prevWidth, int currWidth);
-
-struct ScreenPose convertPose(struct Pose pose, double spb, int so) {
-    
-}
 
 void drawGameVLines(void);
 void drawPose(struct ScreenPose sp, int x, int erase);

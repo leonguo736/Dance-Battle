@@ -51,15 +51,15 @@ int p2Connected = 0;
 int mode = 0;
 int songId = 0;
 int numSongs = 3;
-const char * song_names[numSongs] = {"tetris 99 theme", "groovy gray", "super treadmill"};
+char * song_names[] = {"tetris 99 theme", "groovy gray", "super treadmill"};
 
-const double song_spbs[numSongs] = { 60 / 140.0 };
-const int song_offsets[numSongs] = { 0 };
-const int song_numposes[numSongs] = { 8 };
-const char * song_samplefiles[numSongs] = {
+double song_spbs[] = { 60 / 140.0 };
+int song_offsets[] = { 0 };
+int song_numPoses[] = { 8 };
+char * song_samplefiles[] = {
     "tetris.txt", "groovy.txt", "treadmill.txt"
 };
-const struct Pose song_poses[numSongs][MAX_POSES] = {
+const struct Pose song_poses[][MAX_POSES] = {
     {
         {5, 0.1, 0.2},
         {7, 0.3, 0.4},
@@ -81,7 +81,9 @@ int latePose = -1;
 int gameStarted = 0;
 
 #define FPS 40
-#define SAMPLES_PER_FRAME 1200 // Recalculate if you change the audio rate or frame rate
+#define PIXELS_PER_SAMPLE 0.01375
+#define POSE_LIFETIME 16000
+#define SAMPLES_PER_FRAME 200 // Recalculate if you change the audio rate or frame rate
 
 struct InitScreenState {
     double danceX;
@@ -108,7 +110,7 @@ struct GameScreenState {
     int poseXs[MAX_POSES];
 };
 
-struct GameScreenState gamescreenStates[2];
+struct GameScreenState gameScreenStates[2];
 
 struct ResultsScreenState {
 
@@ -147,11 +149,17 @@ void resetLobbyState(void) {
 
 void resetGamescreenState(void) {
     for (int i = 0; i < 2; i++) {
-        struct GamescreenState state = {
+        struct GameScreenState state = {
             0, -1, -1, { 0 }
         };
-        gamescreenStates[i] = state;
+        gameScreenStates[i] = state;
     }
+}
+
+struct ScreenPose convertPose(struct Pose pose) {
+    struct ScreenPose sp = { (int)(pose.beat * song_spbs[songId] + song_offsets[songId]), -1, POSE_HOUR_LENGTH * cos(pose.hourAngle), POSE_HOUR_LENGTH * sin(pose.hourAngle), POSE_MINUTE_LENGTH * cos(pose.minuteAngle), POSE_MINUTE_LENGTH * sin(pose.minuteAngle) };
+
+    return sp;
 }
 
 void initGame() {
@@ -167,7 +175,7 @@ void initGame() {
     }
 
     for (int p = 0; p < song_numPoses[songId]; p++) {
-        screenPoses[p] = convertPose(song_poses[songId][p], song_spbs[songId], song_offsets[songId]);
+        screenPoses[p] = convertPose(song_poses[songId][p]);
     }
 
     sampleNo = 0;
@@ -183,7 +191,7 @@ void writeAudio(int l, int r) {
 }
 
 int getPoseX(struct ScreenPose sp) {
-    int x = (int)(GAME_VLINE_MARGIN + PIXELS_PER_SAMPLE * (sp.sample - sampleNo + song.sampleOffset));
+    int x = (int)(GAME_VLINE_MARGIN + PIXELS_PER_SAMPLE * (sp.sample - sampleNo + song_offsets[songId]));
     if (x >= GAME_VLINE_MARGIN && x <= WIDTH - GAME_VLINE_MARGIN) {
         return x;
     }
@@ -356,8 +364,8 @@ void updateGraphics(void) {
         }
 
     } else if (screen == 2) { // Game
-        struct GameScreenState * prevState = &(gamescreenStates[buffer]);
-        struct GameScreenState * otherState = &(gamescreenStates[(buffer+1)%2]);
+        struct GameScreenState * prevState = &(gameScreenStates[buffer]);
+        //struct GameScreenState * otherState = &(gameScreenStates[(buffer+1)%2]);
 
         // Update progress bar
         int newPBarWidth = (int)(159 * (double)sampleNo / NUM_SAMPLES);
@@ -383,10 +391,10 @@ void updateGraphics(void) {
                 latePose = 0;
             }
         } else {
-            if (latePose < song.numPoses && sampleNo >= screenPoses[latePose + 1].sample - POSE_LIFETIME) {
+            if (latePose < song_numPoses[songId] && sampleNo >= screenPoses[latePose + 1].sample - POSE_LIFETIME) {
                 latePose++;
             }
-            if (earlyPose < song.numPoses && sampleNo >= screenPoses[earlyPose].sample) {
+            if (earlyPose < song_numPoses[songId] && sampleNo >= screenPoses[earlyPose].sample) {
                 earlyPose++;
             }
         }

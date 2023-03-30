@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
 
 #ifdef GCC
 #include "video.h"
@@ -11,12 +10,6 @@
 #include "vgatools.h"
 
 int game_pbar_rect[] = {80, 210, 160, 15};
-
-struct ScreenPose convertPose(struct Pose pose, double spb, int so) {
-    struct ScreenPose sp = { (int)(pose.beat * spb + so), -1, POSE_HOUR_LENGTH * cos(pose.hourAngle), POSE_HOUR_LENGTH * sin(pose.hourAngle), POSE_MINUTE_LENGTH * cos(pose.minuteAngle), POSE_MINUTE_LENGTH * sin(pose.minuteAngle) };
-
-    return sp;
-}
 
 void drawBackground(void) {
     video_box(0, 0, WIDTH - 1, BORDER, COLOR_BORDER);
