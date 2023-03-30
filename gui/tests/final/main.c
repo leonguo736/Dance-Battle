@@ -62,7 +62,7 @@ struct GameScreenState {
     int poseXs[MAX_POSES];
 };
 
-struct GameScreenState gameScreenStates[2] = {
+struct GameScreenState gamescreenStates[2] = {
     { 0, -1, -1, { 0 } },
     { 0, -1, -1, { 0 } }
 };

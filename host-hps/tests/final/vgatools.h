@@ -78,17 +78,17 @@
 
 #define COLOR_LOBBY_TITLE 0xfa3b
 #define COLOR_LOBBY_BG2 0x3066
-#define COLOR_LOBBY_PLAYER_BORDER 0x2044
+#define COLOR_LOBBY_PLAYER_BORDER 0x8033
 #define COLOR_LOBBY_PLAYER_FILL 0x2804
 #define COLOR_LOBBY_PLAYER_MISSING 0xe9e7
 #define COLOR_LOBBY_PLAYER_READY 0x5f67
-#define COLOR_LOBBY_MODE_BORDER 0x2044
+#define COLOR_LOBBY_MODE_BORDER 0x8033
 #define COLOR_LOBBY_MODE_FILL1 0x3066
 #define COLOR_LOBBY_MODE_FILL2 0x80ee
 #define COLOR_LOBBY_MODE_TEXT1 0x7ba9
 #define COLOR_LOBBY_MODE_TEXT2 0xde92
 #define COLOR_LOBBY_SONG_FILL 0x2044
-#define COLOR_LOBBY_SONG_TEXT 0x237d
+#define COLOR_LOBBY_SONG_TEXT 0xde92
 #define COLOR_LOBBY_SONG_ARROW 0xf72c
 
 #define COLOR_GAME_HLINE 0xffd8
@@ -138,6 +138,12 @@ void drawLoadWheel(double angle);
 
 void drawPBarOutline(void);
 void drawPBarFill(int prevWidth, int currWidth);
-void drawPose(struct ScreenPose sp, int erase);
+
+struct ScreenPose convertPose(struct Pose pose, double spb, int so) {
+    
+}
+
+void drawGameVLines(void);
+void drawPose(struct ScreenPose sp, int x, int erase);
 
 #endif

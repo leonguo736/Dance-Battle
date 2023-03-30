@@ -51,7 +51,34 @@ int p2Connected = 0;
 int mode = 0;
 int songId = 0;
 int numSongs = 3;
-const char * song_names[] = {"tetris 99 theme", "groovy gray", "super treadmill"};
+const char * song_names[numSongs] = {"tetris 99 theme", "groovy gray", "super treadmill"};
+
+const double song_spbs[numSongs] = { 60 / 140.0 };
+const int song_offsets[numSongs] = { 0 };
+const int song_numposes[numSongs] = { 8 };
+const char * song_samplefiles[numSongs] = {
+    "tetris.txt", "groovy.txt", "treadmill.txt"
+};
+const struct Pose song_poses[numSongs][MAX_POSES] = {
+    {
+        {5, 0.1, 0.2},
+        {7, 0.3, 0.4},
+        {9, 0.5, 0.6},
+        {11, 0.7, 0.8},
+        {13, 0.9, 1.0},
+        {17, 1.1, 1.2},
+        {21, 1.3, 1.4},
+        {23, 1.5, 1.6}
+    }
+};
+
+struct ScreenPose screenPoses[MAX_POSES];
+double samplesL[1000000];
+double samplesR[1000000];
+int sampleNo = 0;
+int earlyPose = -1;
+int latePose = -1;
+int gameStarted = 0;
 
 #define FPS 40
 #define SAMPLES_PER_FRAME 1200 // Recalculate if you change the audio rate or frame rate
@@ -72,10 +99,7 @@ struct LobbyScreenState {
     int songId;
 };
 
-struct LobbyScreenState lobbyScreenStates[2] = {
-    { 0, 0, 0, 0 },
-    { 0, 0, 0, 0 }
-};
+struct LobbyScreenState lobbyScreenStates[2];
 
 struct GameScreenState {
     int pBarWidth;
@@ -84,10 +108,7 @@ struct GameScreenState {
     int poseXs[MAX_POSES];
 };
 
-struct GameScreenState gameScreenStates[2] = {
-    { 0, -1, -1, { 0 } },
-    { 0, -1, -1, { 0 } }
-};
+struct GameScreenState gamescreenStates[2];
 
 struct ResultsScreenState {
 
@@ -118,23 +139,55 @@ void resetInitState(void) {
 void resetLobbyState(void) {
     for (int i = 0; i < 2; i++) {
         struct LobbyScreenState state = {
-            0, 0, 0, 0
+            1, 1, 1, 1
         };
         lobbyScreenStates[i] = state;
     }
 }
 
+void resetGamescreenState(void) {
+    for (int i = 0; i < 2; i++) {
+        struct GamescreenState state = {
+            0, -1, -1, { 0 }
+        };
+        gamescreenStates[i] = state;
+    }
+}
+
+void initGame() {
+    fp = fopen(song_samplefiles[songId], "r");
+    if (fp == NULL) {
+        printf("Song file not found\n");
+        exit(0);
+    }
+
+    for (int i = 0; i < NUM_SAMPLES; i++) {
+        samplesL[i] = VOLUME * (getline(&sampleLine, &sampleLen, fp) != -1) ? atof(sampleLine) : 0;
+        samplesR[i] = VOLUME * (getline(&sampleLine, &sampleLen, fp) != -1) ? atof(sampleLine) : 0;
+    }
+
+    for (int p = 0; p < song_numPoses[songId]; p++) {
+        screenPoses[p] = convertPose(song_poses[songId][p], song_spbs[songId], song_offsets[songId]);
+    }
+
+    sampleNo = 0;
+    earlyPose = -1;
+    latePose = -1;
+    gameStarted = 0;
+}
+
 void writeAudio(int l, int r) {
-    //audio_wait_write();
+    audio_wait_write();
     audio_write_left(l);
     audio_write_right(r);
 }
 
-void playNextAudioSample() {
-    double l, r;
-    l = (getline(&sampleLine, &sampleLen, fp) != -1) ? atof(sampleLine) : 0;
-    r = (getline(&sampleLine, &sampleLen, fp) != -1) ? atof(sampleLine) : 0;
-    writeAudio(l * VOLUME, r * VOLUME);
+int getPoseX(struct ScreenPose sp) {
+    int x = (int)(GAME_VLINE_MARGIN + PIXELS_PER_SAMPLE * (sp.sample - sampleNo + song.sampleOffset));
+    if (x >= GAME_VLINE_MARGIN && x <= WIDTH - GAME_VLINE_MARGIN) {
+        return x;
+    }
+    return 0;
 }
 
 void switchBuffer(void) {
@@ -148,11 +201,7 @@ void initGraphics(int s) {
     screen = s;
     for (int i = 0; i < 2; i++) { // Put the same thing on both buffers
         if (s == 0) { // Init
-            fp = fopen("tetris.txt", "r");
-            if (fp == NULL) {
-                printf("Song file not found\n");
-                exit(0);
-            }
+            
 
             titleSlideDone = 0;
             statusSlideDone = 0;
@@ -175,13 +224,13 @@ void initGraphics(int s) {
             drawChar(arrowFont, 'b', LOBBY_SONG_X + LOBBY_SONG_W + 5, 155, COLOR_LOBBY_SONG_ARROW, 1);
 
         } else if (s == 2) { // Game
+            resetGamescreenState();
             drawBackground();
 
             // Straight lines
-            video_line(BORDER, 50, WIDTH - BORDER, 50, COLOR_GAME_HLINE);
-            video_line(BORDER, HEIGHT - 50, WIDTH - BORDER, HEIGHT - 50, COLOR_GAME_HLINE);
-            video_line(50, BORDER, 50, HEIGHT - BORDER, COLOR_GAME_VLINE);
-            video_line(WIDTH - BORDER, BORDER, WIDTH - BORDER, HEIGHT - BORDER, COLOR_GAME_VLINE);
+            video_line(BORDER + 1, GAME_VLINE_MARGIN, WIDTH - BORDER - 1, GAME_VLINE_MARGIN, COLOR_GAME_HLINE);
+            video_line(BORDER + 1, HEIGHT - GAME_VLINE_MARGIN, WIDTH - BORDER - 1, HEIGHT - GAME_VLINE_MARGIN, COLOR_GAME_HLINE);
+            drawGameVLines();
 
             drawPBarOutline();
         }
@@ -278,11 +327,11 @@ void updateGraphics(void) {
         }
         if (p2Connected != prevState->p2Connected) {
             if (p2Connected) {
-                drawStringCenter(basicFont, "p2 missing", 204, 75, COLOR_LOBBY_PLAYER_FILL, LOBBY_PLAYER_SCALE, LOBBY_PLAYER_KERNING);
-                drawStringCenter(basicFont, "p2 ready", 204, 75, COLOR_LOBBY_PLAYER_READY, LOBBY_PLAYER_SCALE, LOBBY_PLAYER_KERNING);
+                drawStringCenter(basicFont, "p2 missing", 214, 75, COLOR_LOBBY_PLAYER_FILL, LOBBY_PLAYER_SCALE, LOBBY_PLAYER_KERNING);
+                drawStringCenter(basicFont, "p2 ready", 214, 75, COLOR_LOBBY_PLAYER_READY, LOBBY_PLAYER_SCALE, LOBBY_PLAYER_KERNING);
             } else {
-                drawStringCenter(basicFont, "p2 ready", 204, 75, COLOR_LOBBY_PLAYER_FILL, LOBBY_PLAYER_SCALE, LOBBY_PLAYER_KERNING);
-                drawStringCenter(basicFont, "p2 missing", 204, 75, COLOR_LOBBY_PLAYER_MISSING, LOBBY_PLAYER_SCALE, LOBBY_PLAYER_KERNING);
+                drawStringCenter(basicFont, "p2 ready", 214, 75, COLOR_LOBBY_PLAYER_FILL, LOBBY_PLAYER_SCALE, LOBBY_PLAYER_KERNING);
+                drawStringCenter(basicFont, "p2 missing", 214, 75, COLOR_LOBBY_PLAYER_MISSING, LOBBY_PLAYER_SCALE, LOBBY_PLAYER_KERNING);
             }
             prevState->p2Connected = p2Connected;
         }
@@ -307,7 +356,51 @@ void updateGraphics(void) {
         }
 
     } else if (screen == 2) { // Game
+        struct GameScreenState * prevState = &(gamescreenStates[buffer]);
+        struct GameScreenState * otherState = &(gamescreenStates[(buffer+1)%2]);
 
+        // Update progress bar
+        int newPBarWidth = (int)(159 * (double)sampleNo / NUM_SAMPLES);
+        drawPBarFill(prevState->pBarWidth, newPBarWidth);
+        prevState->pBarWidth = newPBarWidth;
+
+        // Poses
+        int prevEarly = prevState->earlyPose;
+        int prevLate = prevState->latePose;
+
+        // Erase previous poses
+        if (prevEarly != -1) {
+            for (int p = prevEarly; p <= prevLate; p++) {
+                int prevX = prevState->poseXs[p];
+                drawPose(screenPoses[p], prevX, 1);
+            }
+        }
+
+        // Advance pose pointers if necessary
+        if (earlyPose != -1) {
+            if (sampleNo >= screenPoses[0].sample - POSE_LIFETIME) {
+                earlyPose = 0;
+                latePose = 0;
+            }
+        } else {
+            if (latePose < song.numPoses && sampleNo >= screenPoses[latePose + 1].sample - POSE_LIFETIME) {
+                latePose++;
+            }
+            if (earlyPose < song.numPoses && sampleNo >= screenPoses[earlyPose].sample) {
+                earlyPose++;
+            }
+        }
+        prevState->earlyPose = earlyPose;
+        prevState->latePose = latePose;
+
+        // Draw new poses
+        if (earlyPose != -1) {
+            for (int p = earlyPose; p <= latePose; p++) {
+                int newX = getPoseX(screenPoses[p]);
+                prevState->poseXs[p] = newX;
+                drawPose(screenPoses[p], newX, 0);
+            }
+        }
     }
 
     switchBuffer();
@@ -327,8 +420,11 @@ void * outputThread(void *vargp) {
     int s = 0;
 
     while (1) {
-        if (screen == 0) {
-            playNextAudioSample();
+        if (screen == 2 && gameStarted) {
+            writeAudio(samplesL[sampleNo], samplesR[sampleNo]);
+            sampleNo++;
+        } else {
+            writeAudio(0, 0);
         }
         s = (s + 1) % SAMPLES_PER_FRAME;
         if (s == 0) {
@@ -367,8 +463,7 @@ int main(int argc, char** argv) {
         KEY_read(&keyState);
         
         if (screen == 0) {
-            if (keyState == 2) initGraphics(1);
-            else if (keyState == 4) initGraphics(2);
+            if (keyState == 1) initGraphics(1);
         } else if (screen == 1) {
             while (graphicsUpdateLock);
             if (keyState == 4) songId = (songId == 0) ? numSongs - 1 : songId - 1;
@@ -377,10 +472,13 @@ int main(int argc, char** argv) {
             p1Connected = (swState >> 1) & 1;
             p2Connected = (swState >> 2) & 1;
             
-            if (keyState == 1) initGraphics(0);
+            if (keyState == 1) {
+                initGame();
+                initGraphics(2);
+            }
         } else if (screen == 2) {
             if (keyState == 1) initGraphics(0);
-            else if (keyState == 2) initGraphics(1);
+            else if (keyState == 2) gameStarted = 1;
         }
 
         // else if (keyState == 4) initGraphics(2);

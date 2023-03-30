@@ -87,9 +87,13 @@ void drawPBarFill(int prevWidth, int currWidth) {
     video_box(r[0] + prevWidth + 1, r[1] + 1, r[0] + currWidth, r[1] + r[3] - 1, COLOR_GAME_PBAR_FILL);
 }
 
-void drawPose(struct ScreenPose sp, int erase) {
-    video_line(sp.x, GAME_POSE_Y, sp.x + sp.hx, GAME_POSE_Y + sp.hy, erase ? COLOR_BG : COLOR_POSE_HHAND);
-    video_line(sp.x, GAME_POSE_Y, sp.x + sp.mx, GAME_POSE_Y + sp.my, erase ? COLOR_BG : COLOR_POSE_MHAND);
-    video_pixel(sp.x, GAME_POSE_Y, COLOR_POSE_DOT);
-    
+void drawGameVLines(void) {
+    video_line(GAME_VLINE_MARGIN, BORDER + 1, GAME_VLINE_MARGIN, HEIGHT - BORDER - 1, COLOR_GAME_VLINE);
+    video_line(WIDTH - GAME_VLINE_MARGIN, BORDER + 1, WIDTH - GAME_VLINE_MARGIN, HEIGHT - BORDER - 1, COLOR_GAME_VLINE);
+}
+
+void drawPose(struct ScreenPose sp, int x, int erase) {
+    video_line(x, GAME_POSE_Y, x + sp.hx, GAME_POSE_Y + sp.hy, erase ? COLOR_BG : COLOR_POSE_HHAND);
+    video_line(x, GAME_POSE_Y, x + sp.mx, GAME_POSE_Y + sp.my, erase ? COLOR_BG : COLOR_POSE_MHAND);
+    video_pixel(x, GAME_POSE_Y, erase ? COLOR_BG : COLOR_POSE_DOT);
 }
