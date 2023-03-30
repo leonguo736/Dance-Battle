@@ -6,8 +6,8 @@
 
 #define MAX_POSES 50
 
-#define POSE_HOUR_LENGTH 30
-#define POSE_MINUTE_LENGTH 50
+#define POSE_HOUR_LENGTH 25
+#define POSE_MINUTE_LENGTH 40
 
 struct Pose {
     double beat;

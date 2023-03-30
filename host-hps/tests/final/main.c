@@ -53,7 +53,7 @@ int songId = 0;
 int numSongs = 3;
 char * song_names[] = {"tetris 99 theme", "groovy gray", "super treadmill"};
 
-double song_spbs[] = { 60 / 140.0 };
+double song_spbs[] = { AUDIO_RATE / (140.0 / 60) };
 int song_offsets[] = { 0 };
 int song_numPoses[] = { 8 };
 char * song_samplefiles[] = {
@@ -73,8 +73,8 @@ const struct Pose song_poses[][MAX_POSES] = {
 };
 
 struct ScreenPose screenPoses[MAX_POSES];
-double samplesL[1000000];
-double samplesR[1000000];
+int samplesL[1000000];
+int samplesR[1000000];
 int sampleNo = 0;
 int earlyPose = -1;
 int latePose = -1;
@@ -170,8 +170,8 @@ void initGame() {
     }
 
     for (int i = 0; i < NUM_SAMPLES; i++) {
-        samplesL[i] = VOLUME * (getline(&sampleLine, &sampleLen, fp) != -1) ? atof(sampleLine) : 0;
-        samplesR[i] = VOLUME * (getline(&sampleLine, &sampleLen, fp) != -1) ? atof(sampleLine) : 0;
+        samplesL[i] = (getline(&sampleLine, &sampleLen, fp) != -1) ? (int)(VOLUME * atof(sampleLine)) : 0;
+        samplesR[i] = (getline(&sampleLine, &sampleLen, fp) != -1) ? (int)(VOLUME * atof(sampleLine)) : 0;
     }
 
     for (int p = 0; p < song_numPoses[songId]; p++) {
@@ -368,7 +368,7 @@ void updateGraphics(void) {
         //struct GameScreenState * otherState = &(gameScreenStates[(buffer+1)%2]);
 
         // Update progress bar
-        int newPBarWidth = (int)(159 * (double)sampleNo / NUM_SAMPLES);
+        int newPBarWidth = (int)(157 * (double)sampleNo / NUM_SAMPLES);
         drawPBarFill(prevState->pBarWidth, newPBarWidth);
         prevState->pBarWidth = newPBarWidth;
 
@@ -385,7 +385,7 @@ void updateGraphics(void) {
         }
 
         // Advance pose pointers if necessary
-        if (earlyPose != -1) {
+        if (earlyPose == -1) {
             if (sampleNo >= screenPoses[0].sample - POSE_LIFETIME) {
                 earlyPose = 0;
                 latePose = 0;
@@ -402,6 +402,8 @@ void updateGraphics(void) {
         prevState->latePose = latePose;
 
         // Draw new poses
+        drawGameVLines();
+
         if (earlyPose != -1) {
             for (int p = earlyPose; p <= latePose; p++) {
                 int newX = getPoseX(screenPoses[p]);
@@ -428,7 +430,7 @@ void * outputThread(void *vargp) {
     int s = 0;
 
     while (1) {
-        if (screen == 2 && gameStarted) {
+        if ((screen == 2) && gameStarted) {
             writeAudio(samplesL[sampleNo], samplesR[sampleNo]);
             sampleNo++;
         } else {
