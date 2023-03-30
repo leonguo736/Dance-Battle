@@ -8,5 +8,6 @@
 #define ESP_CONNECT_BACKEND_COMMAND "c"
 #define ESP_POSE_COMMAND "p"
 #define ESP_TYPE_COMMAND "t"
+#define ESP_JSON_COMMAND "j"
 
 #endif

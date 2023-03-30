@@ -11,16 +11,27 @@
 
 #define SERVER_IP "192.168.48.227:8080"
 
-struct Pose {
-  double beat;
-  double hourAngle;
-  double minuteAngle;
-};
-
+/* Private Function Prototypes */
+/*
+ * Resets the ESP
+ */
 void reset_esp(void);
+
+/* 
+ * Initializes the connection to the backend
+ * serverIP - IP address of the backend
+ * Returns true if the connection was successful
+ */
 bool init_connection(char* serverIP);
 
-// Function Definitions
+/*
+ * Sends an ESP command to the ESP8266
+ * cmd - command to send
+ * args - arguments to send
+ */
+void esp_send_command(char* cmd, char** args, unsigned int numArgs);
+
+/* Private Function Definitions */
 void reset_esp() {
   // Reset the ESP
   uart_send_command(ESP_RESET_COMMAND, NULL, 0);
@@ -40,6 +51,7 @@ bool init_connection(char* serverIP) {
   return true;
 }
 
+/* Public Function Definitions */
 bool esp_init(int argc, char** argv) {
 #ifdef DEBUG
   printf("ESP Init\n");
@@ -80,10 +92,18 @@ char* esp_read(unsigned int* len) {
   char recvBuffer[UART_BUFFER_SIZE];
   *len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
 
-  char* returnBuffer = (char*)malloc(sizeof(char) * *len);
-  memcpy(returnBuffer, recvBuffer, *len);
-  
-  return returnBuffer;
+  if (*len > 0) {
+    char* returnBuffer = (char*)malloc(sizeof(char) * *len);
+    memcpy(returnBuffer, recvBuffer, *len);
+    
+    return returnBuffer;
+  } else {
+    return NULL;
+  }
+}
+
+void esp_write(char* data) {
+  uart_send_command(ESP_JSON_COMMAND, (char*[]){data, "\n"}, 2);
 }
 
 void esp_run(void) {
