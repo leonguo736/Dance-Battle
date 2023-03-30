@@ -17,8 +17,8 @@
 #endif
 
 // Communications
-// #include "esp.h"
-// #include "regs.h"
+#include "esp.h"
+#include "regs.h"
 
 // Audio / Frontend
 #include "fonts.h"
@@ -443,24 +443,24 @@ void * outputThread(void *vargp) {
 }
 
 int main(int argc, char** argv) {
-    // void* virtual_base;
+    void* virtual_base;
 
     if (!audio_open()) return 1;
     if (!video_open()) return 1;
     if (!SW_open()) return 1;
     if (!KEY_open()) return 1;
-    // if (!regs_init(&virtual_base)) return 1;
+    if (!regs_init(&virtual_base)) return 1;
 
     pthread_t outputThread_id;
     pthread_create(&outputThread_id, NULL, outputThread, NULL);
 
     // Comms
-    // uart_init(virtual_base);
+    uart_init(virtual_base);
 
-    // if (!esp_init(argc, argv)) return 1;
+    if (!esp_init(argc, argv)) return 1;
     
-    // pthread_t espThread_id;
-    // pthread_create(&espThread_id, NULL, (void*) &esp_run, argv);
+    pthread_t espThread_id;
+    pthread_create(&espThread_id, NULL, (void*) &esp_run, argv);
 
     int swState = 0;
     int keyState = 0;
