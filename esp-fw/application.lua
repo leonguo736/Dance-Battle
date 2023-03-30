@@ -23,6 +23,7 @@ stateMachine = switch()
     :case("d", function(command)
         DEBUG = not DEBUG
         print("Debug: " .. tostring(DEBUG))
+    end)
     :case("j", function(command, json)
         print("Sending JSON")
         ws:send(json)
