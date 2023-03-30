@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <EnsembleReport name="nios2_system" kind="nios2_system" version="1.0" fabric="QSYS">
  <!-- Format version 18.1 625 (Future versions may contain additional information.) -->
- <!-- 2023.03.25.12:15:34 -->
+ <!-- 2023.03.30.15:45:41 -->
  <!-- A collection of modules and connections -->
  <parameter name="AUTO_GENERATION_ID">
   <type>java.lang.Integer</type>
-  <value>1679771734</value>
+  <value>1680216340</value>
   <derived>false</derived>
   <enabled>true</enabled>
   <visible>false</visible>

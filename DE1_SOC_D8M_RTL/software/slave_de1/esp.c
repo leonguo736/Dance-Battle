@@ -85,10 +85,6 @@ bool esp_init(int argc, char** argv) {
 }
 
 char* esp_read(unsigned int* len) {
-#ifdef DEBUG
-  printf("Reading ESP\n");
-#endif
-
   char recvBuffer[UART_BUFFER_SIZE];
   *len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
 
@@ -104,49 +100,4 @@ char* esp_read(unsigned int* len) {
 
 void esp_write(char* data) {
   uart_send_command(ESP_JSON_COMMAND, (char*[]){data, "\n"}, 2);
-}
-
-void esp_run(void) {
-#ifdef DEBUG
-  printf("Running ESP\n");
-#endif
-
-  char recvBuffer[UART_BUFFER_SIZE];
-  char sendBuffer[UART_BUFFER_SIZE];
-  unsigned int count = 0;
-  struct Pose pose;
-
-  uart_send_command(ESP_TYPE_COMMAND, (char*[]){"ca"}, 1);
-
-  while (count < 10) {
-    pose.beat = (rand() % 1000) / (rand() % 100 + 1.0);
-    pose.hourAngle = (rand() % 1000) / (rand() % 100 + 1.0);
-    pose.minuteAngle = (rand() % 1000) / (rand() % 100 + 1.0);
-
-    sprintf(sendBuffer, "%f %f %f", pose.beat, pose.hourAngle,
-            pose.minuteAngle);
-
-    uart_send_command(ESP_POSE_COMMAND, (char*[]){sendBuffer}, 1);
-
-    unsigned int len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
-    printf("[%d] %s\n", len, recvBuffer);
-
-    len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
-    printf("[%d] %s\n", len, recvBuffer);
-
-    len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
-    printf("[%d] %s\n", len, recvBuffer);
-
-    len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
-    printf("[%d] %s\n", len, recvBuffer);
-
-    count++;
-
-    usleep(1000000);
-  }
-
-  while (1) {
-    unsigned int len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
-    printf("[%d] %s\n", len, recvBuffer);
-  }
 }

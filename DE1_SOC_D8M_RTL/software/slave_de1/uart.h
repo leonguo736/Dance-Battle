@@ -29,6 +29,6 @@ char *uart_wait_for_messages(char **messages, unsigned int numMessages);
  * data - buffer to store the data
  * len - length of the buffer
  */
-void uart_read_data(char *data, int len);
+int uart_read_data(char *data, int len);
 
 #endif

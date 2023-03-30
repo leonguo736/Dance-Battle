@@ -34,13 +34,14 @@ int main(int argc, char **argv)
 
   // esp setup
   uart_init();
-  if (!esp_init(argc, argv)) {
-    #ifdef DEBUG_ESP
-      printf("ESP Init failed\n");
-      while(1)
-        ;
-    #endif
+#ifdef DEBUG_ESP
+  if (!esp_init(argc, argv))
+  {
+    printf("ESP Init failed\n");
+    while (1)
+      ;
   }
+#endif
 
   // camera setup
   setupCameraThresholds();
@@ -51,14 +52,21 @@ int main(int argc, char **argv)
   while (1)
   {
     int uartReadLen = 420; // -1;
+#ifndef ESP_DEBUG
     char *uartReadData = esp_read(&uartReadLen);
-    if (uartReadData != NULL) {
-      (void)uartReadData; // TODO: parse uartReadData
-      int uartWriteLen = 500; 
-      char *uartWriteBuf = malloc(sizeof(*uartWriteBuf) * uartWriteLen); 
+#else
+    char *uartReadData = malloc(sizeof(*uartReadData) * uartReadLen);
+#endif
+    if (uartReadData != NULL)
+    {
+      free(uartReadData); // TODO: parse uartReadData
+      int uartWriteLen = 500;
+      char *uartWriteBuf = malloc(sizeof(*uartWriteBuf) * uartWriteLen);
       CameraInterface_updateMedian(cameraInterface);
-      CameraInterface_getJson(cameraInterface, uartWriteBuf, 0.5); 
+      CameraInterface_getJson(cameraInterface, uartWriteBuf, 0.5);
+#ifdef DEBUG
       printf("%s\n", uartWriteBuf);
+#endif
       free(uartWriteBuf); // uartWrite(uartWriteBuf, uartWriteLen);
     }
   }
