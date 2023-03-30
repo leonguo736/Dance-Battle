@@ -87,10 +87,10 @@ void esp_run(void) {
 
     if (!strcmp(recvBuffer, "test")) {
       while (1) {
-    	  for (unsigned int i = 0; i < 10; i++) {
-    		  HEX_set(i);
-    		  usleep(1000000);
-    	  }
+        for (unsigned int i = 0; i < 10; i++) {
+          HEX_set(i);
+          usleep(1000000);
+        }
       }
     }
   }
