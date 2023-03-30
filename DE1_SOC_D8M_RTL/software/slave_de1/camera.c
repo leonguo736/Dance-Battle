@@ -41,7 +41,7 @@ void writeDeviceNumber(uint8_t devId)
 }
 
 CameraInterface* CameraInterface_new(uint8_t devId) {
-    CameraInterface* cam = (CameraInterface*) alt_uncached_malloc(sizeof(CameraInterface));
+    CameraInterface* cam = (CameraInterface*) malloc(sizeof(CameraInterface));
     cam->_bufIndex = 0;
     cam->_devId = devId;
     writeDeviceNumber(devId);

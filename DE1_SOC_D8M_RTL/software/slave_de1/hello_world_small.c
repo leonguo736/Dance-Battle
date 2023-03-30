@@ -51,7 +51,7 @@ void startUart(int argc, char **argv)
   // }
 }
 
-void startCamera()
+void setupCameraThresholds()
 {
   writeThresholds(0, 146, 160, 61, 85); // Leon's Blue
   writeThresholds(1, 64, 93, 156, 175); // Kerry's Dark Red
@@ -59,22 +59,6 @@ void startCamera()
   {
     writeThresholds(i, 64, 93, 156, 175); // Kerry's Dark Red
   }
-
-  CameraInterface* cameraInterface = CameraInterface_new(6); // param is devId (DE1 slave number displayed on HEX)
-  initCameraTimer(cameraInterface);
-  // initCameraTimer(6); // param is devId (DE1 slave number displayed on HEX)
-#ifdef DEBUG
-  while (1)
-  {
-    // CameraInterface* cameraInterface = getTimerCameraInterface(); 
-    CameraInterface_updateMedian(cameraInterface); 
-    char json_str[500]; 
-    CameraInterface_getJson(cameraInterface, json_str);
-    printf("%s\n", json_str);
-    usleep(100000);
-  }
-  free(cameraInterface);
-#endif
 }
 
 int main(int argc, char **argv)
@@ -85,10 +69,30 @@ int main(int argc, char **argv)
   printf("\n === Program start id: %i === \n", __programId__);
 #endif
 
+  // uart setup
   //  startUart(argc, argv);
-   startCamera();
-//   cameraTest();
-  //  testTimer();
+
+  // camera setup
+  setupCameraThresholds();
+  CameraInterface *cameraInterface = CameraInterface_new(6); // param is devId (DE1 slave number displayed on HEX)
+  initCameraTimer(cameraInterface);
+
+  // super loop
+  while (1)
+  {
+    int uartReadLen = 420; // -1;
+    char *uartReadData = NULL; // uartRead(&uartReadLen);
+    if (uartReadLen > 0) {
+      (void)uartReadData; // TODO: parse uartReadData
+      int uartWriteLen = 500; 
+      char *uartWriteBuf = malloc(sizeof(*uartWriteBuf) * uartWriteLen); 
+      CameraInterface_updateMedian(cameraInterface);
+      CameraInterface_getJson(cameraInterface, uartWriteBuf);
+      printf("%s\n", uartWriteBuf);
+      free(uartWriteBuf); // uartWrite(uartWriteBuf, uartWriteLen);
+    }
+  }
+  free(cameraInterface);
 
 #ifdef DEBUG
   printf("\n === Program end id: %i === \n", __programId__);
