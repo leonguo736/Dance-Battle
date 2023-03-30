@@ -87,7 +87,7 @@ int main(int argc, char **argv)
       int uartWriteLen = 500; 
       char *uartWriteBuf = malloc(sizeof(*uartWriteBuf) * uartWriteLen); 
       CameraInterface_updateMedian(cameraInterface);
-      CameraInterface_getJson(cameraInterface, uartWriteBuf);
+      CameraInterface_getJson(cameraInterface, uartWriteBuf, 0.5); 
       printf("%s\n", uartWriteBuf);
       free(uartWriteBuf); // uartWrite(uartWriteBuf, uartWriteLen);
     }

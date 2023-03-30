@@ -88,7 +88,7 @@ void CameraInterface_updateMedian(CameraInterface* cam) {
     }
 }
 
-void CameraInterface_getJson(CameraInterface* ci, char* json_str) {
+void CameraInterface_getJson(CameraInterface* ci, char* json_str, float beat) {
     char median_str[CAMERA_NUM_DETECTORS * CAMERA_DIMENSIONS * 10]; 
     char row_str[CAMERA_DIMENSIONS * 10];
     sprintf(median_str, "[[%d,%d]", ci->median[0][0], ci->median[0][1]);
@@ -97,5 +97,5 @@ void CameraInterface_getJson(CameraInterface* ci, char* json_str) {
         strcat(median_str, row_str);
     }
     strcat(median_str, "]");
-    sprintf(json_str, "{\"median\":%s,\"devId\":%d}", median_str, ci->_devId);
+    sprintf(json_str, "{\"median\":%s,\"devId\":%d,\"beat\":%f},\"medianLen\":%d", median_str, ci->_devId, beat, CAMERA_NUM_DETECTORS);
 }
