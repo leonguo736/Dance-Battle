@@ -64,7 +64,7 @@ red_frame u1 (
 );
 
 // Mux. Combinatorial logic to select the camera video, or, the red ball detector video frame.
-wire [31:0] radius = 8; // radius of the marker
+wire [31:0] radius = 6; // radius of the marker
 always @(*) begin
    if( iVideoSelect == 1'b1 ) begin      
       if( (hIndex == RedPixelVIndex) || (vIndex == RedPixelHIndex) ) begin

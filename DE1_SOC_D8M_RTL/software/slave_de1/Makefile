@@ -147,6 +147,7 @@ C_SRCS += uart.c
 C_SRCS += esp.c
 C_SRCS += camera.c
 C_SRCS += timer.c
+C_SRCS += json.c
 CXX_SRCS :=
 ASM_SRCS :=
 

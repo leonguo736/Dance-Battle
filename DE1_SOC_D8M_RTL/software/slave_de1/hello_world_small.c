@@ -9,9 +9,11 @@
 #include "const.h"
 #include "timer.h"
 #include "camera.h"
+#include "json.h"
 
 #ifdef DEBUG
 #include "cameraTest.h"
+#include "jsonTest.h"
 #endif
 
 void setupCameraThresholds()
@@ -51,19 +53,45 @@ int main(int argc, char **argv)
   // super loop
   while (1)
   {
-    int uartReadLen = 420; // -1;
+    int uartReadLen = 10; // -1;
 #ifndef ESP_DEBUG
     char *uartReadData = esp_read(&uartReadLen);
 #else
     char *uartReadData = malloc(sizeof(*uartReadData) * uartReadLen);
 #endif
+    // while (1) {
+    //   jsonTest();
+    // }
     if (uartReadData != NULL)
     {
-      free(uartReadData); // TODO: parse uartReadData
+      free(uartReadData);
+      
+      char input[] = "echo,3,hello,world,!";
+      int input_len = strlen(input);
+      char **argv;
+      char *cmd;
+      int argc = arrayToArgs(input, input_len, &argv, &cmd);
+
+      printf("command = %s\n", cmd);
+      printf("argc = %d\n", argc);
+      for (int i = 0; i < argc; i++)
+      {
+        printf("arg%d = %s\n", i, argv[i]);
+      }
+
+      // Free the dynamically allocated memory
+      free(cmd);
+      for (int i = 0; i < argc; i++)
+      {
+        free(argv[i]);
+      }
+      free(argv);
+
       int uartWriteLen = 500;
       char *uartWriteBuf = malloc(sizeof(*uartWriteBuf) * uartWriteLen);
       CameraInterface_updateMedian(cameraInterface);
       CameraInterface_getJson(cameraInterface, uartWriteBuf, 0.5);
+
 #ifdef DEBUG
       printf("%s\n", uartWriteBuf);
 #endif

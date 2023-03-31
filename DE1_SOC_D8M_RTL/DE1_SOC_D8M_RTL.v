@@ -476,12 +476,14 @@ always @(*) begin
 	if (SW[8:5] == 4'b1111) begin
 		{ R_to_vga, G_to_vga, B_to_vga } = { 2'd0, RED12b[7:0], 2'd0, GREEN12b[7:0], 2'd0, BLUE12b[7:0] }; 
 		
-    //   // display a square with radius 3 around the center of the object
-    //   if (hIndex <= RedPixelVIndex + radius && hIndex >= RedPixelVIndex - radius && vIndex <= RedPixelHIndex + radius && vIndex >= RedPixelHIndex - radius) begin // apparently changing this to be vIndex vs RedPixelVIndex causes shitty display
+    	// display a square with radius 3 around the center of the object
 		if (hIndex <= redPixelVIndex[0] + radius && hIndex >= redPixelVIndex[0] - radius && vIndex <= redPixelHIndex[0] + radius && vIndex >= redPixelHIndex[0] - radius) begin
-			{ R_to_vga, G_to_vga, B_to_vga } = { 10'd0, 10'd255, 10'd255 }; 
+			// { R_to_vga, G_to_vga, B_to_vga } = { 10'd0, 10'd255, 10'd255 }; 
+			{ R_to_vga, G_to_vga, B_to_vga } = { 2'd0, (8'd255 - RED12b[7:0]), 2'd0, (8'd255 - GREEN12b[7:0]), 2'd0, (8'd255 - BLUE12b[7:0]) };
 		end else if (hIndex <= redPixelVIndex[1] + radius && hIndex >= redPixelVIndex[1] - radius && vIndex <= redPixelHIndex[1] + radius && vIndex >= redPixelHIndex[1] - radius) begin
-			{ R_to_vga, G_to_vga, B_to_vga } = { 10'd0, 10'd255, 10'd255 }; 
+			{ R_to_vga, G_to_vga, B_to_vga } = { 2'd0, (8'd255 - RED12b[7:0]), 2'd0, (8'd255 - GREEN12b[7:0]), 2'd0, (8'd255 - BLUE12b[7:0]) };
+		end else if (hIndex <= redPixelVIndex[2] + radius && hIndex >= redPixelVIndex[2] - radius && vIndex <= redPixelHIndex[2] + radius && vIndex >= redPixelHIndex[2] - radius) begin
+			{ R_to_vga, G_to_vga, B_to_vga } = { 2'd0, (8'd255 - RED12b[7:0]), 2'd0, (8'd255 - GREEN12b[7:0]), 2'd0, (8'd255 - BLUE12b[7:0]) };
 		end else if (SW[9] && (hIndex == 320 || vIndex == 240)) begin
 			{ R_to_vga, G_to_vga, B_to_vga } = { 10'd255, 10'd0, 10'd0 }; 
 		end
@@ -513,8 +515,7 @@ ball_detector  ball_detector_0(
    .oRedPixelVIndex( redPixelVIndex[0] ), 
    .oHIndex( hIndex ), // same accross all ball detectors
    .oVIndex( vIndex )
- );
- 
+ ); 
 ball_detector  ball_detector_1( 
    .reset( KEY[0] ),
    .iVideo12bRgb( { RED12b, GREEN12b, BLUE12b } ),
@@ -533,6 +534,27 @@ ball_detector  ball_detector_1(
    .iCbHigh( cbHigh[1] ),
    .oRedPixelHIndex( redPixelHIndex[1] ),
    .oRedPixelVIndex( redPixelVIndex[1] ), 
+   .oHIndex(  ),
+   .oVIndex(  )
+ );
+ball_detector ball_detector_2(
+	   .reset( KEY[0] ),
+   .iVideo12bRgb( { RED12b, GREEN12b, BLUE12b } ),
+   .iPixelAddress( VGA_ADDRESS ),
+   .iVgaRequest( READ_Request ),
+   .iVgaClk( VGA_CLK ),
+   .iVgaHRequest( READ_Request ),  // Can use H_active_area or READ_Request here.
+   .iVgaVRequest( V_active_area ),
+   .oVideo8bRgb( oVideo8bRgb[2] ),
+   .iVideoSelect( SW[9] ),
+   .iFreezeRam(  ),
+   .iFilterOn(  ), 
+   .iCrLow( crLow[2] ),
+   .iCrHigh( crHigh[2] ),
+   .iCbLow( cbLow[2] ),
+   .iCbHigh( cbHigh[2] ),
+   .oRedPixelHIndex( redPixelHIndex[2] ),
+   .oRedPixelVIndex( redPixelVIndex[2] ), 
    .oHIndex(  ),
    .oVIndex(  )
  );
