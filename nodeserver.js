@@ -1,19 +1,55 @@
 var uuid = require('uuid-random');
 const WebSocket = require('ws');
+const mongoose = require("mongoose");
+var mongo = require("mongodb");
+var Database = require("./Database1.js");
 
 const wss = new WebSocket.WebSocketServer({port:8080}, ()=> {
 	console.log('server started');
 });
+/**
+ * IGNORE THIS SECTION OF COMMENTED CODE. 
+ */
+// var db = new Database("mongodb://127.0.0.1:27017", "cpen391");
+// var messages = {};
+// db.getRooms().then((result) => {
+// 	console.log("werew");
+// 	console.log(result);
+// 	for (var i = 0; i < result.length; i++) {
+// 		messages[result[i]._id] = [];
+// 	}
+// });
+
+// const uri =
+//   "mongodb+srv://leonguo736:12345@cluster0.jnwwabb.mongodb.net/?retryWrites=true&w=majority";
+
+// async function connect() {
+//   try {
+//     await mongoose.connect(uri);
+//     console.log("Connected to MongoDB");
+// 	console.log(db);
+//   } catch (error) {
+//     console.error(error);
+//   }
+// }
+
+// var db = connect();
+
+// db.collection("collection1").insertOne(pose0, function(err, result) {
+// 	console.log("item inserted");
+// });
+
 
 // Object that stores player data 
 const playersData = {
 	"type" : "playerData"
 }
 
-// variable used to differentiate host, player 1 and player 2
-var connectionCount = 1;
+// connection count does not decrement right now
+var connectionCount = 0;
 
 // Object that stores pose information
+// 5 points --> 2 angles
 class Pose {
     constructor(beat, leftArm, rightArm) { 
 		this.beat = beat;
@@ -21,86 +57,86 @@ class Pose {
         this.rightArm = rightArm;
     }
 }
-var pose0 = new Pose(1, 100, 200);
-var pose1 = new Pose(2, 400, 90);
-var song = [pose0, pose1];
-var songBytes = "262.2, 294.8, 327.5, 349.3, 393.0, 436.7, 491.2, 524.0, 589.5";
+class Point {
+	constructor(x, y) {
+		this.x = x;
+		this.y = y;
+	}
+}
 
-/* arrays to store poses */
-var beatArray_atk = [];
-var leftArray_atk = [];
-var rightArray_atk = [];
-var beatArray_def = [0, 1, 2, 3, 4, 5];
-var leftArray_def = [10, 20, 30, 40, 50];
-var rightArray_def = [5, 4, 3, 2, 1];
-var score = 0;
+var receivedFrom = "";
 
 // Websocket function that managages connection with clients
-wss.on('connection', function connection(client){
-
-	//Create Unique User ID for player
-	// client.id = uuid();
-	switch(connectionCount) {
-		case 1:
-			client.id = "Host";
-			break;
-		case 2:
-			client.id = "PlayerA";
-			break;
-		case 3:
-			client.id = "PlayerB";
-			break;
-		default:
-			client.id = "extra";
-	}
-	console.log(`${client.id} Has Connected!`);
+wss.on('connection', function connection(client) {
+	// Create Unique User ID for player
+	client.id = uuid();
+	console.log("current clients:" + wss.clients.values());
 	
-	if (client.id == "Host") {
-		client.send(songBytes);
-	}
-
 	//Method retrieves message from client
 	client.on('message', (data) => {
 		console.log("Player Message");
 		console.log(`received: ${data}`);
+
+		if (data.includes("th")) { // just to identify the host
+			receivedFrom = "host";
+			console.log("msg received from host");
+			connectionCount++;
+			console.log("connection count: " + connectionCount);
+			if (connectionCount >= 2) {
+				setTimeout(() =>{
+					for (client of wss.clients.values()) {
+						var test = "test";
+						client.send(test);
+						console.log("SENT TEST TO CLIENT: " + client.id);
+					}
+				}, 1000);
+			}
+		}
+		else if (data.includes("tc")) { // just to identify players
+			receivedFrom = "player";
+			console.log("msg received from player");
+			connectionCount++;
+			console.log("connection count: " + connectionCount);
+			if (connectionCount >= 2) {
+				setTimeout(() =>{
+					for (client of wss.clients.values()) {
+						var test = "test";
+						client.send(test);
+						console.log("SENT TEST TO CLIENT: " + client.id);
+					}
+				}, 1000);
+			}
+		}
+		else { // for handling the other 99% of messages
+			console.log("else statement hit");
+			parsedData = JSON.parse(data); // coordinate array looks like this: [[0,0], [1,1], [2,2]]
+
+			/**
+			 * Assumes JSON has 3 fields: "command", "median" and maybe "beat". Also assumes only one pose is sent per message.
+			 * 
+			 * Function takes numbers from "median" array and uses them to create 5 Point objects. 
+			 * The points are passed through find_angle() which computes and angle in radians (more info on implementation at bottom).
+			 * A pose object is then created using 2 angles and a beat, which is then passed to the host as a JSON string.
+			 */
+			if (parsedData.command == "camera") {
+				/* set up the 5 points */ 
+				var chest = new Point(parsedData.median[0][0], parsedData.median[0][1]);
+				var leftArm = new Point(parsedData.median[1][0], parsedData.median[1][1]);
+				var leftElbow = new Point(parsedData.median[2][0], parsedData.median[2][1]);
+				var rightArm = new Point(parsedData.median[3][0], parsedData.median[3][1]);
+				var rightElbow = new Point(parsedData.median[4][0], parsedData.median[4][1]);
 		
-		// add if statement later to only read from attacker. also rename arrays to differentiate between atk and def. 
-		// then compare atk vs def to get score
-		// if (client.id == "PlayerA") {
-		// 	var dataArray_atk = data.split(",");
-		// 	for (var i = 0; i < dataArray_atk.length/3; i++) {
-		// 		beatArray_atk.push(dataArray_atk[i]);
-		// 		leftArray_atk.push(dataArray_atk[i+1]);
-		// 		rightArray_atk.push(dataArray_atk[i+2]);
-		// 	}
-		// }
-		// else if (client.id == "PlayerB") {
-		// 	var dataArray_def = data.split(",");
-		// 	for (var i = 0; i < dataArray_def.length/3; i++) {
-		// 		beatArray_def.push(dataArray_def[i]);
-		// 		leftArray_def.push(dataArray_def[i+1]);
-		// 		rightArray_def.push(dataArray_def[i+2]);
-		// 	}
-		// }
-		const dataArray_atk = data.toString().split(",");
-		for (var i = 0; i < dataArray_atk.length/3; i++) {
-			beatArray_atk.push(dataArray_atk[i]);
-			leftArray_atk.push(dataArray_atk[i+1]);
-			rightArray_atk.push(dataArray_atk[i+2]);
-			console.log("pushed: " + dataArray_atk[i+2]);
-		}
-		for (var i = 0; i < dataArray_atk.length/3; i++) {
-			// console.log(Math.parseFloat(leftArray_atk[i]));
-			// console.log("calculation:" + (Math.abs(parseFloat(leftArray_atk[i]) - leftArray_def[i])));
-			// score += 25 - Math.abs(parseFloat(leftArray_atk[i]) - leftArray_def[i]);
-			// score += 25 - Math.abs(parseFloat(rightArray_atk[i]) - rightArray_def[i]);
-		}
-		// console.log("score: " + score);
-		if (client.id == "Host") {
-			client.send(data);
-		}
-		if (data.toString() == "score") {
-			client.send(score.toString());
+				/* calculate the 2 angles and store data in Pose objects */
+				var leftarm_angle = find_angle(leftArm, chest, leftElbow);
+				var rightarm_angle = find_angle(rightArm, chest, rightElbow);
+				var beat = 1; // temporary placeholder
+				var pose = new Pose(beat, leftarm_angle, rightarm_angle);
+				
+				/* send message to front end (sends to everyone connected for now) */
+				for (client of wss.clients.values()) {
+					client.send(JSON.stringify(pose));
+				}
+			}
 		}
 	});
 
@@ -115,3 +151,31 @@ wss.on('connection', function connection(client){
 wss.on('listening', () => {
 	console.log('listening on 8080')
 });
+
+/**
+ * Calculates the angle (in radians) between two vectors pointing outward from one center.
+ * From stackoverflow: https://stackoverflow.com/a/7505937
+ *
+ * @param p0 first point
+ * @param p1 second point
+ * @param c center point
+ */
+function find_angle(p0,p1,c) {
+    var p0c = Math.sqrt(Math.pow(c.x-p0.x,2)+
+                        Math.pow(c.y-p0.y,2)); // p0->c (b)   
+    var p1c = Math.sqrt(Math.pow(c.x-p1.x,2)+
+                        Math.pow(c.y-p1.y,2)); // p1->c (a)
+    var p0p1 = Math.sqrt(Math.pow(p1.x-p0.x,2)+
+                         Math.pow(p1.y-p0.y,2)); // p0->p1 (c)
+    return Math.acos((p1c*p1c+p0c*p0c-p0p1*p0p1)/(2*p1c*p0c));
+}
+
+/**
+ * Calculates the absolute value of a given number
+ */
+function abs(number) {
+    if (number < 0) {
+        return number * -1;
+    }
+    return number;
+}
