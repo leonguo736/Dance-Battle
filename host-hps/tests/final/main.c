@@ -171,6 +171,8 @@ void initGame() {
 
     for (int i = 0; i < NUM_SAMPLES; i++) {
         samplesL[i] = (getline(&sampleLine, &sampleLen, fp) != -1) ? (int)(VOLUME * atof(sampleLine)) : 0;
+    }
+    for (int i = 0; i < NUM_SAMPLES; i++) {
         samplesR[i] = (getline(&sampleLine, &sampleLen, fp) != -1) ? (int)(VOLUME * atof(sampleLine)) : 0;
     }
 
