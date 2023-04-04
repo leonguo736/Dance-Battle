@@ -75,18 +75,24 @@ int main(int argc, char **argv)
         data[data_length] = '\0';
         printf("Data: %s\n", data);
       }
+      // case based on cmd
+      if (strcmp(cmd, "id") == 0)
+      {
+        writeDeviceNumber(atoi(data));
+      } else if (strcmp(cmd, "cap") == 0)
+      {
+        int uartWriteLen = 500;
+        char *uartWriteBuf = malloc(sizeof(*uartWriteBuf) * uartWriteLen);
+        CameraInterface_updateMedian(cameraInterface);
+        CameraInterface_getJson(cameraInterface, uartWriteBuf, 0.5);
 
-      int uartWriteLen = 500;
-      char *uartWriteBuf = malloc(sizeof(*uartWriteBuf) * uartWriteLen);
-      CameraInterface_updateMedian(cameraInterface);
-      CameraInterface_getJson(cameraInterface, uartWriteBuf, 0.5);
-
-      esp_write(uartWriteBuf);
+        esp_write(uartWriteBuf);
+        free(uartWriteBuf); // uartWrite(uartWriteBuf, uartWriteLen);
+      }
 
 #ifdef DEBUG
       // printf("%s\n", uartWriteBuf);
 #endif
-      free(uartWriteBuf); // uartWrite(uartWriteBuf, uartWriteLen);
     }
   }
   free(cameraInterface);
