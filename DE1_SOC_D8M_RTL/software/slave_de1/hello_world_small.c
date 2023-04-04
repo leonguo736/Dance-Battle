@@ -59,18 +59,19 @@ int main(int argc, char **argv)
 #else
     char *uartReadData = malloc(sizeof(*uartReadData) * uartReadLen);
 #endif
-    if (1)
+    if (uartReadData)
     {
+      printf("uartReadData: %s\n", uartReadData);
       free(uartReadData);
       int uartWriteLen = 500;
       char *uartWriteBuf = malloc(sizeof(*uartWriteBuf) * uartWriteLen);
       CameraInterface_updateMedian(cameraInterface);
       CameraInterface_getJson(cameraInterface, uartWriteBuf, 0.5);
 
-      esp_write(uartWriteBuf);
+       esp_write(uartWriteBuf);
 
 #ifdef DEBUG
-      printf("%s\n", uartWriteBuf);
+      // printf("%s\n", uartWriteBuf);
 #endif
       free(uartWriteBuf); // uartWrite(uartWriteBuf, uartWriteLen);
     }
