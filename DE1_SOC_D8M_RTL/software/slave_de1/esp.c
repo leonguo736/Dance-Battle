@@ -9,7 +9,7 @@
 #include "const.h"
 #include "uart.h"
 
-#define SERVER_IP "192.168.48.227:8080"
+#define SERVER_IP "192.168.0.195:8080"
 
 /* Private Function Prototypes */
 /*

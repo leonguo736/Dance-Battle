@@ -2,6 +2,6 @@
 #define CONST_H
 
 #define DEBUG
-#define ESP_DEBUG
+// #define ESP_DEBUG
 
 #endif
