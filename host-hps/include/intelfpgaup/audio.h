@@ -6,11 +6,16 @@
 #define MID_SAMPLING_RATE 32000		// medium audio sampling rate
 #define MIN_SAMPLING_RATE 8000		// minimum audio sampling rate
 
+/*
+ * Initializes audio fifospace register
+ */
+void audio_init_reg(void* virtual_base);
+
 /**
  * Function audio_open: opens the digital audio device
  * Return: 1 on success, else 0
  */
-int audio_open (void);
+int audio_open(void);
 
 /**
  * Function audio_read: reads data from the audio device
@@ -44,6 +49,13 @@ void audio_wait_write (void);
  * Return: void
  */
 void audio_wait_read (void);
+
+/*
+ * Check if space is available for writing to the digital audio device
+ * Return: void
+ */
+
+int audio_check_write(void);
 
 /**
  * Function audio_write_left: writes data to the left channel

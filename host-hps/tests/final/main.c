@@ -16,6 +16,8 @@
 #include <intelfpgaup/video.h>
 #endif
 
+#include "hps_0.h"
+
 // Communications
 #include "esp.h"
 #include "regs.h"
@@ -178,10 +180,24 @@ void initGame() {
   gameStarted = 0;
 }
 
-void writeAudio(int l, int r) {
-  audio_wait_write();
+int writeAudio(int l, int r) {
+  int space = audio_check_write() ;
+  int left_space = ((space >> 16) & 0xff00) >> 8;
+  int right_space = ((space >> 16) & 0xff);
+
+  if (space) {
+    // printf("Channels are free\n");
+  } else {
+    // printf("writeAudio: %x %d %d\n", space, left_space, right_space);
+    // printf("Channels are full\n");
+    return 0;
+    // audio_wait_write();
+  }
+
   audio_write_left(l);
   audio_write_right(r);
+
+  return 1;
 }
 
 int getPoseX(struct ScreenPose sp) {
@@ -505,8 +521,8 @@ void* outputThread(void* vargp) {
 
   while (1) {
     if ((screen == 2) && gameStarted) {
-      writeAudio(samplesL[sampleNo], samplesR[sampleNo]);
-      sampleNo++;
+      sampleNo += (writeAudio(samplesL[sampleNo], samplesR[sampleNo]) % 1000000);
+    //   sampleNo++;
     } else {
       writeAudio(0, 0);
     }
@@ -535,9 +551,12 @@ int main(int argc, char** argv) {
   pthread_create(&outputThread_id, NULL, outputThread, NULL);
 
   // Comms
+  audio_init_reg(virtual_base);
   uart_init(virtual_base);
 
-  if (!esp_init(argc, argv)) return 1;
+  if (!esp_init(argc, argv))
+    ;
+//   return 1;
 
   // pthread_t espThread_id;
   // pthread_create(&espThread_id, NULL, (void*) &esp_run, argv);

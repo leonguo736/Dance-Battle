@@ -8,6 +8,7 @@
 #include "uart.h"
 
 #define ESP_BUFFER_SIZE UART_BUFFER_SIZE
+#define ESP_CONNECT_TIMEOUT 10
 // Global Variables
 extern bool esp_connected;
 

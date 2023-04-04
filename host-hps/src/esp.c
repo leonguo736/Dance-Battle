@@ -37,7 +37,6 @@ bool esp_init(int argc, char** argv) {
 #ifdef DEBUG
   printf("ESP Init\n");
 #endif
-
   reset_esp();
 
   unsigned int failCount = 0;
@@ -51,7 +50,7 @@ bool esp_init(int argc, char** argv) {
              failCount);
     }
 
-  } while (!esp_connected && failCount < 10);
+  } while (!esp_connected && failCount < ESP_CONNECT_TIMEOUT);
 
 
   if (!esp_connected) {
