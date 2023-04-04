@@ -6,14 +6,13 @@ switch = require("switch")
 dofile("ws.lua")
 -- dofile("uart.lua")
 
-DEBUG = true
+DEBUG = false
 
 stateMachine = switch()
     :case("c", function(command, ip)
         ws_connect(ip)
     end)
     :case("r", function(command)
-        print("Resetting ESP...")
         node.restart()
     end)
     :case("q", function(command) 
@@ -25,7 +24,6 @@ stateMachine = switch()
         print("Debug: " .. tostring(DEBUG))
     end)
     :case("j", function(command, json)
-        print("Sending JSON")
         ws:send(json)
     end)
     :default(function(command, ...)
