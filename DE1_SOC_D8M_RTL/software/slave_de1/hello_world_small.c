@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <pthread.h>
+#include <string.h>
 #include "system.h"
 #include "esp.h"
 #include "uart.h"
@@ -34,9 +35,8 @@ int main(int argc, char **argv)
   printf("\n === Program start id: %i === \n", __programId__);
 #endif
 
-  // esp setup
-  uart_init();
 #ifndef ESP_DEBUG
+  uart_init();
   if (!esp_init(argc, argv))
   {
     printf("ESP Init failed\n");
@@ -53,29 +53,39 @@ int main(int argc, char **argv)
   // super loop
   while (1)
   {
-    int uartReadLen = 10; // -1;
+    unsigned int uartReadLen = 10; // -1;
 #ifndef ESP_DEBUG
     char *uartReadData = esp_read(&uartReadLen);
 #else
-    char *uartReadData = malloc(sizeof(*uartReadData) * uartReadLen);
+    static unsigned int randomCounter = 0; 
+    char *uartReadData; 
+    if (++randomCounter % 2 == 0) { 
+      char text[] = "cap"; 
+      uartReadLen = strlen(text);
+      uartReadData = malloc(sizeof(*uartReadData) * uartReadLen);
+      memcpy(uartReadData, text, uartReadLen);
+    } else { 
+      char text[] = "id,2";
+      uartReadLen = strlen(text);
+      uartReadData = malloc(sizeof(*uartReadData) * uartReadLen);
+      memcpy(uartReadData, text, uartReadLen);
+    }
 #endif
     if (uartReadData != NULL)
     {
-      printf("Len: %i\n", uartReadLen);
-      printf("UART: %s\n", uartReadData);
       uartReadData[uartReadLen] = '\0';
       char *cmd, *data;
       cmd = strtok(uartReadData, ",");
       int data_length = uartReadLen - strlen(cmd) - 1;
-      printf("Command: %s\n", cmd);
+      printf("INFO `main`: command %s\n", cmd);
+      data = NULL;
       if (data_length > 0)
       {
         data = malloc((data_length + 2) * sizeof(*data));
         memcpy(data, uartReadData + strlen(cmd) + 1, data_length);
         data[data_length] = '\0';
-        printf("Data: %s\n", data);
+        printf("INFO `main`: data %s\n", data);
       }
-      // case based on cmd
       if (strcmp(cmd, "id") == 0)
       {
         writeDeviceNumber(atoi(data));
