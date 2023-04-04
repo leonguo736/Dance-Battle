@@ -59,16 +59,29 @@ int main(int argc, char **argv)
 #else
     char *uartReadData = malloc(sizeof(*uartReadData) * uartReadLen);
 #endif
-    if (uartReadData)
+    if (uartReadData != NULL)
     {
-      printf("uartReadData: %s\n", uartReadData);
-      free(uartReadData);
+      printf("Len: %i\n", uartReadLen);
+      printf("UART: %s\n", uartReadData);
+      uartReadData[uartReadLen] = '\0';
+      char *cmd, *data;
+      cmd = strtok(uartReadData, ",");
+      int data_length = uartReadLen - strlen(cmd) - 1;
+      printf("Command: %s\n", cmd);
+      if (data_length > 0)
+      {
+        data = malloc((data_length + 2) * sizeof(*data));
+        memcpy(data, uartReadData + strlen(cmd) + 1, data_length);
+        data[data_length] = '\0';
+        printf("Data: %s\n", data);
+      }
+
       int uartWriteLen = 500;
       char *uartWriteBuf = malloc(sizeof(*uartWriteBuf) * uartWriteLen);
       CameraInterface_updateMedian(cameraInterface);
       CameraInterface_getJson(cameraInterface, uartWriteBuf, 0.5);
 
-       esp_write(uartWriteBuf);
+      esp_write(uartWriteBuf);
 
 #ifdef DEBUG
       // printf("%s\n", uartWriteBuf);
