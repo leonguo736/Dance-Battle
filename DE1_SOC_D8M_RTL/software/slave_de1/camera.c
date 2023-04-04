@@ -97,5 +97,5 @@ void CameraInterface_getJson(CameraInterface* ci, char* json_str, float beat) {
         strcat(median_str, row_str);
     }
     strcat(median_str, "]");
-    sprintf(json_str, "{\"median\":%s,\"devId\":%d,\"beat\":%f},\"medianLen\":%d", median_str, ci->_devId, beat, CAMERA_NUM_DETECTORS);
+    sprintf(json_str, "{\"median\":%s,\"devId\":%d,\"beat\":%f,\"medianLen\":%d}", median_str, ci->_devId, beat, CAMERA_NUM_DETECTORS);
 }

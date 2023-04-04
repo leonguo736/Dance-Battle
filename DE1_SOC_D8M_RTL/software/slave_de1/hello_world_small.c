@@ -67,7 +67,7 @@ int main(int argc, char **argv)
       CameraInterface_updateMedian(cameraInterface);
       CameraInterface_getJson(cameraInterface, uartWriteBuf, 0.5);
 
-      // esp_write(uartWriteBuf, uartWriteLen);
+      esp_write(uartWriteBuf);
 
 #ifdef DEBUG
       printf("%s\n", uartWriteBuf);
