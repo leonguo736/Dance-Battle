@@ -57,14 +57,17 @@ int main(int argc, char **argv)
 #ifndef ESP_DEBUG
     char *uartReadData = esp_read(&uartReadLen);
 #else
-    static unsigned int randomCounter = 0; 
-    char *uartReadData; 
-    if (++randomCounter % 2 == 0) { 
-      char text[] = "cap"; 
+    static unsigned int randomCounter = 0;
+    char *uartReadData;
+    if (++randomCounter % 2 == 0)
+    {
+      char text[] = "cap";
       uartReadLen = strlen(text);
       uartReadData = malloc(sizeof(*uartReadData) * uartReadLen);
       memcpy(uartReadData, text, uartReadLen);
-    } else { 
+    }
+    else
+    {
       char text[] = "id,2";
       uartReadLen = strlen(text);
       uartReadData = malloc(sizeof(*uartReadData) * uartReadLen);
@@ -77,32 +80,31 @@ int main(int argc, char **argv)
       char *cmd, *data;
       cmd = strtok(uartReadData, ",");
       int data_length = uartReadLen - strlen(cmd) - 1;
-      printf("INFO `main`: command %s\n", cmd);
       data = NULL;
       if (data_length > 0)
       {
         data = malloc((data_length + 2) * sizeof(*data));
         memcpy(data, uartReadData + strlen(cmd) + 1, data_length);
         data[data_length] = '\0';
-        printf("INFO `main`: data %s\n", data);
       }
       if (strcmp(cmd, "id") == 0)
       {
+        printf("INFO `main`: cmd %s, data %s\n", cmd, data);
         writeDeviceNumber(atoi(data));
-      } else if (strcmp(cmd, "cap") == 0)
+      }
+      else if (strcmp(cmd, "cap") == 0)
       {
         int uartWriteLen = 500;
         char *uartWriteBuf = malloc(sizeof(*uartWriteBuf) * uartWriteLen);
         CameraInterface_updateMedian(cameraInterface);
-        CameraInterface_getJson(cameraInterface, uartWriteBuf, 0.5);
+        CameraInterface_getJson(cameraInterface, uartWriteBuf, 0.5);        
+        printf("INFO `main`: cmd %s, uartWriteBuf %s\n", cmd, uartWriteBuf);
 
         esp_write(uartWriteBuf);
-        free(uartWriteBuf); // uartWrite(uartWriteBuf, uartWriteLen);
+        free(uartWriteBuf);
       }
-
-#ifdef DEBUG
-      // printf("%s\n", uartWriteBuf);
-#endif
+      free(data);
+      free(uartReadData);
     }
   }
   free(cameraInterface);
