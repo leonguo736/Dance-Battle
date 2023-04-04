@@ -4,7 +4,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
-#include "../include/accel.h"
+#include "accel.h"
 
 /* This file contains wrappers for several FPGA character device drivers */
 int accel_FD = -1;

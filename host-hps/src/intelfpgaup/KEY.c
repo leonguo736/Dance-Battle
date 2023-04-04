@@ -4,7 +4,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
-#include "../include/KEY.h"
+#include "KEY.h"
 
 /* This file contains wrappers for the pushbutton KEY character device driver */
 int KEY_FD = -1;

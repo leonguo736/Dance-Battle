@@ -4,7 +4,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
-#include "../include/audio.h"
+#include "audio.h"
+
+#include "address_map_arm.h"
 
 /* This file contains wrappers for the audio character device driver */
 int audio_FD = -1;
@@ -12,6 +14,9 @@ int audio_FD = -1;
 #define audio_CHAR_DEV "/dev/IntelFPGAUP/audio"
 
 #define AUDIO_BYTES 24				// number of bytes to read from audio device
+#define BUF_THRESHOLD 96
+// #define FIFO_REG *()
+#define FIFO_WORD_MASK 0x00FF0000
 
 /* Declare buffers for reading/writing data to device drivers */
 #define BUF_SIZE 32							// large enough for all drivers
@@ -105,6 +110,17 @@ void audio_wait_write( )
 	else
 		fprintf (stderr, "Can't write %s: audio_FD = %d\n", audio_CHAR_DEV, audio_FD);
 }	
+
+/*
+ * Check if space is available for writing to the digital audio device
+ */
+
+// int audio_check_write( )
+// {
+// 	BUF_THRESHOLD
+// }
+
+
 
 /**
  * Waits until data is available for reading from the digital audio device

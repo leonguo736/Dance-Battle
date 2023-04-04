@@ -4,7 +4,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
-#include "../include/HEX.h"
+#include "HEX.h"
 
 /* This file contains wrappers for the 7-segment display HEX character device driver */
 int HEX_FD = -1;

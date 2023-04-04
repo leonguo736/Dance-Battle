@@ -53,29 +53,52 @@ bool esp_init(int argc, char** argv) {
 
   } while (!esp_connected && failCount < 10);
 
-#ifdef DEBUG
+
   if (!esp_connected) {
     printf("ESP Failed to connect to backend. Quitting ...\n");
   } else {
+    uart_send_command(ESP_TYPE_COMMAND, (char*[]){"h"}, 1);
+#ifdef DEBUG
     printf("esp_connected to backend\n");
-  }
 #endif
+  }
 
   return esp_connected;
 }
 
-void esp_run(void) {
-#ifdef DEBUG
-  printf("Running ESP\n");
+char* esp_read(unsigned int* len) {
+#ifdef DEBUG_CRITICAL
+  printf("Reading ESP\n");
 #endif
 
   char recvBuffer[UART_BUFFER_SIZE];
-  char sendBuffer[UART_BUFFER_SIZE];
+  *len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
 
-  uart_send_command(ESP_TYPE_COMMAND, (char*[]){"h"}, 1);
+  if (*len > 0) {
+    char* returnBuffer = (char*)malloc(sizeof(char) * *len);
+    memcpy(returnBuffer, recvBuffer, *len);
 
-  while (1) {
-    unsigned int len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
-    printf("[%d] %s\n", len, recvBuffer);
+    return returnBuffer;
+  } else {
+    return NULL;
   }
+}
+
+void esp_write(char* data) {
+  uart_send_command(ESP_JSON_COMMAND, (char*[]){data, "\n"}, 2);
+}
+
+void esp_run(void) {
+#ifdef DEBUG_CRITICAL
+  printf("Running ESP\n");
+#endif
+
+  // char recvBuffer[UART_BUFFER_SIZE];
+  // char sendBuffer[UART_BUFFER_SIZE];
+
+
+  // while (1) {
+  //   unsigned int len = uart_read_data(recvBuffer, UART_BUFFER_SIZE);
+  //   printf("[%d] %s\n", len, recvBuffer);
+  // }
 }
