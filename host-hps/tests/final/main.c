@@ -53,20 +53,26 @@ int p2Connected = 0;
 int mode = 0;
 int songId = 0;
 int numSongs = 3;
-char* song_names[] = {"tetris 99 theme", "groovy gray", "super treadmill"};
+char * song_names[] = {"tetris 99 theme", "groovy gray", "super treadmill"};
 
-double song_spbs[] = {AUDIO_RATE / (140.0 / 60)};
-int song_offsets[] = {0};
-int song_numPoses[] = {8};
-char* song_samplefiles[] = {"tetris.txt", "groovy.txt", "treadmill.txt"};
-const struct Pose song_poses[][MAX_POSES] = {{{5, 0.1, 0.2},
-                                              {7, 0.3, 0.4},
-                                              {9, 0.5, 0.6},
-                                              {11, 0.7, 0.8},
-                                              {13, 0.9, 1.0},
-                                              {17, 1.1, 1.2},
-                                              {21, 1.3, 1.4},
-                                              {23, 1.5, 1.6}}};
+double song_spbs[] = { AUDIO_RATE / (140.0 / 60) };
+int song_offsets[] = { 0 };
+int song_numPoses[] = { 8 };
+char * song_samplefiles[] = {
+    "tetris32.txt", "groovy.txt", "treadmill.txt"
+};
+const struct Pose song_poses[][MAX_POSES] = {
+    {
+        {5, 0.1, 0.2},
+        {7, 0.3, 0.4},
+        {9, 0.5, 0.6},
+        {11, 0.7, 0.8},
+        {13, 0.9, 1.0},
+        {17, 1.1, 1.2},
+        {21, 1.3, 1.4},
+        {23, 1.5, 1.6}
+    }
+};
 
 struct ScreenPose screenPoses[MAX_POSES];
 int samplesL[1000000];
@@ -77,10 +83,9 @@ int latePose = -1;
 int gameStarted = 0;
 
 #define FPS 40
-#define PIXELS_PER_SAMPLE 0.01375
-#define POSE_LIFETIME 16000
-#define SAMPLES_PER_FRAME \
-  200  // Recalculate if you change the audio rate or frame rate
+#define PIXELS_PER_SAMPLE 0.0034375
+#define POSE_LIFETIME 64000
+#define SAMPLES_PER_FRAME 800 // Recalculate if you change the audio rate or frame rate
 
 struct InitScreenState {
   double danceX;
