@@ -471,7 +471,7 @@ case ( WCNT )
    148	 :SLV8_REG16_DATA8<= { 8'h6c,16'h3814, 8'h07}; // X inc odd. *** h01 for zoomed in. h07 for zoomed out. ***
    149	 :SLV8_REG16_DATA8<= { 8'h6c,16'h3815, 8'h01}; // X inc even
    150	 :SLV8_REG16_DATA8<= { 8'h6c,16'h3820, 8'h06}; // flip on
-   151	 :SLV8_REG16_DATA8<= { 8'h6c,16'h3821, 8'h70}; // hsync_en_o, fst_vbin, mirror on (Kerry initially 0x70; 0x76 mirrors but quality messed up; 0x74 causes gem-like artifacts and not mirrored; 0x72 causes sliding gem)
+   151	 :SLV8_REG16_DATA8<= { 8'h6c,16'h3821, 8'h76}; // hsync_en_o, fst_vbin, mirror on (Kerry: initially 0x70; 0x76 mirrors but quality messed up; 0x74 causes gem-like artifacts and not mirrored; 0x72 causes sliding gem; 0x10 causes pinkish hue with static; 
    152	 :SLV8_REG16_DATA8<= { 8'h6c,16'h382a, 8'h07}; // Y inc odd. *** h01 for zoomed in. h07 for zoomed out. ***
    153	 :SLV8_REG16_DATA8<= { 8'h6c,16'h382b, 8'h01}; // Y inc even
    154	 :SLV8_REG16_DATA8<= { 8'h6c,16'h3830, 8'd8}; // ablc_use_num[5:1]
