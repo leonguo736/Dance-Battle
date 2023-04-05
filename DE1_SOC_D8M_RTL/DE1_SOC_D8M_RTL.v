@@ -477,7 +477,7 @@ wire [23:0] oVideo8bRgb [0:5];
 wire [31:0] radius = 3; 
 always @(*) begin
 	if (SW[8:5] == 4'b1111) begin
-		{ R_to_vga, G_to_vga, B_to_vga } = { 2'd0, RED12b[7:0], 2'd0, GREEN12b[7:0], 2'd0, BLUE12b[7:0] }; 
+		{ R_to_vga, G_to_vga, B_to_vga } = { 2'd0, RED12b[8:1], 2'd0, GREEN12b[8:1], 2'd0, BLUE12b[8:1] }; 
 		
     	// display a square with radius 3 around the center of the object
 		if (hIndex <= redPixelVIndex[0] + radius && hIndex >= redPixelVIndex[0] - radius && vIndex <= redPixelHIndex[0] + radius && vIndex >= redPixelHIndex[0] - radius) begin
