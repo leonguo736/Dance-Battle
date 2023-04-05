@@ -57,7 +57,7 @@ double song_spbs[] = { AUDIO_RATE / (140.0 / 60) };
 int song_offsets[] = { 0 };
 int song_numPoses[] = { 8 };
 char * song_samplefiles[] = {
-    "tetris.txt", "groovy.txt", "treadmill.txt"
+    "tetris32.txt", "groovy.txt", "treadmill.txt"
 };
 const struct Pose song_poses[][MAX_POSES] = {
     {
@@ -81,9 +81,9 @@ int latePose = -1;
 int gameStarted = 0;
 
 #define FPS 40
-#define PIXELS_PER_SAMPLE 0.01375
-#define POSE_LIFETIME 16000
-#define SAMPLES_PER_FRAME 200 // Recalculate if you change the audio rate or frame rate
+#define PIXELS_PER_SAMPLE 0.0034375
+#define POSE_LIFETIME 64000
+#define SAMPLES_PER_FRAME 800 // Recalculate if you change the audio rate or frame rate
 
 struct InitScreenState {
     double danceX;
