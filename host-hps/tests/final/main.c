@@ -53,7 +53,7 @@ double song_spbs[] = { AUDIO_RATE / (140.0 / 60) };
 int song_offsets[] = { 0 };
 int song_numPoses[] = { 8 };
 char * song_samplefiles[] = {
-    "tetris32.txt", "groovy.txt", "treadmill.txt"
+    "shawty.txt", "tetris32.txt", "groovy.txt", "treadmill.txt"
 };
 
 int samplesL[MAX_SAMPLES];
@@ -63,6 +63,8 @@ FILE* fp;
 char* sampleLine = NULL;
 size_t sampleLen = 0;
 ssize_t sampleRead;
+
+struct ScreenPose convertPose(struct Pose pose);
 
 void loadSong(char * filename, int numSamples) {
     fp = fopen(filename, "r");
