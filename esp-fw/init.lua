@@ -63,6 +63,7 @@ wifi_disconnect_event = function(T)
   end
   if disconnect_ct < total_tries then
     print("Retrying connection...(attempt "..(disconnect_ct+1).." of "..total_tries..")")
+    wifi.sta.config({ssid=SSID[(disconnect_ct % #SSID) + 1], pwd=PASSWORD[(disconnect_ct % #PASSWORD) + 1]})
   else
     wifi.sta.disconnect()
     print("Aborting connection to AP!")
@@ -77,4 +78,4 @@ wifi.eventmon.register(wifi.eventmon.STA_DISCONNECTED, wifi_disconnect_event)
 
 print("Connecting to WiFi access point...")
 wifi.setmode(wifi.STATION)
-wifi.sta.config({ssid=SSID, pwd=PASSWORD})
+wifi.sta.config({ssid=SSID[1], pwd=PASSWORD[1]})
