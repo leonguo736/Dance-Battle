@@ -1,3 +1,4 @@
+
 /**
  * Calculates the absolute value of a given number
  */
@@ -86,28 +87,30 @@ for (var i = 0; i < numPoses; i++) {
     score += 25 - abs(Number.parseInt(rightArray_atk[i]) - Number.parseInt(leftArray_def[i]));
     console.log("score: " + score);
 }
+console.log("qweq");
+console.log("round: " + Math.round(12.23443));
 
-client.on('message', (data) => {
-    parsedData = JSON.parse(data); // coordinate array looks like this: [[0,0], [1,1], [2,2]]
+// client.on('message', (data) => {
+//     parsedData = JSON.parse(data); // coordinate array looks like this: [[0,0], [1,1], [2,2]]
 
-    /* determine what to do based on command field */
-    if (parsedData.command == "camera") {
-        /* set up the 5 points. chest left right */ 
-        var leftArm = new Point(parsedData.median[0], parsedData.median[1]);
-        var leftElbow = new Point(parsedData.median[2], parsedData.median[3]);
-        var rightArm = new Point(parsedData.median[4], parsedData.median[5]);
-        var rightElbow = new Point(parsedData.median[6], parsedData.median[7]);
-        var chest = new Point(parsedData.median[8], parsedData.median[9]);
+//     /* determine what to do based on command field */
+//     if (parsedData.command == "camera") {
+//         /* set up the 5 points. chest left right */ 
+//         var leftArm = new Point(parsedData.median[0], parsedData.median[1]);
+//         var leftElbow = new Point(parsedData.median[2], parsedData.median[3]);
+//         var rightArm = new Point(parsedData.median[4], parsedData.median[5]);
+//         var rightElbow = new Point(parsedData.median[6], parsedData.median[7]);
+//         var chest = new Point(parsedData.median[8], parsedData.median[9]);
 
-        /* calculate the 2 angles and store data in Pose objects */
-        var leftarm_angle = find_angle(leftArm, chest, leftElbow);
-        var rightarm_angle = find_angle(rightArm, chest, rightElbow);
-        var beat = 1; // temporary placeholder
-        var pose = new Pose(beat, leftarm_angle, rightarm_angle);
+//         /* calculate the 2 angles and store data in Pose objects */
+//         var leftarm_angle = find_angle(leftArm, chest, leftElbow);
+//         var rightarm_angle = find_angle(rightArm, chest, rightElbow);
+//         var beat = 1; // temporary placeholder
+//         var pose = new Pose(beat, leftarm_angle, rightarm_angle);
         
-        /* send message to front end (sends to everyone connected for now) */
-        for (client of wss.clients.values()) {
-            client.send(JSON.stringify(pose));
-        }
-    }
-});
+//         /* send message to front end (sends to everyone connected for now) */
+//         for (client of wss.clients.values()) {
+//             client.send(JSON.stringify(pose));
+//         }
+//     }
+// });
