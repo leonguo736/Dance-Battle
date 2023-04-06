@@ -5,7 +5,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #ifdef GCC
+#include "HEX.h"
 #include "KEY.h"
+#include "LEDR.h"
 #include "SW.H"
 #include "audio.h"
 #include "video.h"
@@ -14,6 +16,8 @@
 #include <intelfpgaup/SW.h>
 #include <intelfpgaup/audio.h>
 #include <intelfpgaup/video.h>
+#include <intelfpgaup/HEX.h>
+#include <intelfpgaup/LEDR.h>
 #endif
 
 #include "hps_0.h"
@@ -187,16 +191,16 @@ void initGame() {
 
 int writeAudio(int l, int r) {
   int space = audio_check_write() ;
-  int left_space = ((space >> 16) & 0xff00) >> 8;
-  int right_space = ((space >> 16) & 0xff);
 
   if (space) {
     // printf("Channels are free\n");
+    LEDR_set(0);
   } else {
     // printf("writeAudio: %x %d %d\n", space, left_space, right_space);
     // printf("Channels are full\n");
-    return 0;
-    // audio_wait_write();
+    LEDR_set(1);
+    audio_wait_write();
+    // return 0;
   }
 
   audio_write_left(l);
@@ -529,13 +533,13 @@ void* outputThread(void* vargp) {
       sampleNo += (writeAudio(samplesL[sampleNo], samplesR[sampleNo]) % 1000000);
     //   sampleNo++;
     } else {
-      writeAudio(0, 0);
+      // writeAudio(0, 0);
     }
     s = (s + 1) % SAMPLES_PER_FRAME;
     if (s == 0) {
       while (switchScreenLock)
         ;
-      updateGraphics();
+      // updateGraphics();
     }
   }
 }
@@ -550,6 +554,8 @@ int main(int argc, char** argv) {
   if (!video_open()) return 1;
   if (!SW_open()) return 1;
   if (!KEY_open()) return 1;
+  if (!LEDR_open()) return 1;
+  if (!HEX_open()) return 1;
   if (!regs_init(&virtual_base)) return 1;
 
   pthread_t outputThread_id;
@@ -559,8 +565,7 @@ int main(int argc, char** argv) {
   audio_init_reg(virtual_base);
   uart_init(virtual_base);
 
-  if (!esp_init(argc, argv))
-    ;
+  // if (!esp_init(argc, argv))
 //   return 1;
 
   // pthread_t espThread_id;
@@ -568,6 +573,7 @@ int main(int argc, char** argv) {
 
   int swState = 0;
   int keyState = 0;
+  int s = 0;
 
   while (keyState != 8) {
     char* recvBuffer = esp_read(&recvLen);
@@ -608,6 +614,20 @@ int main(int argc, char** argv) {
       }
     }
 
+    // if ((screen == 2) && gameStarted) {
+    //   sampleNo +=
+    //       (writeAudio(samplesL[sampleNo], samplesR[sampleNo]) % 1000000);
+    //   //   sampleNo++;
+    // } else {
+    //   // writeAudio(0, 0);
+    // }
+    // s = (s + 1) % SAMPLES_PER_FRAME;
+    // if (s == 0) {
+    //   while (switchScreenLock)
+    //     ;
+      updateGraphics();
+    // }
+
     // else if (keyState == 4) initGraphics(2);
     // if (esp_connected) initGraphics(2);
   }
@@ -616,6 +636,9 @@ int main(int argc, char** argv) {
   video_close();
   SW_close();
   KEY_close();
+
+  LEDR_close();
+  HEX_close();
 
   fclose(fp);
   free(sampleLine);
