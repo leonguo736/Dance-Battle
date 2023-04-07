@@ -48,12 +48,11 @@ int buffer = 0;  // 0 or 1
 // Song
 
 int numSongs = 3;
-char* song_names[] = {"tetris 99 theme", "groovy gray", "super treadmill"};
+char* song_displaynames[] = {"tetris 99 theme", "groovy gray", "super treadmill"};
 double song_spbs[] = {AUDIO_RATE / (140.0 / 60)};
 int song_offsets[] = {0};
-int song_numPoses[] = {8};
-char* menu_samplefile = "shop.txt";
-char* song_samplefiles[] = {"tetris32.txt", "groovy.txt",
+char* menu_filename = "shop.txt";
+char* song_filenames[] = {"tetris.txt", "groovy.txt",
                             "treadmill.txt"};
 
 int numSamples;
@@ -64,8 +63,6 @@ int samplesR[MAX_SAMPLES];
 char* sampleLine = NULL;
 size_t sampleLen = 0;
 ssize_t sampleRead;
-
-struct ScreenPose convertPose(struct Pose pose);
 
 void loadSong(char* filename) {
   FILE* fp;
@@ -115,21 +112,67 @@ int writeAudio(int l, int r) {
   return 1;
 }
 
+// Poses
+
+int numPoses;
+struct Pose defenderPoses[MAX_POSES] = {};
+struct Pose attackerPoses[MAX_POSES] = {};
+
+char* poseLine = NULL;
+size_t poseLen = 0;
+ssize_t poseRead;
+
+void loadPoses(char* filename) {
+  FILE* fp;
+  fp = fopen(strcat("poses/", filename), "r");
+  if (fp == NULL) {
+    printf("Pose file not found\n");
+    exit(0);
+  }
+
+  char* delim = " ";
+  int count = 0;
+
+  while (getline(&poseLine, &poseLen, fp) != -1) {
+    int lineSize = strlen(poseLine);
+    char* ptr = strtok(poseLine, delim);
+    int token = 0;
+    int id;
+    int sample;
+
+    struct Pose newPose = {0, 0, -1, 30, 30, -30, -30};
+
+    while (ptr != NULL) {
+      if (token == 0) {
+        id = atoi(ptr);
+      } else if (token == 1) {
+        newPose.isDefender = atoi(ptr);
+      } else if (token == 2) {
+        sample = (int)(atof(ptr)*song_spbs[lobbyState.songId]+song_offsets[lobbyState.songId]);
+        if (newPose.isDefender) {
+          defenderPoses[id].sample = sample;
+        } else {
+          attackerPoses[id].sample = sample;
+        }
+      }
+      token++;
+      ptr = strtok(NULL, delim);
+    }
+
+    count++;
+  }
+
+  numPoses = count;
+
+  fclose(fp);
+}
+
 // State data
 
 const char* init_names[] = {"alex", "bell", "kery", "leon"};
 int init_name_speeds[] = {4, 4, -4, -4};
 int init_name_offsets[] = {0, 0, 40, 40};
 short color_init_names[] = {0xe4a, 0xd19, 0xc641, 0x7859};
-
-const struct Pose song_poses[][MAX_POSES] = {{{5, 0.1, 0.2},
-                                              {7, 0.3, 0.4},
-                                              {9, 0.5, 0.6},
-                                              {11, 0.7, 0.8},
-                                              {13, 0.9, 1.0},
-                                              {17, 1.1, 1.2},
-                                              {21, 1.3, 1.4},
-                                              {23, 1.5, 1.6}}};
 
 struct InitState initState;
 struct LobbyState lobbyState;
@@ -164,40 +207,28 @@ void resetLobbyState(void) {
   }
 }
 
-void resetGamescreenState(void) {
-  gameState.earlyPose = -1;
-  gameState.latePose = -1;
+void resetGameState(void) {
+  gameState.earlyPoseA = -1;
+  gameState.earlyPoseD = -1;
+  gameState.latePoseA = -1;
+  gameState.latePoseD = -1;
   gameState.gameStarted = 0;
 
-  for (int p = 0; p < song_numPoses[lobbyState.songId]; p++) {
-    gameState.screenPoses[p] = convertPose(song_poses[lobbyState.songId][p]);
-  }
-
   for (int i = 0; i < 2; i++) {
-    struct GameScreenState state = {0, -1, -1, {0}};
+    struct GameScreenState state = {0, -1, -1, -1, -1, {0}, {0}};
     gameState.gameScreenStates[i] = state;
   }
 }
 
-void insertPose(struct ScreenPose sp, int index) {
-  gameState.screenPoses[index] = sp;
+void insertDefenderPose(struct Pose p, int id) {
+  if (p.isDefender) {
+    defenderPoses[id] = p;
+  }
 }
 
-struct ScreenPose convertPose(struct Pose pose) {
-  struct ScreenPose sp = {(int)(pose.beat * song_spbs[lobbyState.songId] +
-                                song_offsets[lobbyState.songId]),
-                          -1,
-                          POSE_HOUR_LENGTH * cos(pose.hourAngle),
-                          POSE_HOUR_LENGTH * sin(pose.hourAngle),
-                          POSE_MINUTE_LENGTH * cos(pose.minuteAngle),
-                          POSE_MINUTE_LENGTH * sin(pose.minuteAngle)};
-
-  return sp;
-}
-
-int getPoseX(struct ScreenPose sp) {
+int getPoseX(struct Pose p) {
   int x = (int)(GAME_VLINE_MARGIN +
-                PIXELS_PER_SAMPLE * (sp.sample - sampleNo +
+                PIXELS_PER_SAMPLE * (p.sample - sampleNo +
                                      song_offsets[lobbyState.songId]));
   if (x >= GAME_VLINE_MARGIN && x <= WIDTH - GAME_VLINE_MARGIN) {
     return x;
@@ -252,7 +283,7 @@ void initGraphics(int s) {
                COLOR_LOBBY_SONG_ARROW, 1);
 
     } else if (s == 2) {  // Game
-      resetGamescreenState();
+      resetGameState();
       drawBackground();
 
       // Straight lines
@@ -439,16 +470,15 @@ void updateGraphics(void) {
       prevState->mode = lobbyState.mode;
     }
     if (lobbyState.songId != prevState->songId) {
-      drawStringCenter(basicFont, (char*)song_names[prevState->songId], 160,
+      drawStringCenter(basicFont, (char*)song_displaynames[prevState->songId], 160,
                        160, COLOR_LOBBY_SONG_FILL, 1, 1);
-      drawStringCenter(basicFont, (char*)song_names[lobbyState.songId], 160,
+      drawStringCenter(basicFont, (char*)song_displaynames[lobbyState.songId], 160,
                        160, COLOR_LOBBY_SONG_TEXT, 1, 1);
       prevState->songId = lobbyState.songId;
     }
 
   } else if (screen == 2) {  // Game
     struct GameScreenState* prevState = &(gameState.gameScreenStates[buffer]);
-    // struct GameScreenState * otherState = &(gameScreenStates[(buffer+1)%2]);
 
     // Update progress bar
     int newPBarWidth = (int)(157 * (double)sampleNo / NUM_SAMPLES);
@@ -456,48 +486,73 @@ void updateGraphics(void) {
     prevState->pBarWidth = newPBarWidth;
 
     // Poses
-    int prevEarly = prevState->earlyPose;
-    int prevLate = prevState->latePose;
+    int prevEarlyA = prevState->earlyPoseA;
+    int prevEarlyD = prevState->earlyPoseD;
+    int prevLateA = prevState->latePoseA;
+    int prevLateD = prevState->latePoseD;
 
     // Erase previous poses
-    if (prevEarly != -1) {
-      for (int p = prevEarly; p <= prevLate; p++) {
-        int prevX = prevState->poseXs[p];
-        drawPose(gameState.screenPoses[p], prevX, 1);
+    if (prevEarlyA != -1) {
+      for (int p = prevEarlyA; p <= prevLateA; p++) {
+        int prevX = prevState->poseAXs[p];
+        drawPose(attackerPoses[p], prevX, 1);
+      }
+    }
+    if (prevEarlyD != -1) {
+      for (int p = prevEarlyD; p <= prevLateD; p++) {
+        int prevX = prevState->poseDXs[p];
+        drawPose(defenderPoses[p], prevX, 1);
       }
     }
 
     // Advance pose pointers if necessary
-    if (gameState.earlyPose == -1) {
-      if (sampleNo >=
-          gameState.screenPoses[0].sample - POSE_LIFETIME) {
-        gameState.earlyPose = 0;
-        gameState.latePose = 0;
+    if (gameState.earlyPoseA == -1) {
+      if (sampleNo >= attackerPoses[0].sample - POSE_LIFETIME) {
+        gameState.earlyPoseA = 0;
+        gameState.latePoseA = 0;
       }
     } else {
-      if (gameState.latePose < song_numPoses[lobbyState.songId] &&
-          sampleNo >=
-              gameState.screenPoses[gameState.latePose + 1].sample -
-                  POSE_LIFETIME) {
-        gameState.latePose++;
+      if (gameState.latePoseA < numPoses && sampleNo >= attackerPoses[gameState.latePoseA + 1].sample - POSE_LIFETIME) {
+        gameState.latePoseA++;
       }
-      if (gameState.earlyPose < song_numPoses[lobbyState.songId] &&
-          sampleNo >=
-              gameState.screenPoses[gameState.earlyPose].sample) {
-        gameState.earlyPose++;
+      if (gameState.earlyPoseA < numPoses && sampleNo >= attackerPoses[gameState.earlyPoseA].sample) {
+        gameState.earlyPoseA++;
       }
     }
-    prevState->earlyPose = gameState.earlyPose;
-    prevState->latePose = gameState.latePose;
+    prevState->earlyPoseA = gameState.earlyPoseA;
+    prevState->latePoseA = gameState.latePoseA;
+
+    if (gameState.earlyPoseD == -1) {
+      if (sampleNo >= defenderPoses[0].sample - POSE_LIFETIME) {
+        gameState.earlyPoseD = 0;
+        gameState.latePoseD = 0;
+      }
+    } else {
+      if (gameState.latePoseD < numPoses && sampleNo >= defenderPoses[gameState.latePoseD + 1].sample - POSE_LIFETIME) {
+        gameState.latePoseD++;
+      }
+      if (gameState.earlyPoseD < numPoses && sampleNo >= defenderPoses[gameState.earlyPoseD].sample) {
+        gameState.earlyPoseD++;
+      }
+    }
+    prevState->earlyPoseD = gameState.earlyPoseD;
+    prevState->latePoseD = gameState.latePoseD;
 
     // Draw new poses
     drawGameVLines();
 
-    if (gameState.earlyPose != -1) {
-      for (int p = gameState.earlyPose; p <= gameState.latePose; p++) {
-        int newX = getPoseX(gameState.screenPoses[p]);
-        prevState->poseXs[p] = newX;
-        drawPose(gameState.screenPoses[p], newX, 0);
+    if (gameState.earlyPoseA != -1) {
+      for (int p = gameState.earlyPoseA; p <= gameState.latePoseA; p++) {
+        int newX = getPoseX(attackerPoses[p]);
+        prevState->poseAXs[p] = newX;
+        drawPose(attackerPoses[p], newX, 0);
+      }
+    }
+    if (gameState.earlyPoseD != -1) {
+      for (int p = gameState.earlyPoseD; p <= gameState.latePoseD; p++) {
+        int newX = getPoseX(defenderPoses[p]);
+        prevState->poseDXs[p] = newX;
+        drawPose(defenderPoses[p], newX, 0);
       }
     }
   }
@@ -613,7 +668,8 @@ int main(int argc, char** argv) {
       lobbyState.p2Connected = (swState >> 2) & 1;
 
       if (keyState == 1) {
-        loadSong(song_samplefiles[lobbyState.songId]);
+        loadSong(song_filenames[lobbyState.songId]);
+        loadPoses(song_filenames[lobbyState.songId]);
         initGraphics(2);
       }
     } else if (screen == 2) {
