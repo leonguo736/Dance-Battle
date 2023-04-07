@@ -53,7 +53,6 @@ struct LobbyState {
 
 struct GameState {
     struct ScreenPose screenPoses[MAX_POSES];
-    int sampleNo;
     int earlyPose;
     int latePose;
     int gameStarted;

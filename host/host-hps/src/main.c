@@ -49,13 +49,15 @@ int buffer = 0;  // 0 or 1
 
 int numSongs = 3;
 char* song_names[] = {"tetris 99 theme", "groovy gray", "super treadmill"};
-int song_sampleNos[] = {1000000, 0, 0};
 double song_spbs[] = {AUDIO_RATE / (140.0 / 60)};
 int song_offsets[] = {0};
 int song_numPoses[] = {8};
-char* song_samplefiles[] = {"shawty.txt", "tetris32.txt", "groovy.txt",
+char* menu_samplefile = "shop.txt";
+char* song_samplefiles[] = {"tetris32.txt", "groovy.txt",
                             "treadmill.txt"};
 
+int numSamples;
+int sampleNo;
 int samplesL[MAX_SAMPLES];
 int samplesR[MAX_SAMPLES];
 
@@ -65,24 +67,29 @@ ssize_t sampleRead;
 
 struct ScreenPose convertPose(struct Pose pose);
 
-void loadSong(char* filename, int numSamples) {
+void loadSong(char* filename) {
   FILE* fp;
-  fp = fopen(filename, "r");
+  fp = fopen(strcat("songs/", filename), "r");
   if (fp == NULL) {
     printf("Song file not found\n");
     exit(0);
   }
 
-  for (int i = 0; i < numSamples; i++) {
-    samplesL[i] = (getline(&sampleLine, &sampleLen, fp) != -1)
-                      ? (int)(VOLUME * atof(sampleLine))
-                      : 0;
+  int count = 0;
+  int left = true;
+  while (getline(&sampleLine, &sampleLen, fp) != -1) {
+    if (left) {
+      samplesL[count] = (int)(VOLUME * atof(sampleLine));
+    } else {
+      samplesR[count] = (int)(VOLUME * atof(sampleLine));
+      count++;
+    }
+    left = !left;
   }
-  for (int i = 0; i < numSamples; i++) {
-    samplesR[i] = (getline(&sampleLine, &sampleLen, fp) != -1)
-                      ? (int)(VOLUME * atof(sampleLine))
-                      : 0;
-  }
+
+  sampleNo = 0;
+  numSamples = count;
+
   fclose(fp);
 }
 
@@ -158,7 +165,6 @@ void resetLobbyState(void) {
 }
 
 void resetGamescreenState(void) {
-  gameState.sampleNo = 0;
   gameState.earlyPose = -1;
   gameState.latePose = -1;
   gameState.gameStarted = 0;
@@ -187,7 +193,7 @@ struct ScreenPose convertPose(struct Pose pose) {
 
 int getPoseX(struct ScreenPose sp) {
   int x = (int)(GAME_VLINE_MARGIN +
-                PIXELS_PER_SAMPLE * (sp.sample - gameState.sampleNo +
+                PIXELS_PER_SAMPLE * (sp.sample - sampleNo +
                                      song_offsets[lobbyState.songId]));
   if (x >= GAME_VLINE_MARGIN && x <= WIDTH - GAME_VLINE_MARGIN) {
     return x;
@@ -201,8 +207,7 @@ void switchBuffer(void) {
 }
 
 void initGraphics(int s) {
-  while (graphicsUpdateLock)
-    ;
+  while (graphicsUpdateLock);
   switchScreenLock = 1;
   screen = s;
   for (int i = 0; i < 2; i++) {  // Put the same thing on both buffers
@@ -442,7 +447,7 @@ void updateGraphics(void) {
     // struct GameScreenState * otherState = &(gameScreenStates[(buffer+1)%2]);
 
     // Update progress bar
-    int newPBarWidth = (int)(157 * (double)gameState.sampleNo / NUM_SAMPLES);
+    int newPBarWidth = (int)(157 * (double)sampleNo / NUM_SAMPLES);
     drawPBarFill(prevState->pBarWidth, newPBarWidth);
     prevState->pBarWidth = newPBarWidth;
 
@@ -460,20 +465,20 @@ void updateGraphics(void) {
 
     // Advance pose pointers if necessary
     if (gameState.earlyPose == -1) {
-      if (gameState.sampleNo >=
+      if (sampleNo >=
           gameState.screenPoses[0].sample - POSE_LIFETIME) {
         gameState.earlyPose = 0;
         gameState.latePose = 0;
       }
     } else {
       if (gameState.latePose < song_numPoses[lobbyState.songId] &&
-          gameState.sampleNo >=
+          sampleNo >=
               gameState.screenPoses[gameState.latePose + 1].sample -
                   POSE_LIFETIME) {
         gameState.latePose++;
       }
       if (gameState.earlyPose < song_numPoses[lobbyState.songId] &&
-          gameState.sampleNo >=
+          sampleNo >=
               gameState.screenPoses[gameState.earlyPose].sample) {
         gameState.earlyPose++;
       }
@@ -510,11 +515,10 @@ void* outputThread(void* vargp) {
 
   while (1) {
     if ((screen == 2) && gameState.gameStarted) {
-      // printf("sampleNo: %d | %x | %x\n", gameState.sampleNo, samplesL[gameState.sampleNo], samplesR[gameState.sampleNo]);
-      gameState.sampleNo =
-          (gameState.sampleNo + writeAudio(samplesL[gameState.sampleNo],
-                                           samplesR[gameState.sampleNo])) %
-          song_sampleNos[lobbyState.songId];
+      sampleNo =
+          (sampleNo + writeAudio(samplesL[sampleNo],
+                                           samplesR[sampleNo])) %
+          numSamples;
       //   sampleNo++;
     } else {
       // writeAudio(0, 0);
@@ -605,8 +609,7 @@ int main(int argc, char** argv) {
       lobbyState.p2Connected = (swState >> 2) & 1;
 
       if (keyState == 1) {
-        loadSong(song_samplefiles[lobbyState.songId],
-                 song_sampleNos[lobbyState.songId]);
+        loadSong(song_samplefiles[lobbyState.songId]);
         initGraphics(2);
       }
     } else if (screen == 2) {
@@ -622,13 +625,12 @@ int main(int argc, char** argv) {
       }
     }
 
-    if ((screen == 2) && gameState.gameStarted) {
-      // printf("sampleNo: %d | %x | %x\n", gameState.sampleNo,
-      // samplesL[gameState.sampleNo], samplesR[gameState.sampleNo]);
-      gameState.sampleNo =
-          (gameState.sampleNo + writeAudio(samplesL[gameState.sampleNo],
-                                           samplesR[gameState.sampleNo])) %
-          song_sampleNos[lobbyState.songId];
+    // Playing a song
+    if ((screen == 0) || (screen == 1) || (screen == 2 && gameState.gameStarted)) {
+      sampleNo =
+          (sampleNo + writeAudio(samplesL[sampleNo],
+                                           samplesR[sampleNo])) %
+          numSamples;
     }
 
     // else if (keyState == 4) initGraphics(2);
