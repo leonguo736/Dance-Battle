@@ -179,6 +179,10 @@ void resetGamescreenState(void) {
   }
 }
 
+void insertPose(struct ScreenPose sp, int index) {
+  gameState.screenPoses[index] = sp;
+}
+
 struct ScreenPose convertPose(struct Pose pose) {
   struct ScreenPose sp = {(int)(pose.beat * song_spbs[lobbyState.songId] +
                                 song_offsets[lobbyState.songId]),
