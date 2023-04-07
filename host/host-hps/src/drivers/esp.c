@@ -55,7 +55,6 @@ void esp_init(char* server_ip) {
       esp_send_command(ESP_CONNECT_BACKEND_COMMAND, (char*[]){server_ip}, 1);
       esp_initialized = true;
     } else if (strcmp(data, ESP_READY_COMMAND) == 0) {
-      esp_send_command(ESP_TYPE_COMMAND, (char*[]){"h"}, 1);
 #ifdef DEBUG
       printf("ESP connected to backend @ %s\n", server_ip);
 #endif
@@ -121,7 +120,8 @@ void esp_write_data(char* str) {
 int esp_read_data(char* str, int max_len) {
   unsigned int read_len = 0;
 
-  if (uart_read_ready()) {  // Clear buffer
+  if (uart_read_ready()) {  
+    // Clear buffer
     for (unsigned int i = 0; i < max_len; i++) {
       str[i] = '\0';
     }
@@ -199,7 +199,7 @@ char* esp_read(unsigned int* len) {
     char* returnBuffer = (char*)malloc(sizeof(char) * *len);
     memcpy(returnBuffer, recvBuffer, *len);
 #ifdef DEBUG_CRITICAL
-    printf("ESP_Read -----\n%s\n-----\n%s\n-----\n", recvBuffer, returnBuffer);
+    printf("ESP_Read [%d]-----\n%s\n-----\n%s\n-----\n", *len, recvBuffer, returnBuffer);
 #endif
     return returnBuffer;
   } else {

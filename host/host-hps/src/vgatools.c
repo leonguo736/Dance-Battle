@@ -86,7 +86,16 @@ void drawGameVLines(void) {
 }
 
 void drawPose(struct Pose p, int x, int erase) {
-    video_line(x, GAME_POSE_Y, x + p.hx, GAME_POSE_Y + p.hy, erase ? COLOR_BG : COLOR_POSE_HHAND);
-    video_line(x, GAME_POSE_Y, x + p.mx, GAME_POSE_Y + p.my, erase ? COLOR_BG : COLOR_POSE_MHAND);
-    video_pixel(x, GAME_POSE_Y, erase ? COLOR_BG : COLOR_POSE_DOT);
+    if (p.isDefender) {
+        video_line(x, GAME_HLINE_MARGIN + 1, x, HEIGHT - GAME_HLINE_MARGIN - 1,
+                   erase ? COLOR_BG : COLOR_GAME_HLINE);
+        video_line(x, GAME_POSE_Y, x + p.hx, GAME_POSE_Y + p.hy,
+                   erase ? COLOR_BG : COLOR_POSE_HHAND);
+        video_line(x, GAME_POSE_Y, x + p.mx, GAME_POSE_Y + p.my,
+                   erase ? COLOR_BG : COLOR_POSE_MHAND);
+        video_pixel(x, GAME_POSE_Y, erase ? COLOR_BG : COLOR_POSE_DOT);
+    } else {
+        video_line(x, GAME_HLINE_MARGIN + 1, x, HEIGHT - GAME_HLINE_MARGIN - 1,
+                   erase ? COLOR_BG : COLOR_GAME_PBAR_FILL);
+    }
 }

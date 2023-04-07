@@ -1,10 +1,11 @@
 #ifndef ESP_H
 #define ESP_H
 
-#include <unistd.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "const.h"
+#include "hwlib.h"  // has uintX_t defines
 #include "uart.h"
 
 #define ESP_BUFFER_SIZE 1024

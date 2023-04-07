@@ -9,5 +9,6 @@
 #define ESP_POSE_COMMAND "p"
 #define ESP_TYPE_COMMAND "t"
 #define ESP_JSON_COMMAND "j"
+#define ESP_LOBBY_COMMAND 'l'
 
 #endif

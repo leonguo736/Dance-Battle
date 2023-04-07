@@ -3,8 +3,8 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
+#include <unistd.h>
 #ifdef GCC
 #include "HEX.h"
 #include "KEY.h"
@@ -22,8 +22,10 @@
 #endif
 
 #include "hps_0.h"
+#include "hwlib.h"  // has uintX_t defines
 
 // Communications
+#include "commands.h"
 #include "esp.h"
 #include "regs.h"
 
@@ -49,12 +51,12 @@ int buffer = 0;  // 0 or 1
 // Song
 
 int numSongs = 3;
-char* song_displaynames[] = {"tetris 99 theme", "groovy gray", "super treadmill"};
+char* song_displaynames[] = {"tetris 99 theme", "groovy gray",
+                             "super treadmill"};
 double song_spbs[] = {AUDIO_RATE / (140.0 / 60)};
 int song_offsets[] = {0};
 char* menu_filename = "shop.txt";
-char* song_filenames[] = {"tetris.txt", "groovy.txt",
-                            "treadmill.txt"};
+char* song_filenames[] = {"tetris.txt", "groovy.txt", "treadmill.txt"};
 
 int numSamples;
 int sampleNo;
@@ -69,7 +71,7 @@ void loadSong(char* filename) {
   FILE* fp;
   char path[100] = "songs/";
   strcat(path, filename);
- 
+
   fp = fopen(path, "r");
   if (fp == NULL) {
     printf("Song file not found\n");
@@ -153,7 +155,7 @@ void resetLobbyState(void) {
   lobbyState.songId = 0;
 
   for (int i = 0; i < 2; i++) {
-    struct LobbyScreenState state = {0, 0, 0, 0};
+    struct LobbyScreenState state = {1, 1, 1, 1};
     lobbyState.lobbyScreenStates[i] = state;
   }
 }
@@ -183,7 +185,10 @@ ssize_t poseRead;
 
 void loadPoses(char* filename) {
   FILE* fp;
-  fp = fopen(strcat("poses/", filename), "r");
+  char path[50] = "poses/";
+  strcat(path, filename);
+
+  fp = fopen(path, "r");
   if (fp == NULL) {
     printf("Pose file not found\n");
     exit(0);
@@ -224,19 +229,27 @@ void loadPoses(char* filename) {
 
   numPoses = count;
 
+  printf("Loaded Pose %s | %d samples\n", path, numPoses);
+
   fclose(fp);
 }
 
-void insertDefenderPose(struct Pose p, int id) {
-  if (p.isDefender) {
-    defenderPoses[id] = p;
-  }
+void insertDefenderPose(int id, double ha, double ma) {
+  struct Pose pose;
+  pose.hx = POSE_HOUR_LENGTH * cos(ha);
+  pose.hy = POSE_HOUR_LENGTH * sin(ha);
+  pose.mx = POSE_MINUTE_LENGTH * cos(ma);
+  pose.my = POSE_MINUTE_LENGTH * sin(ma);
+  pose.sample = defenderPoses[id].sample;
+  pose.isDefender = 1;
+
+  defenderPoses[id] = pose;
 }
 
 int getPoseX(struct Pose p) {
   int x = (int)(GAME_VLINE_MARGIN +
-                PIXELS_PER_SAMPLE * (p.sample - sampleNo +
-                                     song_offsets[lobbyState.songId]));
+                PIXELS_PER_SAMPLE *
+                    (p.sample - sampleNo + song_offsets[lobbyState.songId]));
   if (x >= GAME_VLINE_MARGIN && x <= WIDTH - GAME_VLINE_MARGIN) {
     return x;
   }
@@ -249,7 +262,8 @@ void switchBuffer(void) {
 }
 
 void initGraphics(int s) {
-  while (graphicsUpdateLock);
+  while (graphicsUpdateLock)
+    ;
   switchScreenLock = 1;
   screen = s;
   for (int i = 0; i < 2; i++) {  // Put the same thing on both buffers
@@ -477,10 +491,10 @@ void updateGraphics(void) {
       prevState->mode = lobbyState.mode;
     }
     if (lobbyState.songId != prevState->songId) {
-      drawStringCenter(basicFont, (char*)song_displaynames[prevState->songId], 160,
-                       160, COLOR_LOBBY_SONG_FILL, 1, 1);
-      drawStringCenter(basicFont, (char*)song_displaynames[lobbyState.songId], 160,
-                       160, COLOR_LOBBY_SONG_TEXT, 1, 1);
+      drawStringCenter(basicFont, (char*)song_displaynames[prevState->songId],
+                       160, 160, COLOR_LOBBY_SONG_FILL, 1, 1);
+      drawStringCenter(basicFont, (char*)song_displaynames[lobbyState.songId],
+                       160, 160, COLOR_LOBBY_SONG_TEXT, 1, 1);
       prevState->songId = lobbyState.songId;
     }
 
@@ -519,10 +533,13 @@ void updateGraphics(void) {
         gameState.latePoseA = 0;
       }
     } else {
-      if (gameState.latePoseA < numPoses && sampleNo >= attackerPoses[gameState.latePoseA + 1].sample - POSE_LIFETIME) {
+      if (gameState.latePoseA < numPoses &&
+          sampleNo >=
+              attackerPoses[gameState.latePoseA + 1].sample - POSE_LIFETIME) {
         gameState.latePoseA++;
       }
-      if (gameState.earlyPoseA < numPoses && sampleNo >= attackerPoses[gameState.earlyPoseA].sample) {
+      if (gameState.earlyPoseA < numPoses &&
+          sampleNo >= attackerPoses[gameState.earlyPoseA].sample) {
         gameState.earlyPoseA++;
       }
     }
@@ -535,10 +552,13 @@ void updateGraphics(void) {
         gameState.latePoseD = 0;
       }
     } else {
-      if (gameState.latePoseD < numPoses && sampleNo >= defenderPoses[gameState.latePoseD + 1].sample - POSE_LIFETIME) {
+      if (gameState.latePoseD < numPoses &&
+          sampleNo >=
+              defenderPoses[gameState.latePoseD + 1].sample - POSE_LIFETIME) {
         gameState.latePoseD++;
       }
-      if (gameState.earlyPoseD < numPoses && sampleNo >= defenderPoses[gameState.earlyPoseD].sample) {
+      if (gameState.earlyPoseD < numPoses &&
+          sampleNo >= defenderPoses[gameState.earlyPoseD].sample) {
         gameState.earlyPoseD++;
       }
     }
@@ -582,8 +602,7 @@ void* outputThread(void* vargp) {
   while (1) {
     if ((screen == 2) && gameState.gameStarted) {
       sampleNo =
-          (sampleNo + writeAudio(samplesL[sampleNo],
-                                           samplesR[sampleNo])) %
+          (sampleNo + writeAudio(samplesL[sampleNo], samplesR[sampleNo])) %
           numSamples;
       //   sampleNo++;
     } else {
@@ -591,15 +610,17 @@ void* outputThread(void* vargp) {
     }
     // s = (s + 1) % SAMPLES_PER_FRAME;
     // if (s == 0) {
-      // while (switchScreenLock)
-        // ;
-      // updateGraphics();
+    // while (switchScreenLock)
+    // ;
+    // updateGraphics();
     // }
   }
 }
 
 void* graphicsThread(void* vargp) {
   while (1) {
+    while (switchScreenLock)
+      ;
     updateGraphics();
   }
 }
@@ -624,6 +645,8 @@ int main(int argc, char** argv) {
   // pthread_t outputThread_id;
   // pthread_create(&outputThread_id, NULL, outputThread, NULL);
 
+  loadSong("shop.txt");
+
   pthread_t graphicsThread_id;
   pthread_create(&graphicsThread_id, NULL, graphicsThread, NULL);
 
@@ -631,8 +654,6 @@ int main(int argc, char** argv) {
   audio_init_reg(virtual_base);
   uart_init(virtual_base);
   esp_reset();
-
-  loadSong("shop.txt");
 
   // if (!esp_init(argc > 1 ? argv[1] : NULL)) return 1;
 
@@ -645,60 +666,95 @@ int main(int argc, char** argv) {
   int s = 0;
 
   while (keyState != 8) {
+    SW_read(&swState);
+    KEY_read(&keyState);
+
     if (esp_failed) {
       printf("ESP Failed to connect to backend. Quitting ...\n");
       break;
     } else if (!esp_ready) {
+      // Attempt to connect to backend
       esp_init(argc > 1 ? argv[1] : NULL);
+
+      // Tell host what device I am
+      if (esp_ready) {
+        esp_write("{\"command\":\"setType\",\"identifier\":\"host\"}");
+      }
     } else {
+      // Read from ESP
       char* recvBuffer = esp_read(&recvLen);
 
+      // If we received something, parse it
       if (recvBuffer) {
+#ifdef DEBUG
         printf("[%d] %s\n", recvLen, recvBuffer);
+#endif
+
+        unsigned int p1Connected = lobbyState.p1Connected;
+        unsigned int p2Connected = lobbyState.p2Connected;
+
+        switch (recvBuffer[0]) {
+          case ESP_LOBBY_COMMAND:
+            sscanf(recvBuffer + 1, "%u %u", &p1Connected, &p2Connected);
+
+            lobbyState.p1Connected = p1Connected > 0;
+            lobbyState.p2Connected = p2Connected > 0;
+
+#ifdef DEBUG
+            printf("P1: %d, P2: %d\n", lobbyState.p1Connected,
+                   lobbyState.p2Connected);
+#endif
+            break;
+          default:
+#ifdef DEBUG
+            printf("[%d] %s\n", recvLen, recvBuffer);
+#endif
+            break;
+        }
+
         free(recvBuffer);
       }
-    }
 
-    SW_read(&swState);
-    KEY_read(&keyState);
+      if (screen == 0) {
+        if (keyState == 1) {
+          initGraphics(1);
+          esp_write("{\"command\":\"lobbyInit\"}");
+        }
+      } else if (screen == 1) {
+        // while (graphicsUpdateLock)
+          // ;
+        if (keyState == 4)
+          lobbyState.songId =
+              (lobbyState.songId == 0) ? numSongs - 1 : lobbyState.songId - 1;
+        else if (keyState == 8)
+          lobbyState.songId = (lobbyState.songId + 1) % numSongs;
+        lobbyState.mode = swState & 1;
+        // lobbyState.p1Connected = (swState >> 1) & 1;
+        // lobbyState.p2Connected = (swState >> 2) & 1;
 
-    if (screen == 0) {
-      if (keyState == 1) initGraphics(1);
-    } else if (screen == 1) {
-      while (graphicsUpdateLock)
-        ;
-      if (keyState == 4)
-        lobbyState.songId =
-            (lobbyState.songId == 0) ? numSongs - 1 : lobbyState.songId - 1;
-      else if (keyState == 8)
-        lobbyState.songId = (lobbyState.songId + 1) % numSongs;
-      lobbyState.mode = swState & 1;
-      lobbyState.p1Connected = (swState >> 1) & 1;
-      lobbyState.p2Connected = (swState >> 2) & 1;
-
-      if (keyState == 1) {
-        loadSong(song_filenames[lobbyState.songId]);
-        loadPoses(song_filenames[lobbyState.songId]);
-        initGraphics(2);
-      }
-    } else if (screen == 2) {
-      if (keyState == 1)
-        initGraphics(0);
-      else if (keyState == 2) {
-        gameState.gameStarted = 1;
-      }
-      else if (keyState == 4) {
-        sprintf(sendBuffer, "{\"command\":\"captureAttacker\",\"poseID\":%u}",
-                poseID);
-        esp_write(sendBuffer);
+        if (keyState == 1) {
+          loadSong(song_filenames[lobbyState.songId]);
+          loadPoses(song_filenames[lobbyState.songId]);
+          initGraphics(2);
+        }
+      } else if (screen == 2) {
+        if (keyState == 1)
+          initGraphics(0);
+        else if (keyState == 2) {
+          gameState.gameStarted = 1;
+        } else if (keyState == 4) {
+          sprintf(sendBuffer, "{\"command\":\"captureAttacker\",\"poseID\":%u}",
+                  poseID);
+          esp_write(sendBuffer);
+        }
       }
     }
 
     // Playing a song
-    if ((screen == 0) || (screen == 1) || (screen == 2 && gameState.gameStarted)) {
+    if ((screen == 0) || (screen == 1) ||
+        (screen == 2 && gameState.gameStarted)) {
       sampleNo =
-          (sampleNo + writeAudio(samplesL[sampleNo],
-                                           samplesR[sampleNo])) %
+          (sampleNo + writeAudio(samplesL[sampleNo], samplesR[sampleNo])) %
           numSamples;
     }
 
