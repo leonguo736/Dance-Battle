@@ -17,24 +17,6 @@ volatile uint16_t *UART_CONTROL_REG;
 
 // Private Function Prototypes
 /*
- * Returns whether the UART is ready to read data
- */
-int uart_read_ready(void);
-
-/*
- * Writes a string to the UART
- * data - the string to write
- */
-void uart_write_data(char *data);
-
-/*
- * Reads a byte from the UART and stores it in the data pointer.
- * Blocks until a byte is available
- * Returns 0 on success, -1 on failure
- */
-int uart_read_byte(uint8_t *data);
-
-/*
  * Reads from UART register
  * reg - the register to read from
  * mask - the mask to apply to the register
@@ -124,79 +106,6 @@ void uart_init(void *virtual_base) {
   *UART_STATUS_REG = 0;
 
   uart_output();
-}
-
-void uart_write_data(char *str) {
-  while (*str != '\0') {
-    uart_write_byte((uint16_t)*str);
-    str++;
-  }
-  uart_write_byte('\r');
-}
-
-int uart_read_data(char *str, int len) {
-  unsigned int actualLen = 0;
-
-  if (uart_read_ready()) {  // Clear buffer
-    for (unsigned int i = 0; i < len; i++) {
-      str[i] = '\0';
-    }
-
-    // Read from UART and store in buffer
-    while (*str != '\n' && actualLen < len) {
-      uart_read_byte((uint8_t *)str);
-      str += *str != '\n';
-      actualLen += *str != '\n';
-    }
-
-    *str = '\0';
-
-    if (actualLen >= len) {
-      printf("Buffer Overflow - %d\n", actualLen);
-      actualLen = -1;
-    }
-  } 
-
-  return actualLen;
-}
-
-char *uart_wait_for_messages(char **messages, unsigned int numMessages) {
-#ifdef DEBUG
-  printf("Waiting for messages: ");
-  for (unsigned int i = 0; i < numMessages; i++) {
-    printf("%s, ", messages[i]);
-  }
-  printf("\n");
-#endif
-  char recvBuffer[UART_BUFFER_SIZE];
-  char *yieldedMessage = NULL;
-  do {
-    uart_read_data(recvBuffer, UART_BUFFER_SIZE);
-    for (unsigned int i = 0; i < numMessages && !yieldedMessage; i++) {
-      yieldedMessage =
-          strcmp(recvBuffer, messages[i]) == 0 ? messages[i] : NULL;
-    }
-  } while (!yieldedMessage);
-  return yieldedMessage;
-}
-
-void uart_send_command(char *cmd, char **args, unsigned int numArgs) {
-  char sendBuffer[UART_BUFFER_SIZE];
-#ifdef DEBUG 
-  printf("Parsing Command: %s |", cmd);
-#endif
-  sprintf(sendBuffer, "%s", cmd);
-  for (unsigned int i = 0; i < numArgs; i++) {
-    #ifdef DEBUG
-      printf(" %s,", args[i]);
-    #endif
-    sprintf(sendBuffer, "%s%s ", sendBuffer, args[i]);
-  }
-
-  #ifdef DEBUG
-    printf("\nSending Command: %s\n", sendBuffer);
-  #endif
-  uart_write_data(sendBuffer);
 }
 
 void uart_output(void) {

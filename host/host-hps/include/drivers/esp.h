@@ -7,15 +7,16 @@
 #include "const.h"
 #include "uart.h"
 
-#define ESP_BUFFER_SIZE UART_BUFFER_SIZE
+#define ESP_BUFFER_SIZE 1024
 #define ESP_CONNECT_TIMEOUT 10
 // Global Variables
-extern bool esp_connected;
+extern bool esp_failed;
+extern bool esp_ready;
 
 /*
  * Initializes the ESP
  */
-bool esp_init(int argc, char **argv);
+bool esp_init(char *server_ip);
 
 /*
  * Reads a string from the ESP

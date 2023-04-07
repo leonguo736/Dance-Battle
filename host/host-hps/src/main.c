@@ -12,12 +12,12 @@
 #include "audio.h"
 #include "video.h"
 #else
+#include <intelfpgaup/HEX.h>
 #include <intelfpgaup/KEY.h>
+#include <intelfpgaup/LEDR.h>
 #include <intelfpgaup/SW.h>
 #include <intelfpgaup/audio.h>
 #include <intelfpgaup/video.h>
-#include <intelfpgaup/HEX.h>
-#include <intelfpgaup/LEDR.h>
 #endif
 
 #include "hps_0.h"
@@ -35,7 +35,8 @@
 #define FPS 40
 #define PIXELS_PER_SAMPLE 0.0034375
 #define POSE_LIFETIME 64000
-#define SAMPLES_PER_FRAME 800 // Recalculate if you change the audio rate or frame rate
+#define SAMPLES_PER_FRAME \
+  800  // Recalculate if you change the audio rate or frame rate
 
 // Global State
 
@@ -47,62 +48,63 @@ int buffer = 0;  // 0 or 1
 // Song
 
 int numSongs = 3;
-char * song_names[] = {"tetris 99 theme", "groovy gray", "super treadmill"};
-int song_sampleNos[] = { 1000000, 0, 0 };
-double song_spbs[] = { AUDIO_RATE / (140.0 / 60) };
-int song_offsets[] = { 0 };
-int song_numPoses[] = { 8 };
-char * song_samplefiles[] = {
-    "shawty.txt", "tetris32.txt", "groovy.txt", "treadmill.txt"
-};
+char* song_names[] = {"tetris 99 theme", "groovy gray", "super treadmill"};
+int song_sampleNos[] = {1000000, 0, 0};
+double song_spbs[] = {AUDIO_RATE / (140.0 / 60)};
+int song_offsets[] = {0};
+int song_numPoses[] = {8};
+char* song_samplefiles[] = {"shawty.txt", "tetris32.txt", "groovy.txt",
+                            "treadmill.txt"};
 
 int samplesL[MAX_SAMPLES];
 int samplesR[MAX_SAMPLES];
 
-FILE* fp;
 char* sampleLine = NULL;
 size_t sampleLen = 0;
 ssize_t sampleRead;
 
 struct ScreenPose convertPose(struct Pose pose);
 
-void loadSong(char * filename, int numSamples) {
-    fp = fopen(filename, "r");
-    if (fp == NULL) {
-        printf("Song file not found\n");
-        exit(0);
-    }
+void loadSong(char* filename, int numSamples) {
+  FILE* fp;
+  fp = fopen(filename, "r");
+  if (fp == NULL) {
+    printf("Song file not found\n");
+    exit(0);
+  }
 
-    for (int i = 0; i < numSamples; i++) {
-        samplesL[i] = (getline(&sampleLine, &sampleLen, fp) != -1)
-                        ? (int)(VOLUME * atof(sampleLine))
-                        : 0;
-    }
-    for (int i = 0; i < numSamples; i++) {
-        samplesR[i] = (getline(&sampleLine, &sampleLen, fp) != -1)
-                        ? (int)(VOLUME * atof(sampleLine))
-                        : 0;
-    }
+  for (int i = 0; i < numSamples; i++) {
+    samplesL[i] = (getline(&sampleLine, &sampleLen, fp) != -1)
+                      ? (int)(VOLUME * atof(sampleLine))
+                      : 0;
+  }
+  for (int i = 0; i < numSamples; i++) {
+    samplesR[i] = (getline(&sampleLine, &sampleLen, fp) != -1)
+                      ? (int)(VOLUME * atof(sampleLine))
+                      : 0;
+  }
+
+  fclose(fp);
 }
 
 int writeAudio(int l, int r) {
-    int space = audio_check_write() ;
+  int space = audio_check_write();
 
-    if (space) {
-        // printf("Channels are free\n");
-        LEDR_set(0);
-    } else {
-        // printf("writeAudio: %x %d %d\n", space, left_space, right_space);
-        // printf("Channels are full\n");
-        LEDR_set(1);
-        audio_wait_write();
-        // return 0;
-    }
+  if (space) {
+    // printf("Channels are free\n");
+    LEDR_set(0);
+  } else {
+    // printf("writeAudio: %x %d %d\n", space, left_space, right_space);
+    // printf("Channels are full\n");
+    LEDR_set(1);
+    audio_wait_write();
+    // return 0;
+  }
 
-    audio_write_left(l);
-    audio_write_right(r);
+  audio_write_left(l);
+  audio_write_right(r);
 
-    return 1;
+  return 1;
 }
 
 // State data
@@ -112,18 +114,14 @@ int init_name_speeds[] = {4, 4, -4, -4};
 int init_name_offsets[] = {0, 0, 40, 40};
 short color_init_names[] = {0xe4a, 0xd19, 0xc641, 0x7859};
 
-const struct Pose song_poses[][MAX_POSES] = {
-    {
-        {5, 0.1, 0.2},
-        {7, 0.3, 0.4},
-        {9, 0.5, 0.6},
-        {11, 0.7, 0.8},
-        {13, 0.9, 1.0},
-        {17, 1.1, 1.2},
-        {21, 1.3, 1.4},
-        {23, 1.5, 1.6}
-    }
-};
+const struct Pose song_poses[][MAX_POSES] = {{{5, 0.1, 0.2},
+                                              {7, 0.3, 0.4},
+                                              {9, 0.5, 0.6},
+                                              {11, 0.7, 0.8},
+                                              {13, 0.9, 1.0},
+                                              {17, 1.1, 1.2},
+                                              {21, 1.3, 1.4},
+                                              {23, 1.5, 1.6}}};
 
 struct InitState initState;
 struct LobbyState lobbyState;
@@ -131,72 +129,74 @@ struct GameState gameState;
 struct ResultsState resultsState;
 
 void resetInitState(void) {
-    initState.titleSlideDone = 0;
-    initState.statusSlideDone = 0;
+  initState.titleSlideDone = 0;
+  initState.statusSlideDone = 0;
 
-    for (int i = 0; i < 2; i++) {
-        struct InitScreenState state = {240.0,
-                                        -100.0,
-                                        240.0,
-                                        {{{0}, {8}, {16}, {24}},
-                                        {{160}, {168}, {176}, {184}},
-                                        {{80}, {88}, {96}, {104}},
-                                        {{240}, {248}, {256}, {264}}}};
-        initState.initScreenStates[i] = state;
-    }
+  for (int i = 0; i < 2; i++) {
+    struct InitScreenState state = {240.0,
+                                    -100.0,
+                                    240.0,
+                                    {{{0}, {8}, {16}, {24}},
+                                     {{160}, {168}, {176}, {184}},
+                                     {{80}, {88}, {96}, {104}},
+                                     {{240}, {248}, {256}, {264}}}};
+    initState.initScreenStates[i] = state;
+  }
 }
 
 void resetLobbyState(void) {
-    lobbyState.p1Connected = 0;
-    lobbyState.p2Connected = 0;
-    lobbyState.mode = 0;
-    lobbyState.songId = 0;
+  lobbyState.p1Connected = 0;
+  lobbyState.p2Connected = 0;
+  lobbyState.mode = 0;
+  lobbyState.songId = 0;
 
-    for (int i = 0; i < 2; i++) {
-        struct LobbyScreenState state = {0, 0, 0, 0};
-        lobbyState.lobbyScreenStates[i] = state;
-    }
+  for (int i = 0; i < 2; i++) {
+    struct LobbyScreenState state = {0, 0, 0, 0};
+    lobbyState.lobbyScreenStates[i] = state;
+  }
 }
 
 void resetGamescreenState(void) {
-    gameState.sampleNo = 0;
-    gameState.earlyPose = -1;
-    gameState.latePose = -1;
-    gameState.gameStarted = 0;
+  gameState.sampleNo = 0;
+  gameState.earlyPose = -1;
+  gameState.latePose = -1;
+  gameState.gameStarted = 0;
 
-    for (int p = 0; p < song_numPoses[lobbyState.songId]; p++) {
-        gameState.screenPoses[p] = convertPose(song_poses[lobbyState.songId][p]);
-    }
+  for (int p = 0; p < song_numPoses[lobbyState.songId]; p++) {
+    gameState.screenPoses[p] = convertPose(song_poses[lobbyState.songId][p]);
+  }
 
-    for (int i = 0; i < 2; i++) {
-        struct GameScreenState state = {0, -1, -1, {0}};
-        gameState.gameScreenStates[i] = state;
-    }
+  for (int i = 0; i < 2; i++) {
+    struct GameScreenState state = {0, -1, -1, {0}};
+    gameState.gameScreenStates[i] = state;
+  }
 }
 
 struct ScreenPose convertPose(struct Pose pose) {
-    struct ScreenPose sp = {
-        (int)(pose.beat * song_spbs[lobbyState.songId] + song_offsets[lobbyState.songId]),
-        -1,
-        POSE_HOUR_LENGTH * cos(pose.hourAngle),
-        POSE_HOUR_LENGTH * sin(pose.hourAngle),
-        POSE_MINUTE_LENGTH * cos(pose.minuteAngle),
-        POSE_MINUTE_LENGTH * sin(pose.minuteAngle)};
+  struct ScreenPose sp = {(int)(pose.beat * song_spbs[lobbyState.songId] +
+                                song_offsets[lobbyState.songId]),
+                          -1,
+                          POSE_HOUR_LENGTH * cos(pose.hourAngle),
+                          POSE_HOUR_LENGTH * sin(pose.hourAngle),
+                          POSE_MINUTE_LENGTH * cos(pose.minuteAngle),
+                          POSE_MINUTE_LENGTH * sin(pose.minuteAngle)};
 
-    return sp;
+  return sp;
 }
 
 int getPoseX(struct ScreenPose sp) {
-    int x = (int)(GAME_VLINE_MARGIN + PIXELS_PER_SAMPLE * (sp.sample - gameState.sampleNo + song_offsets[lobbyState.songId]));
-    if (x >= GAME_VLINE_MARGIN && x <= WIDTH - GAME_VLINE_MARGIN) {
-        return x;
-    }
-    return 0;
+  int x = (int)(GAME_VLINE_MARGIN +
+                PIXELS_PER_SAMPLE * (sp.sample - gameState.sampleNo +
+                                     song_offsets[lobbyState.songId]));
+  if (x >= GAME_VLINE_MARGIN && x <= WIDTH - GAME_VLINE_MARGIN) {
+    return x;
+  }
+  return 0;
 }
 
 void switchBuffer(void) {
-    video_show();
-    buffer = !buffer;
+  video_show();
+  buffer = !buffer;
 }
 
 void initGraphics(int s) {
@@ -267,7 +267,8 @@ void updateGraphics(void) {
   graphicsUpdateLock = 1;
   if (screen == 0) {  // Init
     struct InitScreenState* prevState = &(initState.initScreenStates[buffer]);
-    struct InitScreenState* otherState = &(initState.initScreenStates[(buffer + 1) % 2]);
+    struct InitScreenState* otherState =
+        &(initState.initScreenStates[(buffer + 1) % 2]);
 
     if (!initState.titleSlideDone) {
       int dx = (int)round(prevState->danceX);
@@ -348,7 +349,8 @@ void updateGraphics(void) {
       }
     }
   } else if (screen == 1) {  // Lobby
-    struct LobbyScreenState* prevState = &(lobbyState.lobbyScreenStates[buffer]);
+    struct LobbyScreenState* prevState =
+        &(lobbyState.lobbyScreenStates[buffer]);
     // struct LobbyScreenState * otherState =
     // &(lobbyScreenStates[(buffer+1)%2]);
 
@@ -429,8 +431,8 @@ void updateGraphics(void) {
     if (lobbyState.songId != prevState->songId) {
       drawStringCenter(basicFont, (char*)song_names[prevState->songId], 160,
                        160, COLOR_LOBBY_SONG_FILL, 1, 1);
-      drawStringCenter(basicFont, (char*)song_names[lobbyState.songId], 160, 160,
-                       COLOR_LOBBY_SONG_TEXT, 1, 1);
+      drawStringCenter(basicFont, (char*)song_names[lobbyState.songId], 160,
+                       160, COLOR_LOBBY_SONG_TEXT, 1, 1);
       prevState->songId = lobbyState.songId;
     }
 
@@ -457,17 +459,21 @@ void updateGraphics(void) {
 
     // Advance pose pointers if necessary
     if (gameState.earlyPose == -1) {
-      if (gameState.sampleNo >= gameState.screenPoses[0].sample - POSE_LIFETIME) {
+      if (gameState.sampleNo >=
+          gameState.screenPoses[0].sample - POSE_LIFETIME) {
         gameState.earlyPose = 0;
         gameState.latePose = 0;
       }
     } else {
       if (gameState.latePose < song_numPoses[lobbyState.songId] &&
-          gameState.sampleNo >= gameState.screenPoses[gameState.latePose + 1].sample - POSE_LIFETIME) {
+          gameState.sampleNo >=
+              gameState.screenPoses[gameState.latePose + 1].sample -
+                  POSE_LIFETIME) {
         gameState.latePose++;
       }
       if (gameState.earlyPose < song_numPoses[lobbyState.songId] &&
-          gameState.sampleNo >= gameState.screenPoses[gameState.earlyPose].sample) {
+          gameState.sampleNo >=
+              gameState.screenPoses[gameState.earlyPose].sample) {
         gameState.earlyPose++;
       }
     }
@@ -503,8 +509,11 @@ void* outputThread(void* vargp) {
 
   while (1) {
     if ((screen == 2) && gameState.gameStarted) {
-      gameState.sampleNo = (gameState.sampleNo + writeAudio(samplesL[gameState.sampleNo], samplesR[gameState.sampleNo])) % song_sampleNos[lobbyState.songId];
-    //   sampleNo++;
+      gameState.sampleNo =
+          (gameState.sampleNo + writeAudio(samplesL[gameState.sampleNo],
+                                           samplesR[gameState.sampleNo])) %
+          song_sampleNos[lobbyState.songId];
+      //   sampleNo++;
     } else {
       // writeAudio(0, 0);
     }
@@ -538,22 +547,24 @@ int main(int argc, char** argv) {
   audio_init_reg(virtual_base);
   uart_init(virtual_base);
 
-  // if (!esp_init(argc, argv))
-//   return 1;
+  if (!esp_init(argc > 1 ? argv[1] : NULL)) return 1;
 
   // pthread_t espThread_id;
-  // pthread_create(&espThread_id, NULL, (void*) &esp_run, argv);
+  // pthread_create(&espThread_id, NULL, (void*)&esp_init,
+                //  argc > 1 ? argv[1] : NULL);
 
   int swState = 0;
   int keyState = 0;
   int s = 0;
 
   while (keyState != 8) {
-    char* recvBuffer = esp_read(&recvLen);
+    if (esp_ready) {
+      char* recvBuffer = esp_read(&recvLen);
 
-    if (recvBuffer) {
-      printf("[%d] %s\n", recvLen, recvBuffer);
-      free(recvBuffer);
+      if (recvBuffer) {
+        printf("[%d] %s\n", recvLen, recvBuffer);
+        free(recvBuffer);
+      }
     }
 
     SW_read(&swState);
@@ -565,7 +576,8 @@ int main(int argc, char** argv) {
       while (graphicsUpdateLock)
         ;
       if (keyState == 4)
-        lobbyState.songId = (lobbyState.songId == 0) ? numSongs - 1 : lobbyState.songId - 1;
+        lobbyState.songId =
+            (lobbyState.songId == 0) ? numSongs - 1 : lobbyState.songId - 1;
       else if (keyState == 8)
         lobbyState.songId = (lobbyState.songId + 1) % numSongs;
       lobbyState.mode = swState & 1;
@@ -573,7 +585,8 @@ int main(int argc, char** argv) {
       lobbyState.p2Connected = (swState >> 2) & 1;
 
       if (keyState == 1) {
-        loadSong(song_samplefiles[lobbyState.songId], song_sampleNos[lobbyState.songId]);
+        loadSong(song_samplefiles[lobbyState.songId],
+                 song_sampleNos[lobbyState.songId]);
         initGraphics(2);
       }
     } else if (screen == 2) {
@@ -582,7 +595,8 @@ int main(int argc, char** argv) {
       else if (keyState == 2)
         gameState.gameStarted = 1;
       else if (keyState == 4) {
-        sprintf(sendBuffer, "{\"command\":\"captureAttacker\",\"poseID\":%u}", poseID);
+        sprintf(sendBuffer, "{\"command\":\"captureAttacker\",\"poseID\":%u}",
+                poseID);
         esp_write(sendBuffer);
       }
     }
@@ -598,7 +612,7 @@ int main(int argc, char** argv) {
     // if (s == 0) {
     //   while (switchScreenLock)
     //     ;
-      updateGraphics();
+    updateGraphics();
     // }
 
     // else if (keyState == 4) initGraphics(2);
@@ -613,8 +627,7 @@ int main(int argc, char** argv) {
   LEDR_close();
   HEX_close();
 
-  fclose(fp);
-  free(sampleLine);
+  regs_close(virtual_base);
 
   return 0;
 }

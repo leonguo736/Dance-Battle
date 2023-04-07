@@ -47,16 +47,30 @@
 #define UART_RTS_MASK 0x800
 #define UART_IEOP_MASK 0x1000
 
-/* constants */
-#define UART_BUFFER_SIZE 1024
 /* UART Functions */
 void uart_init(void *virtual_base);
-void uart_write_data(char *data);
-int uart_read_data(char *data, int len);
+/*
+ * Reads a byte from the UART
+ * data - a pointer to a byte to store the read data
+ * Returns 1 if successful, 0 if not
+ */
 int uart_read_byte(uint8_t *data);
+
+/*
+ * Writes a byte to the UART
+ * data - the byte to write
+ */
 void uart_write_byte(uint8_t data);
-char *uart_wait_for_messages(char **messages, unsigned int numMessages);
-void uart_send_command(char *cmd, char **args, unsigned int numArgs);
+
+/*
+ * Returns whether the UART is ready to read data
+ * Returns 1 if ready, 0 if not
+ */
+int uart_read_ready(void);
+
+/* 
+ * Outputs UART Register Information
+ */
 void uart_output(void);
 
 #endif
