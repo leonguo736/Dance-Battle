@@ -8,8 +8,8 @@ RM := clean
 
 # All of the sources participating in the build are defined here
 -include sources.mk
--include tests/final/subdir.mk
 -include src/intelfpgaup/subdir.mk
+-include src/drivers/subdir.mk
 -include src/subdir.mk
 -include subdir.mk
 -include objects.mk

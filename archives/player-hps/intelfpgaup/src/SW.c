@@ -4,7 +4,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
-#include "../include/SW.h"
+#include "SW.h"
 
 /* This file contain wrappers for the slider switch SW character device driver */
 int SW_FD = -1;

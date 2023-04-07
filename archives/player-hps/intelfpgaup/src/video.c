@@ -4,7 +4,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
-#include "../include/video.h"
+#include "video.h"
 
 /* This file contains wrappers for the VGA video character device driver */
 int video_FD = -1;

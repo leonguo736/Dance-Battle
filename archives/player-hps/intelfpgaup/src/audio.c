@@ -1,10 +1,16 @@
+#include "audio.h"
+
+#include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <fcntl.h>
 #include <unistd.h>
-#include <errno.h>
-#include "../include/audio.h"
+
+#include "hps_0.h"
+#include "hwlib.h"
+#include "regs.h"
+#include "socal/hps.h"
 
 /* This file contains wrappers for the audio character device driver */
 int audio_FD = -1;
@@ -12,10 +18,23 @@ int audio_FD = -1;
 #define audio_CHAR_DEV "/dev/IntelFPGAUP/audio"
 
 #define AUDIO_BYTES 24				// number of bytes to read from audio device
+#define BUF_THRESHOLD 96
+#define FIFO_REG_OFFSET 4
+#define FIFO_OUTPUT_WORD_MASK 0xFFFF0000
 
 /* Declare buffers for reading/writing data to device drivers */
-#define BUF_SIZE 32							// large enough for all drivers
+#define BUF_SIZE 128						// large enough for all drivers
 char audio_buffer[BUF_SIZE];				// buffer for audio data
+
+volatile uint32_t* FIFO_REG = NULL;
+
+/* 
+ * Initializes audio fifospace register
+ */
+void audio_init_reg(void* virtual_base) {
+	FIFO_REG = (uint32_t*)(virtual_base + ((unsigned long) (ALT_LWFPGASLVS_OFST + AUDIO_SUBSYSTEM_AUDIO_BASE + FIFO_REG_OFFSET) &
+                    (unsigned long)(HW_REGS_MASK)));
+}
 
 /**
  * Opens the digital audio device
@@ -105,6 +124,18 @@ void audio_wait_write( )
 	else
 		fprintf (stderr, "Can't write %s: audio_FD = %d\n", audio_CHAR_DEV, audio_FD);
 }	
+
+/*
+ * Check if space is available for writing to the digital audio device
+ */
+
+int audio_check_write( )
+{
+	// printf("audio_check_write | %x\n", *FIFO_REG);
+	return *FIFO_REG & FIFO_OUTPUT_WORD_MASK;
+}
+
+
 
 /**
  * Waits until data is available for reading from the digital audio device

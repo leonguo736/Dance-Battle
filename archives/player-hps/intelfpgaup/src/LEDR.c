@@ -4,7 +4,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
-#include "../include/LEDR.h"
+#include "LEDR.h"
 
 /* This file contains wrappers for the red light LEDR character device driver */
 int LEDR_FD = -1;
