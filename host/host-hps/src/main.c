@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #ifdef GCC
 #include "HEX.h"
 #include "KEY.h"
@@ -66,7 +67,10 @@ ssize_t sampleRead;
 
 void loadSong(char* filename) {
   FILE* fp;
-  fp = fopen(strcat("songs/", filename), "r");
+  char path[100] = "songs/";
+  strcat(path, filename);
+ 
+  fp = fopen(path, "r");
   if (fp == NULL) {
     printf("Song file not found\n");
     exit(0);
@@ -86,6 +90,8 @@ void loadSong(char* filename) {
 
   sampleNo = 0;
   numSamples = count;
+
+  printf("Loaded Song %s | %d samples\n", path, numSamples);
 
   fclose(fp);
 }
@@ -110,61 +116,6 @@ int writeAudio(int l, int r) {
   audio_write_right(r);
 
   return 1;
-}
-
-// Poses
-
-int numPoses;
-struct Pose defenderPoses[MAX_POSES] = {};
-struct Pose attackerPoses[MAX_POSES] = {};
-
-char* poseLine = NULL;
-size_t poseLen = 0;
-ssize_t poseRead;
-
-void loadPoses(char* filename) {
-  FILE* fp;
-  fp = fopen(strcat("poses/", filename), "r");
-  if (fp == NULL) {
-    printf("Pose file not found\n");
-    exit(0);
-  }
-
-  char* delim = " ";
-  int count = 0;
-
-  while (getline(&poseLine, &poseLen, fp) != -1) {
-    int lineSize = strlen(poseLine);
-    char* ptr = strtok(poseLine, delim);
-    int token = 0;
-    int id;
-    int sample;
-
-    struct Pose newPose = {0, 0, -1, 30, 30, -30, -30};
-
-    while (ptr != NULL) {
-      if (token == 0) {
-        id = atoi(ptr);
-      } else if (token == 1) {
-        newPose.isDefender = atoi(ptr);
-      } else if (token == 2) {
-        sample = (int)(atof(ptr)*song_spbs[lobbyState.songId]+song_offsets[lobbyState.songId]);
-        if (newPose.isDefender) {
-          defenderPoses[id].sample = sample;
-        } else {
-          attackerPoses[id].sample = sample;
-        }
-      }
-      token++;
-      ptr = strtok(NULL, delim);
-    }
-
-    count++;
-  }
-
-  numPoses = count;
-
-  fclose(fp);
 }
 
 // State data
@@ -218,6 +169,62 @@ void resetGameState(void) {
     struct GameScreenState state = {0, -1, -1, -1, -1, {0}, {0}};
     gameState.gameScreenStates[i] = state;
   }
+}
+
+// Poses
+
+int numPoses;
+struct Pose defenderPoses[MAX_POSES] = {};
+struct Pose attackerPoses[MAX_POSES] = {};
+
+char* poseLine = NULL;
+size_t poseLen = 0;
+ssize_t poseRead;
+
+void loadPoses(char* filename) {
+  FILE* fp;
+  fp = fopen(strcat("poses/", filename), "r");
+  if (fp == NULL) {
+    printf("Pose file not found\n");
+    exit(0);
+  }
+
+  char* delim = " ";
+  int count = 0;
+
+  while (getline(&poseLine, &poseLen, fp) != -1) {
+    int lineSize = strlen(poseLine);
+    char* ptr = strtok(poseLine, delim);
+    int token = 0;
+    int id;
+    int sample;
+
+    struct Pose newPose = {0, 0, -1, 30, 30, -30, -30};
+
+    while (ptr != NULL) {
+      if (token == 0) {
+        id = atoi(ptr);
+      } else if (token == 1) {
+        newPose.isDefender = atoi(ptr);
+      } else if (token == 2) {
+        sample = (int)(atof(ptr) * song_spbs[lobbyState.songId] +
+                       song_offsets[lobbyState.songId]);
+        if (newPose.isDefender) {
+          defenderPoses[id].sample = sample;
+        } else {
+          attackerPoses[id].sample = sample;
+        }
+      }
+      token++;
+      ptr = strtok(NULL, delim);
+    }
+
+    count++;
+  }
+
+  numPoses = count;
+
+  fclose(fp);
 }
 
 void insertDefenderPose(struct Pose p, int id) {
@@ -624,6 +631,8 @@ int main(int argc, char** argv) {
   audio_init_reg(virtual_base);
   uart_init(virtual_base);
   esp_reset();
+
+  loadSong("shop.txt");
 
   // if (!esp_init(argc > 1 ? argv[1] : NULL)) return 1;
 
