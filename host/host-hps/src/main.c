@@ -546,25 +546,33 @@ int main(int argc, char** argv) {
   // Comms
   audio_init_reg(virtual_base);
   uart_init(virtual_base);
+  esp_reset();
 
-  if (!esp_init(argc > 1 ? argv[1] : NULL)) return 1;
+  // if (!esp_init(argc > 1 ? argv[1] : NULL)) return 1;
 
   // pthread_t espThread_id;
   // pthread_create(&espThread_id, NULL, (void*)&esp_init,
-                //  argc > 1 ? argv[1] : NULL);
+  //  argc > 1 ? argv[1] : NULL);
 
   int swState = 0;
   int keyState = 0;
   int s = 0;
 
   while (keyState != 8) {
-    if (esp_ready) {
+    if (esp_failed) {
+      printf("ESP Failed to connect to backend. Quitting ...\n");
+      break;
+    } else if (!esp_ready) {
+      esp_init(argc > 1 ? argv[1] : NULL);
+    } else {
       char* recvBuffer = esp_read(&recvLen);
 
       if (recvBuffer) {
         printf("[%d] %s\n", recvLen, recvBuffer);
         free(recvBuffer);
       }
+
+      updateGraphics();
     }
 
     SW_read(&swState);
@@ -612,7 +620,6 @@ int main(int argc, char** argv) {
     // if (s == 0) {
     //   while (switchScreenLock)
     //     ;
-    updateGraphics();
     // }
 
     // else if (keyState == 4) initGraphics(2);

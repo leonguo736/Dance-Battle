@@ -62,9 +62,10 @@ int uart_read_byte(uint8_t *data) {
 
   if (uart_read_command(UART_STATUS_REG, UART_ROE_MASK) != 0) {
     printf("uart_read_data - ROE\n");
+    return 0;
   }
 
-  return 0;
+  return 1;
 }
 
 void uart_write_byte(uint8_t value) {

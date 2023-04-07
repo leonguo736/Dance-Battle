@@ -8,15 +8,23 @@
 #include "uart.h"
 
 #define ESP_BUFFER_SIZE 1024
-#define ESP_CONNECT_TIMEOUT 10
-// Global Variables
-extern bool esp_failed;
+#define ESP_CONNECT_THRESHOLD 10
+
+/* Global Variables */
 extern bool esp_ready;
+extern bool esp_failed;
+
+/* Function Prototypes */
+
+/*
+ * Resets the ESP module
+ */
+void esp_reset(void);
 
 /*
  * Initializes the ESP
  */
-bool esp_init(char *server_ip);
+void esp_init(char *server_ip);
 
 /*
  * Reads a string from the ESP
