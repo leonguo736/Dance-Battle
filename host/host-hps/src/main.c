@@ -83,22 +83,23 @@ void loadSong(char* filename, int numSamples) {
                       ? (int)(VOLUME * atof(sampleLine))
                       : 0;
   }
-
   fclose(fp);
 }
 
 int writeAudio(int l, int r) {
   int space = audio_check_write();
+  int left_space = ((space >> 16) & 0xff00) >> 8;
+  int right_space = ((space >> 16) & 0xff);
 
-  if (space) {
-    // printf("Channels are free\n");
+  if (left_space > 0 && right_space > 0) {
+    // printf("Space available\n");
     LEDR_set(0);
   } else {
     // printf("writeAudio: %x %d %d\n", space, left_space, right_space);
     // printf("Channels are full\n");
     LEDR_set(1);
-    audio_wait_write();
-    // return 0;
+    // audio_wait_write();
+    return 0;
   }
 
   audio_write_left(l);
@@ -509,6 +510,7 @@ void* outputThread(void* vargp) {
 
   while (1) {
     if ((screen == 2) && gameState.gameStarted) {
+      // printf("sampleNo: %d | %x | %x\n", gameState.sampleNo, samplesL[gameState.sampleNo], samplesR[gameState.sampleNo]);
       gameState.sampleNo =
           (gameState.sampleNo + writeAudio(samplesL[gameState.sampleNo],
                                            samplesR[gameState.sampleNo])) %
@@ -517,12 +519,18 @@ void* outputThread(void* vargp) {
     } else {
       // writeAudio(0, 0);
     }
-    s = (s + 1) % SAMPLES_PER_FRAME;
-    if (s == 0) {
-      while (switchScreenLock)
-        ;
+    // s = (s + 1) % SAMPLES_PER_FRAME;
+    // if (s == 0) {
+      // while (switchScreenLock)
+        // ;
       // updateGraphics();
-    }
+    // }
+  }
+}
+
+void* graphicsThread(void* vargpoid) {
+  while (1) {
+    updateGraphics();
   }
 }
 
@@ -540,8 +548,14 @@ int main(int argc, char** argv) {
   if (!HEX_open()) return 1;
   if (!regs_init(&virtual_base)) return 1;
 
-  pthread_t outputThread_id;
-  pthread_create(&outputThread_id, NULL, outputThread, NULL);
+  audio_init();
+  audio_rate(AUDIO_RATE);
+  initGraphics(0);
+  // pthread_t outputThread_id;
+  // pthread_create(&outputThread_id, NULL, outputThread, NULL);
+
+  pthread_t graphicsThread_id;
+  pthread_create(&graphicsThread_id, NULL, graphicsThread, NULL);
 
   // Comms
   audio_init_reg(virtual_base);
@@ -571,8 +585,6 @@ int main(int argc, char** argv) {
         printf("[%d] %s\n", recvLen, recvBuffer);
         free(recvBuffer);
       }
-
-      updateGraphics();
     }
 
     SW_read(&swState);
@@ -600,8 +612,9 @@ int main(int argc, char** argv) {
     } else if (screen == 2) {
       if (keyState == 1)
         initGraphics(0);
-      else if (keyState == 2)
+      else if (keyState == 2) {
         gameState.gameStarted = 1;
+      }
       else if (keyState == 4) {
         sprintf(sendBuffer, "{\"command\":\"captureAttacker\",\"poseID\":%u}",
                 poseID);
@@ -609,18 +622,14 @@ int main(int argc, char** argv) {
       }
     }
 
-    // if ((screen == 2) && gameStarted) {
-    //   sampleNo +=
-    //       (writeAudio(samplesL[sampleNo], samplesR[sampleNo]) % 1000000);
-    //   //   sampleNo++;
-    // } else {
-    //   // writeAudio(0, 0);
-    // }
-    // s = (s + 1) % SAMPLES_PER_FRAME;
-    // if (s == 0) {
-    //   while (switchScreenLock)
-    //     ;
-    // }
+    if ((screen == 2) && gameState.gameStarted) {
+      // printf("sampleNo: %d | %x | %x\n", gameState.sampleNo,
+      // samplesL[gameState.sampleNo], samplesR[gameState.sampleNo]);
+      gameState.sampleNo =
+          (gameState.sampleNo + writeAudio(samplesL[gameState.sampleNo],
+                                           samplesR[gameState.sampleNo])) %
+          song_sampleNos[lobbyState.songId];
+    }
 
     // else if (keyState == 4) initGraphics(2);
     // if (esp_connected) initGraphics(2);
