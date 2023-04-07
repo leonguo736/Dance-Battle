@@ -528,7 +528,7 @@ void* outputThread(void* vargp) {
   }
 }
 
-void* graphicsThread(void* vargpoid) {
+void* graphicsThread(void* vargp) {
   while (1) {
     updateGraphics();
   }
