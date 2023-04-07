@@ -85,8 +85,8 @@ void drawGameVLines(void) {
     video_line(WIDTH - GAME_VLINE_MARGIN, BORDER + 1, WIDTH - GAME_VLINE_MARGIN, HEIGHT - BORDER - 1, COLOR_GAME_VLINE);
 }
 
-void drawPose(struct ScreenPose sp, int x, int erase) {
-    video_line(x, GAME_POSE_Y, x + sp.hx, GAME_POSE_Y + sp.hy, erase ? COLOR_BG : COLOR_POSE_HHAND);
-    video_line(x, GAME_POSE_Y, x + sp.mx, GAME_POSE_Y + sp.my, erase ? COLOR_BG : COLOR_POSE_MHAND);
+void drawPose(struct Pose p, int x, int erase) {
+    video_line(x, GAME_POSE_Y, x + p.hx, GAME_POSE_Y + p.hy, erase ? COLOR_BG : COLOR_POSE_HHAND);
+    video_line(x, GAME_POSE_Y, x + p.mx, GAME_POSE_Y + p.my, erase ? COLOR_BG : COLOR_POSE_MHAND);
     video_pixel(x, GAME_POSE_Y, erase ? COLOR_BG : COLOR_POSE_DOT);
 }

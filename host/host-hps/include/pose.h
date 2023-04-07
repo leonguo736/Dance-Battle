@@ -10,9 +10,14 @@
 #define POSE_MINUTE_LENGTH 40
 
 struct Pose {
-    double beat;
-    double hourAngle;
-    double minuteAngle;
+    int isDefender;
+    int sample;
+    
+    int x;
+    double hx;
+    double hy;
+    double mx;
+    double my;
 };
 
 #endif

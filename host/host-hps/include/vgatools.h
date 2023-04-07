@@ -100,17 +100,6 @@
 #define COLOR_POSE_HHAND 0xee3
 #define COLOR_POSE_MHAND 0xb3b
 
-// Screen Pose
-
-struct ScreenPose {
-    int sample;
-    int x;
-    double hx;
-    double hy;
-    double mx;
-    double my;
-};
-
 // General Methods
 
 void drawBackground(void);
@@ -138,6 +127,6 @@ void drawPBarOutline(void);
 void drawPBarFill(int prevWidth, int currWidth);
 
 void drawGameVLines(void);
-void drawPose(struct ScreenPose sp, int x, int erase);
+void drawPose(struct Pose p, int x, int erase);
 
 #endif

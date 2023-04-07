@@ -26,9 +26,12 @@ struct LobbyScreenState {
 
 struct GameScreenState {
     int pBarWidth;
-    int earlyPose;
-    int latePose;
-    int poseXs[MAX_POSES];
+    int earlyPoseA;
+    int earlyPoseD;
+    int latePoseA;
+    int latePoseD;
+    int poseAXs[MAX_POSES];
+    int poseDXs[MAX_POSES];
 };
 
 struct ResultsScreenState {
@@ -52,9 +55,10 @@ struct LobbyState {
 };
 
 struct GameState {
-    struct ScreenPose screenPoses[MAX_POSES];
-    int earlyPose;
-    int latePose;
+    int earlyPoseA;
+    int earlyPoseD;
+    int latePoseA;
+    int latePoseD;
     int gameStarted;
     struct GameScreenState gameScreenStates[2];
 };
