@@ -84,7 +84,7 @@ int main(int argc, char **argv)
     if (uartReadData != NULL)
     {
       printf("INFO `main`: uartReadData %s, uartReadLen %i\n", uartReadData, uartReadLen);
-      uartReadData[uartReadLen] = '\0';
+      // uartReadData[uartReadLen] = '\0';
 
       // Parse data from backend
       char *cmd = strtok(uartReadData, ",");

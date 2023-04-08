@@ -91,7 +91,7 @@ char* esp_read(unsigned int* len) {
   if (*len > 0) {
     char* returnBuffer = (char*)malloc(sizeof(char) * *len);
     memcpy(returnBuffer, recvBuffer, *len);
-    
+    returnBuffer[*len] = '\0';
     return returnBuffer;
   } else {
     return NULL;
