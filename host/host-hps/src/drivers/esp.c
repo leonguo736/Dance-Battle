@@ -31,10 +31,10 @@ void esp_reset() {
 bool init_connection(char* serverIP) {
   // Connect to the backend
   esp_send_command(ESP_CONNECT_BACKEND_COMMAND, (char*[]){serverIP}, 1);
-  char* yieldedMessage =
-      esp_wait_for_messages((char*[]){ESP_READY_COMMAND, ESP_CLOSE_COMMAND}, 2);
+  char* yieldedMessage = esp_wait_for_messages(
+      (char*[]){ESP_READY_COMMAND, ESP_FAILED_COMMAND}, 2);
 
-  if (strcmp(yieldedMessage, ESP_CLOSE_COMMAND) == 0) {
+  if (strcmp(yieldedMessage, ESP_FAILED_COMMAND) == 0) {
     return false;
   }
 
@@ -59,7 +59,7 @@ void esp_init(char* server_ip) {
       printf("ESP connected to backend @ %s\n", server_ip);
 #endif
       esp_ready = true;
-    } else if (strcmp(data, ESP_CLOSE_COMMAND) == 0) {
+    } else if (strcmp(data, ESP_FAILED_COMMAND) == 0) {
       fail_count++;
       printf("Failed to connect to backend %d/%d times. Retrying ...\n",
              fail_count, ESP_CONNECT_THRESHOLD);
@@ -209,4 +209,15 @@ char* esp_read(unsigned int* len) {
 
 void esp_write(char* data) {
   esp_send_command(ESP_JSON_COMMAND, (char*[]){data, "\n"}, 2);
+}
+
+void esp_close(char* server_ip) { 
+  printf("Closing ESP\n");
+
+  fail_count = 0;
+  esp_ready = false;
+  esp_failed = false;
+
+  // Attempt to reconnect
+  esp_send_command(ESP_CONNECT_BACKEND_COMMAND, (char*[]){server_ip}, 1);
 }

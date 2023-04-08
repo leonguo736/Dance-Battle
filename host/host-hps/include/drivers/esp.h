@@ -41,4 +41,9 @@ char *esp_read(unsigned int *len);
  */
 void esp_write(char *data);
 
+/*
+ * Called when backend connection closes
+ */
+void esp_close(char *server_ip);
+
 #endif

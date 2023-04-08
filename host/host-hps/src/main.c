@@ -93,8 +93,9 @@ void loadSong(char* filename) {
   sampleNo = 0;
   numSamples = count;
 
+#ifdef DEBUG
   printf("Loaded Song %s | %d samples\n", path, numSamples);
-
+#endif
   fclose(fp);
 }
 
@@ -229,7 +230,9 @@ void loadPoses(char* filename) {
 
   numPoses = count;
 
+#ifdef DEBUG
   printf("Loaded Pose %s | %d samples\n", path, numPoses);
+#endif
 
   fclose(fp);
 }
@@ -693,6 +696,10 @@ int main(int argc, char** argv) {
         unsigned int p1Connected = lobbyState.p1Connected;
         unsigned int p2Connected = lobbyState.p2Connected;
 
+        unsigned int recvID = 0;
+        unsigned int score = 0;
+        double angles[3];
+
         switch (recvBuffer[0]) {
           case ESP_LOBBY_COMMAND:
             sscanf(recvBuffer + 1, "%u %u", &p1Connected, &p2Connected);
@@ -705,9 +712,26 @@ int main(int argc, char** argv) {
                    lobbyState.p2Connected);
 #endif
             break;
-          default:
+          case ESP_POSE_COMMAND:
+            sscanf(recvBuffer + 1, "%u %lf %lf %lf", &recvID, angles, angles + 1,
+                   angles + 2);
+
+            printf("Pose %u: %lf %lf %lf\n", recvID, angles[0], angles[1], angles[2]);
+
+            insertDefenderPose(recvID, angles[0], angles[1]);
+            break;
+          case ESP_SCORE_COMMAND:
+            sscanf(recvBuffer + 1, "%u %u", &recvID, &score);
+
+            printf("Score %u: %u\n", recvID, score);
+            break;
+          case ESP_CLOSE_COMMAND:
+            initGraphics(0);
+            esp_close(argc > 1 ? argv[1] : NULL);
+            break;
+          default :
 #ifdef DEBUG
-            printf("[%d] %s\n", recvLen, recvBuffer);
+                printf("[%d] %s\n", recvLen, recvBuffer);
 #endif
             break;
         }
@@ -745,6 +769,7 @@ int main(int argc, char** argv) {
         } else if (keyState == 4) {
           sprintf(sendBuffer, "{\"command\":\"captureAttacker\",\"poseID\":%u}",
                   poseID);
+          poseID++;
           esp_write(sendBuffer);
         }
       }
