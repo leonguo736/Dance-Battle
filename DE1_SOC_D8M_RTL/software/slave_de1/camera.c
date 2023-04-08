@@ -88,7 +88,7 @@ void CameraInterface_updateMedian(CameraInterface* cam) {
     }
 }
 
-void CameraInterface_getMedian(CameraInterface* ci, char* json_str, float beat) {
+void CameraInterface_getMedianStr(CameraInterface* ci, char* json_str) {
     char median_str[CAMERA_NUM_DETECTORS * CAMERA_DIMENSIONS * 10]; 
     char row_str[CAMERA_DIMENSIONS * 10];
     sprintf(median_str, "[[%d,%d]", ci->median[0][0], ci->median[0][1]);

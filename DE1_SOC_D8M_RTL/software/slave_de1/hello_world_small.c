@@ -48,12 +48,16 @@ int main(int argc, char **argv)
   }
 #endif
 
+  printf("INFO: ESP initialized\n");
   // camera setup
   setupCameraThresholds();
   CameraInterface *cameraInterface = CameraInterface_new(6); // param is devId (DE1 slave number displayed on HEX)
   initCameraTimer(cameraInterface);
 
   // super loop
+#ifndef ESP_DEBUG
+  esp_write("{\"command\":\"setType\",\"identifier\":\"camera\"}");
+#endif
   while (1)
   {
     unsigned int uartReadLen = 10; // -1;
@@ -79,11 +83,20 @@ int main(int argc, char **argv)
 #endif
     if (uartReadData != NULL)
     {
+      printf("INFO `main`: uartReadData %s, uartReadLen %i\n", uartReadData, uartReadLen);
       uartReadData[uartReadLen] = '\0';
-      char *cmd, *data;
-      cmd = strtok(uartReadData, ",");
+
+      // Parse data from backend
+      char *cmd = strtok(uartReadData, ",");
+      if (cmd == NULL)
+      {
+        printf("ERROR `main`: cmd is NULL\n");
+        free(uartReadData);
+        continue;
+      }
+
       int data_length = uartReadLen - strlen(cmd) - 1;
-      data = NULL;
+      char *data = NULL;
       if (data_length > 0)
       {
         data = malloc((data_length + 2) * sizeof(*data));
@@ -100,14 +113,14 @@ int main(int argc, char **argv)
         int uartWriteLen = 500;
         char *cameraWriteBuf = malloc(sizeof(*cameraWriteBuf) * uartWriteLen);
         CameraInterface_updateMedian(cameraInterface);
-        CameraInterface_getMedian(cameraInterface, cameraWriteBuf, 0.5);        
+        CameraInterface_getMedianStr(cameraInterface, cameraWriteBuf);        
         
         char *uartWriteBuf = malloc(sizeof(*uartWriteBuf) * uartWriteLen);
-        sprintf(uartWriteBuf, "{%s,\"poseId\":%i,\"command\":\"poseData\"}", cameraWriteBuf, data);
+        sprintf(uartWriteBuf, "{%s,\"poseId\":%s,\"command\":\"poseData\"}", cameraWriteBuf, data);
 
         printf("INFO `main`: cmd %s, uartWriteBuf %s\n", cmd, uartWriteBuf);
 
-        esp_write(cameraWriteBuf);
+        esp_write(uartWriteBuf);
         free(cameraWriteBuf);
         free(uartWriteBuf);
       }
