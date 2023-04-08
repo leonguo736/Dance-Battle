@@ -84,7 +84,6 @@ int main(int argc, char **argv)
     if (uartReadData != NULL)
     {
       printf("INFO `main`: uartReadData %s, uartReadLen %i\n", uartReadData, uartReadLen);
-      // uartReadData[uartReadLen] = '\0';
 
       // Parse data from backend
       char *cmd = strtok(uartReadData, ",");
@@ -123,6 +122,12 @@ int main(int argc, char **argv)
         esp_write(uartWriteBuf);
         free(cameraWriteBuf);
         free(uartWriteBuf);
+      } else if (strcmp(cmd, "c") == 0) {
+        printf("WARNING `main` esp disconnected"); 
+        esp_init(argc, argv);
+      }
+      else {
+        printf("WARNING `main` unknown cmd: cmd %s, data %s\n", cmd, data);
       }
       free(data);
       free(uartReadData);
