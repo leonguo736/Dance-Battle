@@ -47,6 +47,10 @@ const playersData = {
 
 // connection count does not decrement right now
 var connectionCount = 0;
+/* set to 1 if connected, 0 if not */
+var atkConnected = 0; 
+var defConnected = 0;
+var hostConnected = 0;
 
 // Object that stores pose information
 // 5 points --> 2 angles
@@ -57,6 +61,7 @@ class Pose {
         this.rightArm = rightArm;
     }
 }
+
 class Point {
 	constructor(x, y) {
 		this.x = x;
@@ -84,66 +89,105 @@ var receivedFrom = "";
 wss.on('connection', function connection(client) {
 	// Create Unique User ID for player
 	// client.id = uuid();
-	client.id = connectionCount;
-	connectionCount++;
-	console.log("current clients:" + wss.clients.values());
-	setTimeout(() =>{
-		for (client of wss.clients.values()) {
-			client.send("id," + client.id);
-			console.log("SENT TEST TO CLIENT: " + client.id);
-		}
-	}, 1000);
-
-	setTimeout(() =>{
-		for (client of wss.clients.values()) {
-			client.send("cap");
-		}
-	}, 10000);
+	// client.id = connectionCount;
+	// connectionCount++;
+	// setTimeout(() =>{
+	// 	for (client of wss.clients.values()) {
+	// 		client.send("you are connected");
+	// 		console.log("SENT TEST TO CLIENT: " + client.id);
+	// 	}
+	// }, 1000);
+	// client.send("l" + atkConnected + " " + defConnected);
 	
 	//Method retrieves message from client
 	client.on('message', (data) => {
 		console.log("Player Message");
 		console.log(`received: ${data}`);
+		try {
+			var parsedData = JSON.parse(data);
+			console.log("parsed: " + parsedData);
+		} catch (e) {
+			console.log("Server received incorrectly formatted JSON string");
+		}
 
-		if (data.includes("th")) { // just to identify the host
-			receivedFrom = "host";
-			console.log("msg received from host");
-			// connectionCount++;
-			console.log("connection count: " + connectionCount);
-			if (connectionCount >= 2) {
-				setTimeout(() =>{
+		/* For lobby init. Reponds to the Host with info regarding to connected players */
+		if (parsedData.command == "lobbyInit") {
+			console.log("entered init");
+			client.send("l" + atkConnected + " " + defConnected);
+		}
+		else if (parsedData.command == "setType") {
+			console.log("entered set type");
+			if (parsedData.identifier == "host") {
+				hostConnected = 1;
+				client.id = "host";
+				console.log("host connected");
+
+				client.send("l" + atkConnected + " " + defConnected);
+			}
+			else if (parsedData.identifier == "camera") {
+				if (atkConnected == 0) {
+					atkConnected = 1;
+					client.id = "attacker";
+					var data = "id,1";
+					console.log("atk connected");
+					
 					for (client of wss.clients.values()) {
-						var test = "test";
-						client.send(test);
-						console.log("SENT TEST TO CLIENT: " + client.id);
+						console.log("client id: " + client.id);
+						if (client.id == "host") {
+							console.log("sending data to host");
+							client.send("l" + atkConnected + " " + defConnected);
+						}
 					}
+				}
+				else if (defConnected == 0) {
+					defConnected = 1;
+					client.id = "defender";
+					var data = "id,2";
+					console.log("def connected");
+
+					for (client of wss.clients.values()) {
+						console.log("client id: " + client.id);
+						if (client.id == "host") {
+							console.log("sending data to host");
+							client.send("l" + atkConnected + " " + defConnected);
+						}
+					}
+				}
+				else {
+					console.log("extra client connected");
+					var data = "extra client";
+				}
+		
+				// var setCamera = new Object();
+				// setCamera.command = "giveId";
+				// setCamera.data = data;
+				setTimeout(() =>{
+					client.send(data);
 				}, 1000);
 			}
 		}
-		else if (data.includes("tc")) { // just to identify players
-			receivedFrom = "player";
-			console.log("msg received from player");
-			// connectionCount++;
-			console.log("connection count: " + connectionCount);
-			if (connectionCount >= 2) {
-				setTimeout(() =>{
-					for (client of wss.clients.values()) {
-						var test = "test";
-						client.send(test);
-						console.log("SENT TEST TO CLIENT: " + client.id);
-					}
-				}, 1000);
+		else if (parsedData.command == "captureAttacker") {
+			console.log("sending signal to attacker");
+			for (client of wss.clients.values()) {
+				if (client.id == "attacker") {
+					console.log("msg to attacker");
+					client.send("cap," + parsedData.poseID);
+				}
 			}
 		}
-		else { // for handling the other 99% of messages
-			console.log("else statement hit");
-			try {
-				parsedData = JSON.parse(data); // coordinate array looks like this: [[0,0], [1,1], [2,2]]
-				console.log("parsed: " + parsedData);
-			} catch (e) {
-				console.log("Server received incorrectly formatted JSON string")
+		else if (parsedData.command == "captureDefender") {
+			console.log("sending signal to defender");
+			for (client of wss.clients.values()) {
+				if (client.id == "defender") {
+					console.log("msg to defender");
+					client.send("cap," + parsedData.poseID);
+				}
 			}
-
+		}
+		else if (parsedData.command == "poseData") { // for handling the other 99% of messages
+			console.log("reading pose data");
+			
+			console.log(parsedData.median);
 			/**
 			 * Assumes JSON has 3 fields: "command", "median" and "beat". Also assumes only one pose is sent per message.
 			 * 
@@ -160,26 +204,36 @@ wss.on('connection', function connection(client) {
 			var rightElbow = new Point(parsedData.median[4][0], parsedData.median[4][1]);
 
 			/* calculate the 2 angles and store data in a Pose object */
-			var beat = 1; // temporary placeholder. This should be a field in JSON string
+			var poseID = parsedData.poseId; // temporary placeholder. This should be a field in JSON string
 			var leftarm_angle = find_angle(leftArm, chest, leftElbow);
 			var rightarm_angle = find_angle(rightArm, chest, rightElbow);
-			var pose = new Pose(beat, leftarm_angle, rightarm_angle);
+			var pose = new Pose(poseID, leftarm_angle, rightarm_angle);
 
-			if (parsedData.command == "getPose") { // for getting attacker moves 
+			console.log("current client IS: " + client.id);
+			if (client.id == "attacker") { // for getting attacker moves 
 				attackerPoses.push(pose);
 
 				/* send message to front end (sends to everyone connected for now) */
 				for (client of wss.clients.values()) {
-					client.send(JSON.stringify(pose));
+					if (client.id == "host") {
+						var msg = "p" + poseID + " " + leftarm_angle + " " + rightarm_angle;
+						client.send(msg);
+					}
 				}
 			}
-			else if (parsedData.command == "getScore") { // for getting defender moves 
-				var score = 100 - 16 * Math.round(abs(pose.leftarm_angle - attackerPoses[pose.beat].leftarm_angle));
-
+			else if (client.id == "defender") { // for getting defender moves 
+				// var score = 100 - 16 * Math.round(abs(pose.leftarm_angle - attackerPoses[pose.beat].leftarm_angle));
+				var score = 100;
 				/* send message to front end (sends to everyone connected for now) */
 				for (client of wss.clients.values()) {
-					client.send(score);
+					if (client.id == "host") {
+						var msg = "s" + poseID + " " + score;
+						client.send(msg);
+					}
 				}
+			}
+			else {
+				console.log("ERROR: CLIENT ID WHEN RECEIVING POSE IS BAD");
 			}
 		}
 	});
@@ -187,8 +241,20 @@ wss.on('connection', function connection(client) {
 	//Method notifies when client disconnects
 	client.on('close', () => {
 		// connectionCount--;
-		console.log('This Connection Closed!')
-		console.log("Removing Client: " + client.id)
+		console.log('This Connection Closed!');
+		console.log("Removing Client: " + client.id);
+		if (client.id == "host") {
+			hostConnected = 0;
+		}
+		else if (client.id == "attacker") {
+			atkConnected = 0;
+		}
+		else if (client.id == "defender") {
+			defConnected = 0;
+		}
+		else {
+			console.log("mystery client disconnected");
+		}
 	});
 
 });

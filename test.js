@@ -114,3 +114,19 @@ console.log("round: " + Math.round(12.23443));
 //         }
 //     }
 // });
+
+/* For lobby init. Reponds to the Host with info regarding to connected players */
+if (parsedData.command == "lobbyInit") {
+    console.log("entered init");
+    hostConnected = 1;
+    var connections = new Object();
+    connections.command = "lobbyInit";
+    connections.connections = [atkConnected, defConnected];
+    setTimeout(() =>{
+        // for (client of wss.clients.values()) {
+        // 	client.send(JSON.stringify(connections));
+        // 	console.log("responded to lobbyInit");
+        // }
+        client.send(JSON.stringify(connections));
+    }, 1000);
+}
