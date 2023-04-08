@@ -196,7 +196,7 @@ void loadPoses(char* filename) {
   }
 
   char* delim = " ";
-  int count = 0;
+  int maxPoses = 0;
 
   while (getline(&poseLine, &poseLen, fp) != -1) {
     int lineSize = strlen(poseLine);
@@ -225,10 +225,10 @@ void loadPoses(char* filename) {
       ptr = strtok(NULL, delim);
     }
 
-    count++;
+    if (id > maxPoses) maxPoses = id;
   }
 
-  numPoses = count;
+  numPoses = maxPoses;
 
 #ifdef DEBUG
   printf("Loaded Pose %s | %d samples\n", path, numPoses);
