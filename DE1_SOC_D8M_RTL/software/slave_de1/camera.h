@@ -25,6 +25,6 @@ typedef struct CameraInterface {
 CameraInterface* CameraInterface_new(uint8_t devId);
 void CameraInterface_updateCoords(CameraInterface* cam); 
 void CameraInterface_updateMedian(CameraInterface* cam); 
-void CameraInterface_getJson(CameraInterface* ci, char* json_str, float beat); 
+void CameraInterface_getMedian(CameraInterface* ci, char* json_str, float beat); 
 
 #endif

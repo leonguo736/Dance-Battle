@@ -19,12 +19,15 @@
 
 void setupCameraThresholds()
 {
-  writeThresholds(0, 146, 160, 61, 85); // Leon's Blue
-  writeThresholds(1, 64, 93, 156, 175); // Kerry's Dark Red
-  for (int i = 1; i < CAMERA_NUM_DETECTORS; i++)
-  {
-    writeThresholds(i, 64, 93, 156, 175); // Kerry's Dark Red
-  }
+  int reduceRange = 6;
+  writeThresholds(0, 84+reduceRange, 104-reduceRange, 137+reduceRange, 157-reduceRange); // Yellow Foam
+  writeThresholds(1, 110+reduceRange, 130-reduceRange, 143+reduceRange, 163-reduceRange); // Red Foam
+  writeThresholds(2, 109+reduceRange, 129-reduceRange, 127+reduceRange, 147-reduceRange); // Brown Foam
+
+  // for (int i = 1; i < CAMERA_NUM_DETECTORS; i++)
+  // {
+  //   writeThresholds(i, 64, 93, 156, 175); // Kerry's Dark Red
+  // }
 }
 
 int main(int argc, char **argv)
@@ -68,7 +71,7 @@ int main(int argc, char **argv)
     }
     else
     {
-      char text[] = "id,2";
+      char text[] = "id,8";
       uartReadLen = strlen(text);
       uartReadData = malloc(sizeof(*uartReadData) * uartReadLen);
       memcpy(uartReadData, text, uartReadLen);
@@ -95,12 +98,17 @@ int main(int argc, char **argv)
       else if (strcmp(cmd, "cap") == 0)
       {
         int uartWriteLen = 500;
-        char *uartWriteBuf = malloc(sizeof(*uartWriteBuf) * uartWriteLen);
+        char *cameraWriteBuf = malloc(sizeof(*cameraWriteBuf) * uartWriteLen);
         CameraInterface_updateMedian(cameraInterface);
-        CameraInterface_getJson(cameraInterface, uartWriteBuf, 0.5);        
+        CameraInterface_getMedian(cameraInterface, cameraWriteBuf, 0.5);        
+        
+        char *uartWriteBuf = malloc(sizeof(*uartWriteBuf) * uartWriteLen);
+        sprintf(uartWriteBuf, "{%s,\"poseId\":%i,\"command\":\"poseData\"}", cameraWriteBuf, data);
+
         printf("INFO `main`: cmd %s, uartWriteBuf %s\n", cmd, uartWriteBuf);
 
-        esp_write(uartWriteBuf);
+        esp_write(cameraWriteBuf);
+        free(cameraWriteBuf);
         free(uartWriteBuf);
       }
       free(data);
