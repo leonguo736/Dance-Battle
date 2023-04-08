@@ -13,7 +13,6 @@ struct Pose {
     int isDefender;
     int sample;
     
-    int x;
     double hx;
     double hy;
     double mx;

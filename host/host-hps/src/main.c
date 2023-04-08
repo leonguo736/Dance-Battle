@@ -256,7 +256,7 @@ int getPoseX(struct Pose p) {
   if (x >= GAME_VLINE_MARGIN && x <= WIDTH - GAME_VLINE_MARGIN) {
     return x;
   }
-  return 0;
+  return -1;
 }
 
 void switchBuffer(void) {
@@ -519,13 +519,13 @@ void updateGraphics(void) {
     if (prevEarlyA != -1) {
       for (int p = prevEarlyA; p <= prevLateA; p++) {
         int prevX = prevState->poseAXs[p];
-        drawPose(attackerPoses[p], prevX, 1);
+        if (prevX != -1) drawPose(attackerPoses[p], prevX, 1);
       }
     }
     if (prevEarlyD != -1) {
       for (int p = prevEarlyD; p <= prevLateD; p++) {
         int prevX = prevState->poseDXs[p];
-        drawPose(defenderPoses[p], prevX, 1);
+        if (prevX != -1) drawPose(defenderPoses[p], prevX, 1);
       }
     }
 
@@ -575,14 +575,14 @@ void updateGraphics(void) {
       for (int p = gameState.earlyPoseA; p <= gameState.latePoseA; p++) {
         int newX = getPoseX(attackerPoses[p]);
         prevState->poseAXs[p] = newX;
-        drawPose(attackerPoses[p], newX, 0);
+        if (newX != -1) drawPose(attackerPoses[p], newX, 0);
       }
     }
     if (gameState.earlyPoseD != -1) {
       for (int p = gameState.earlyPoseD; p <= gameState.latePoseD; p++) {
         int newX = getPoseX(defenderPoses[p]);
         prevState->poseDXs[p] = newX;
-        drawPose(defenderPoses[p], newX, 0);
+        if (newX != -1) drawPose(defenderPoses[p], newX, 0);
       }
     }
   }
