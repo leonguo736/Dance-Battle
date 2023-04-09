@@ -19,10 +19,10 @@
 
 void setupCameraThresholds()
 {
-  int reduceRange = 6;
-  writeThresholds(0, 84+reduceRange, 104-reduceRange, 137+reduceRange, 157-reduceRange); // Yellow Foam
-  writeThresholds(1, 110+reduceRange, 130-reduceRange, 143+reduceRange, 163-reduceRange); // Red Foam
-  writeThresholds(2, 109+reduceRange, 129-reduceRange, 127+reduceRange, 147-reduceRange); // Brown Foam
+  int reduceRange = 0;
+//  writeThresholds(0, 84+reduceRange, 104-reduceRange, 137+reduceRange, 157-reduceRange); // Yellow Foam
+//  writeThresholds(1, 110+reduceRange, 130-reduceRange, 143+reduceRange, 163-reduceRange); // Red Foam
+//  writeThresholds(2, 109+reduceRange, 129-reduceRange, 127+reduceRange, 147-reduceRange); // Brown Foam
 
   // for (int i = 1; i < CAMERA_NUM_DETECTORS; i++)
   // {
@@ -83,8 +83,6 @@ int main(int argc, char **argv)
 #endif
     if (uartReadData != NULL)
     {
-      printf("INFO `main`: uartReadData %s, uartReadLen %i\n", uartReadData, uartReadLen);
-
       // Parse data from backend
       char *cmd = strtok(uartReadData, ",");
       if (cmd == NULL)
@@ -104,7 +102,7 @@ int main(int argc, char **argv)
       }
       if (strcmp(cmd, "id") == 0)
       {
-        printf("INFO `main`: cmd %s, data %s\n", cmd, data);
+        printf("INFO `main` received id cmd: id %s\n", cmd, data);
         writeDeviceNumber(atoi(data));
       }
       else if (strcmp(cmd, "cap") == 0)
@@ -117,13 +115,13 @@ int main(int argc, char **argv)
         char *uartWriteBuf = malloc(sizeof(*uartWriteBuf) * uartWriteLen);
         sprintf(uartWriteBuf, "{%s,\"poseId\":%s,\"command\":\"poseData\"}", cameraWriteBuf, data);
 
-        printf("INFO `main`: cmd %s, uartWriteBuf %s\n", cmd, uartWriteBuf);
+        printf("INFO `main` received cap cmd: uartWriteBuf %s\n", uartWriteBuf);
 
         esp_write(uartWriteBuf);
         free(cameraWriteBuf);
         free(uartWriteBuf);
       } else if (strcmp(cmd, "c") == 0) {
-        printf("WARNING `main` esp disconnected"); 
+        printf("WARNING `main` esp disconnected, reconnecting...\n"); 
         esp_init(argc, argv);
       }
       else {
