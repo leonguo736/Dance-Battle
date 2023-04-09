@@ -562,6 +562,70 @@ ball_detector ball_detector_2(
    .oVIndex(  )
  );
 
+ball_detector ball_detector_3(
+	   .reset( KEY[0] ),
+   .iVideo12bRgb( { RED12b, GREEN12b, BLUE12b } ),
+   .iPixelAddress( VGA_ADDRESS ),
+   .iVgaRequest( READ_Request ),
+   .iVgaClk( VGA_CLK ),
+   .iVgaHRequest( READ_Request ),  // Can use H_active_area or READ_Request here.
+   .iVgaVRequest( V_active_area ),
+   .oVideo8bRgb( oVideo8bRgb[3] ),
+   .iVideoSelect( SW[9] ),
+   .iFreezeRam(  ),
+   .iFilterOn(  ), 
+   .iCrLow( crLow[3] ),
+   .iCrHigh( crHigh[3] ),
+   .iCbLow( cbLow[3] ),
+   .iCbHigh( cbHigh[3] ),
+   .oRedPixelHIndex( redPixelHIndex[3] ),
+   .oRedPixelVIndex( redPixelVIndex[3] ), 
+   .oHIndex(  ),
+   .oVIndex(  )
+ );
+ball_detector ball_detector_4(
+	   .reset( KEY[0] ),
+   .iVideo12bRgb( { RED12b, GREEN12b, BLUE12b } ),
+   .iPixelAddress( VGA_ADDRESS ),
+   .iVgaRequest( READ_Request ),
+   .iVgaClk( VGA_CLK ),
+   .iVgaHRequest( READ_Request ),  // Can use H_active_area or READ_Request here.
+   .iVgaVRequest( V_active_area ),
+   .oVideo8bRgb( oVideo8bRgb[4] ),
+   .iVideoSelect( SW[9] ),
+   .iFreezeRam(  ),
+   .iFilterOn(  ), 
+   .iCrLow( crLow[4] ),
+   .iCrHigh( crHigh[4] ),
+   .iCbLow( cbLow[4] ),
+   .iCbHigh( cbHigh[4] ),
+   .oRedPixelHIndex( redPixelHIndex[4] ),
+   .oRedPixelVIndex( redPixelVIndex[4] ), 
+   .oHIndex(  ),
+   .oVIndex(  )
+ );
+ball_detector ball_detector_5(
+	   .reset( KEY[0] ),
+   .iVideo12bRgb( { RED12b, GREEN12b, BLUE12b } ),
+   .iPixelAddress( VGA_ADDRESS ),
+   .iVgaRequest( READ_Request ),
+   .iVgaClk( VGA_CLK ),
+   .iVgaHRequest( READ_Request ),  // Can use H_active_area or READ_Request here.
+   .iVgaVRequest( V_active_area ),
+   .oVideo8bRgb( oVideo8bRgb[5] ),
+   .iVideoSelect( SW[9] ),
+   .iFreezeRam(  ),
+   .iFilterOn(  ), 
+   .iCrLow( crLow[5] ),
+   .iCrHigh( crHigh[5] ),
+   .iCbLow( cbLow[5] ),
+   .iCbHigh( cbHigh[5] ),
+   .oRedPixelHIndex( redPixelHIndex[5] ),
+   .oRedPixelVIndex( redPixelVIndex[5] ), 
+   .oHIndex(  ),
+   .oVIndex(  )
+ );
+
 wire [4:0] coords_ram_addr; 
 wire [31:0] coords_ram_data; 
 wire thresholds_ram_write_en;
