@@ -460,10 +460,10 @@ always @(posedge CLOCK2_50) begin
 			end
 		end
 		if (~KEY[3]) begin
-			cbLow[SW[8:5]] <= Cb - 10 >= 0 ? Cb - 10 : 0;
-			cbHigh[SW[8:5]] <= Cb + 10 <= 255 ? Cb + 10 : 255;
-			crLow[SW[8:5]] <= Cr - 10 >= 0 ? Cr - 10 : 0;
-			crHigh[SW[8:5]] <= Cr + 10 <= 255 ? Cr + 10 : 255;
+			cbLow[SW[8:5]] <= Cb - 3 >= 0 ? Cb - 3 : 0;
+			cbHigh[SW[8:5]] <= Cb + 3 <= 255 ? Cb + 3 : 255;
+			crLow[SW[8:5]] <= Cr - 3 >= 0 ? Cr - 3 : 0;
+			crHigh[SW[8:5]] <= Cr + 3 <= 255 ? Cr + 3 : 255;
 		end		
 		if (hIndex == 320 && vIndex == 240) begin
 			RED8b_cached <= RED12b[7:0]; 
