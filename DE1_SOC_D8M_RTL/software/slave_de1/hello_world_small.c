@@ -102,7 +102,7 @@ int main(int argc, char **argv)
       }
       if (strcmp(cmd, "id") == 0)
       {
-        printf("INFO `main` received id cmd: id %s\n", cmd, data);
+        printf("INFO `main` received cmd id: %i\n", atoi(data));
         writeDeviceNumber(atoi(data));
       }
       else if (strcmp(cmd, "cap") == 0)

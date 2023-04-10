@@ -69,9 +69,9 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY
  25 .quartus_project_dir 00000030  00000000  00000000  000783c4  2**0
                   CONTENTS, READONLY
- 26 .jdi          000000ea  00000000  00000000  000783f4  2**0
+ 26 .jdi          000053cc  00000000  00000000  000783f4  2**0
                   CONTENTS, READONLY
- 27 .sopcinfo     000410c1  00000000  00000000  000784de  2**0
+ 27 .sopcinfo     000410c1  00000000  00000000  0007d7c0  2**0
                   CONTENTS, READONLY
 SYMBOL TABLE:
 00020000 l    d  .entry	00000000 .entry
@@ -4107,21 +4107,21 @@ void uart_output(void) {
    22418:	10800017 	ldw	r2,0(r2)
    2241c:	1000683a 	jmp	r2
    22420:	00022fc8 	cmpgei	zero,zero,2239
-   22424:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   22428:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
+   22424:	00023080 	call	2308 <__reset-0x1dcf8>
+   22428:	00023080 	call	2308 <__reset-0x1dcf8>
    2242c:	00022fbc 	xorhi	zero,zero,2238
-   22430:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   22434:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   22438:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   2243c:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   22440:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   22444:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
+   22430:	00023080 	call	2308 <__reset-0x1dcf8>
+   22434:	00023080 	call	2308 <__reset-0x1dcf8>
+   22438:	00023080 	call	2308 <__reset-0x1dcf8>
+   2243c:	00023080 	call	2308 <__reset-0x1dcf8>
+   22440:	00023080 	call	2308 <__reset-0x1dcf8>
+   22444:	00023080 	call	2308 <__reset-0x1dcf8>
    22448:	00022688 	cmpgei	zero,zero,2202
    2244c:	00022ecc 	andi	zero,zero,2235
-   22450:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
+   22450:	00023080 	call	2308 <__reset-0x1dcf8>
    22454:	00022594 	movui	zero,2198
    22458:	000226ac 	andhi	zero,zero,2202
-   2245c:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
+   2245c:	00023080 	call	2308 <__reset-0x1dcf8>
    22460:	00022738 	rdprs	zero,zero,2204
    22464:	000226fc 	xorhi	zero,zero,2203
    22468:	000226fc 	xorhi	zero,zero,2203
@@ -4132,47 +4132,47 @@ void uart_output(void) {
    2247c:	000226fc 	xorhi	zero,zero,2203
    22480:	000226fc 	xorhi	zero,zero,2203
    22484:	000226fc 	xorhi	zero,zero,2203
-   22488:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   2248c:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   22490:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   22494:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   22498:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   2249c:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   224a0:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   224a4:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   224a8:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   224ac:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
+   22488:	00023080 	call	2308 <__reset-0x1dcf8>
+   2248c:	00023080 	call	2308 <__reset-0x1dcf8>
+   22490:	00023080 	call	2308 <__reset-0x1dcf8>
+   22494:	00023080 	call	2308 <__reset-0x1dcf8>
+   22498:	00023080 	call	2308 <__reset-0x1dcf8>
+   2249c:	00023080 	call	2308 <__reset-0x1dcf8>
+   224a0:	00023080 	call	2308 <__reset-0x1dcf8>
+   224a4:	00023080 	call	2308 <__reset-0x1dcf8>
+   224a8:	00023080 	call	2308 <__reset-0x1dcf8>
+   224ac:	00023080 	call	2308 <__reset-0x1dcf8>
    224b0:	000227fc 	xorhi	zero,zero,2207
    224b4:	00022744 	movi	zero,2205
-   224b8:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
+   224b8:	00023080 	call	2308 <__reset-0x1dcf8>
    224bc:	00022744 	movi	zero,2205
-   224c0:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   224c4:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   224c8:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   224cc:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
+   224c0:	00023080 	call	2308 <__reset-0x1dcf8>
+   224c4:	00023080 	call	2308 <__reset-0x1dcf8>
+   224c8:	00023080 	call	2308 <__reset-0x1dcf8>
+   224cc:	00023080 	call	2308 <__reset-0x1dcf8>
    224d0:	000227f0 	cmpltui	zero,zero,2207
-   224d4:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   224d8:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
+   224d4:	00023080 	call	2308 <__reset-0x1dcf8>
+   224d8:	00023080 	call	2308 <__reset-0x1dcf8>
    224dc:	000228c4 	movi	zero,2211
-   224e0:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   224e4:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   224e8:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   224ec:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   224f0:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   224f4:	00022d40 	call	22d4 <__alt_mem_onchip_memory2_0-0x1dd2c>
-   224f8:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   224fc:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
+   224e0:	00023080 	call	2308 <__reset-0x1dcf8>
+   224e4:	00023080 	call	2308 <__reset-0x1dcf8>
+   224e8:	00023080 	call	2308 <__reset-0x1dcf8>
+   224ec:	00023080 	call	2308 <__reset-0x1dcf8>
+   224f0:	00023080 	call	2308 <__reset-0x1dcf8>
+   224f4:	00022d40 	call	22d4 <__reset-0x1dd2c>
+   224f8:	00023080 	call	2308 <__reset-0x1dcf8>
+   224fc:	00023080 	call	2308 <__reset-0x1dcf8>
    22500:	00022dac 	andhi	zero,zero,2230
-   22504:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   22508:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   2250c:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   22510:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   22514:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   22518:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   2251c:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   22520:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   22524:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   22528:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
+   22504:	00023080 	call	2308 <__reset-0x1dcf8>
+   22508:	00023080 	call	2308 <__reset-0x1dcf8>
+   2250c:	00023080 	call	2308 <__reset-0x1dcf8>
+   22510:	00023080 	call	2308 <__reset-0x1dcf8>
+   22514:	00023080 	call	2308 <__reset-0x1dcf8>
+   22518:	00023080 	call	2308 <__reset-0x1dcf8>
+   2251c:	00023080 	call	2308 <__reset-0x1dcf8>
+   22520:	00023080 	call	2308 <__reset-0x1dcf8>
+   22524:	00023080 	call	2308 <__reset-0x1dcf8>
+   22528:	00023080 	call	2308 <__reset-0x1dcf8>
    2252c:	00022e68 	cmpgeui	zero,zero,2233
    22530:	00022fe8 	cmpgeui	zero,zero,2239
    22534:	00022744 	movi	zero,2205
@@ -4180,20 +4180,20 @@ void uart_output(void) {
    2253c:	00022744 	movi	zero,2205
    22540:	0002305c 	xori	zero,zero,2241
    22544:	00022fe8 	cmpgeui	zero,zero,2239
-   22548:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   2254c:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
+   22548:	00023080 	call	2308 <__reset-0x1dcf8>
+   2254c:	00023080 	call	2308 <__reset-0x1dcf8>
    22550:	00023008 	cmpgei	zero,zero,2240
-   22554:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
+   22554:	00023080 	call	2308 <__reset-0x1dcf8>
    22558:	0002301c 	xori	zero,zero,2240
    2255c:	00022eac 	andhi	zero,zero,2234
    22560:	000225a0 	cmpeqi	zero,zero,2198
    22564:	00022ee4 	muli	zero,zero,2235
-   22568:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
+   22568:	00023080 	call	2308 <__reset-0x1dcf8>
    2256c:	00022ef0 	cmpltui	zero,zero,2235
-   22570:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
+   22570:	00023080 	call	2308 <__reset-0x1dcf8>
    22574:	00022f54 	movui	zero,2237
-   22578:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
-   2257c:	00023080 	call	2308 <__alt_mem_onchip_memory2_0-0x1dcf8>
+   22578:	00023080 	call	2308 <__reset-0x1dcf8>
+   2257c:	00023080 	call	2308 <__reset-0x1dcf8>
    22580:	00022f74 	movhi	zero,2237
    22584:	d8c03117 	ldw	r3,196(sp)
    22588:	d8802e15 	stw	r2,184(sp)
@@ -6345,72 +6345,72 @@ void uart_output(void) {
    24708:	10800017 	ldw	r2,0(r2)
    2470c:	1000683a 	jmp	r2
    24710:	000252b8 	rdprs	zero,zero,2378
-   24714:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   24718:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
+   24714:	000253c0 	call	253c <__reset-0x1dac4>
+   24718:	000253c0 	call	253c <__reset-0x1dac4>
    2471c:	000252d8 	cmpnei	zero,zero,2379
-   24720:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   24724:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   24728:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   2472c:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   24730:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   24734:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   24738:	000249c0 	call	249c <__alt_mem_onchip_memory2_0-0x1db64>
+   24720:	000253c0 	call	253c <__reset-0x1dac4>
+   24724:	000253c0 	call	253c <__reset-0x1dac4>
+   24728:	000253c0 	call	253c <__reset-0x1dac4>
+   2472c:	000253c0 	call	253c <__reset-0x1dac4>
+   24730:	000253c0 	call	253c <__reset-0x1dac4>
+   24734:	000253c0 	call	253c <__reset-0x1dac4>
+   24738:	000249c0 	call	249c <__reset-0x1db64>
    2473c:	000251c8 	cmpgei	zero,zero,2375
-   24740:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
+   24740:	000253c0 	call	253c <__reset-0x1dac4>
    24744:	00024884 	movi	zero,2338
    24748:	000249e4 	muli	zero,zero,2343
-   2474c:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
+   2474c:	000253c0 	call	253c <__reset-0x1dac4>
    24750:	00024a34 	movhi	zero,2344
-   24754:	00024a40 	call	24a4 <__alt_mem_onchip_memory2_0-0x1db5c>
-   24758:	00024a40 	call	24a4 <__alt_mem_onchip_memory2_0-0x1db5c>
-   2475c:	00024a40 	call	24a4 <__alt_mem_onchip_memory2_0-0x1db5c>
-   24760:	00024a40 	call	24a4 <__alt_mem_onchip_memory2_0-0x1db5c>
-   24764:	00024a40 	call	24a4 <__alt_mem_onchip_memory2_0-0x1db5c>
-   24768:	00024a40 	call	24a4 <__alt_mem_onchip_memory2_0-0x1db5c>
-   2476c:	00024a40 	call	24a4 <__alt_mem_onchip_memory2_0-0x1db5c>
-   24770:	00024a40 	call	24a4 <__alt_mem_onchip_memory2_0-0x1db5c>
-   24774:	00024a40 	call	24a4 <__alt_mem_onchip_memory2_0-0x1db5c>
-   24778:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   2477c:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   24780:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   24784:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   24788:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   2478c:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   24790:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   24794:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   24798:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   2479c:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
+   24754:	00024a40 	call	24a4 <__reset-0x1db5c>
+   24758:	00024a40 	call	24a4 <__reset-0x1db5c>
+   2475c:	00024a40 	call	24a4 <__reset-0x1db5c>
+   24760:	00024a40 	call	24a4 <__reset-0x1db5c>
+   24764:	00024a40 	call	24a4 <__reset-0x1db5c>
+   24768:	00024a40 	call	24a4 <__reset-0x1db5c>
+   2476c:	00024a40 	call	24a4 <__reset-0x1db5c>
+   24770:	00024a40 	call	24a4 <__reset-0x1db5c>
+   24774:	00024a40 	call	24a4 <__reset-0x1db5c>
+   24778:	000253c0 	call	253c <__reset-0x1dac4>
+   2477c:	000253c0 	call	253c <__reset-0x1dac4>
+   24780:	000253c0 	call	253c <__reset-0x1dac4>
+   24784:	000253c0 	call	253c <__reset-0x1dac4>
+   24788:	000253c0 	call	253c <__reset-0x1dac4>
+   2478c:	000253c0 	call	253c <__reset-0x1dac4>
+   24790:	000253c0 	call	253c <__reset-0x1dac4>
+   24794:	000253c0 	call	253c <__reset-0x1dac4>
+   24798:	000253c0 	call	253c <__reset-0x1dac4>
+   2479c:	000253c0 	call	253c <__reset-0x1dac4>
    247a0:	00024a7c 	xorhi	zero,zero,2345
    247a4:	00024b44 	movi	zero,2349
-   247a8:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
+   247a8:	000253c0 	call	253c <__reset-0x1dac4>
    247ac:	00024b44 	movi	zero,2349
-   247b0:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   247b4:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   247b8:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   247bc:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
+   247b0:	000253c0 	call	253c <__reset-0x1dac4>
+   247b4:	000253c0 	call	253c <__reset-0x1dac4>
+   247b8:	000253c0 	call	253c <__reset-0x1dac4>
+   247bc:	000253c0 	call	253c <__reset-0x1dac4>
    247c0:	00024bf0 	cmpltui	zero,zero,2351
-   247c4:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   247c8:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
+   247c4:	000253c0 	call	253c <__reset-0x1dac4>
+   247c8:	000253c0 	call	253c <__reset-0x1dac4>
    247cc:	00024bfc 	xorhi	zero,zero,2351
-   247d0:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   247d4:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   247d8:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   247dc:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   247e0:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   247e4:	00025080 	call	2508 <__alt_mem_onchip_memory2_0-0x1daf8>
-   247e8:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   247ec:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
+   247d0:	000253c0 	call	253c <__reset-0x1dac4>
+   247d4:	000253c0 	call	253c <__reset-0x1dac4>
+   247d8:	000253c0 	call	253c <__reset-0x1dac4>
+   247dc:	000253c0 	call	253c <__reset-0x1dac4>
+   247e0:	000253c0 	call	253c <__reset-0x1dac4>
+   247e4:	00025080 	call	2508 <__reset-0x1daf8>
+   247e8:	000253c0 	call	253c <__reset-0x1dac4>
+   247ec:	000253c0 	call	253c <__reset-0x1dac4>
    247f0:	000250ec 	andhi	zero,zero,2371
-   247f4:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   247f8:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   247fc:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   24800:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   24804:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   24808:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   2480c:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   24810:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   24814:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   24818:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
+   247f4:	000253c0 	call	253c <__reset-0x1dac4>
+   247f8:	000253c0 	call	253c <__reset-0x1dac4>
+   247fc:	000253c0 	call	253c <__reset-0x1dac4>
+   24800:	000253c0 	call	253c <__reset-0x1dac4>
+   24804:	000253c0 	call	253c <__reset-0x1dac4>
+   24808:	000253c0 	call	253c <__reset-0x1dac4>
+   2480c:	000253c0 	call	253c <__reset-0x1dac4>
+   24810:	000253c0 	call	253c <__reset-0x1dac4>
+   24814:	000253c0 	call	253c <__reset-0x1dac4>
+   24818:	000253c0 	call	253c <__reset-0x1dac4>
    2481c:	00025364 	muli	zero,zero,2381
    24820:	000252e4 	muli	zero,zero,2379
    24824:	00024b44 	movi	zero,2349
@@ -6418,20 +6418,20 @@ void uart_output(void) {
    2482c:	00024b44 	movi	zero,2349
    24830:	00025304 	movi	zero,2380
    24834:	000252e4 	muli	zero,zero,2379
-   24838:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   2483c:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
+   24838:	000253c0 	call	253c <__reset-0x1dac4>
+   2483c:	000253c0 	call	253c <__reset-0x1dac4>
    24840:	00025310 	cmplti	zero,zero,2380
-   24844:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
+   24844:	000253c0 	call	253c <__reset-0x1dac4>
    24848:	00025324 	muli	zero,zero,2380
    2484c:	000251a8 	cmpgeui	zero,zero,2374
    24850:	00024890 	cmplti	zero,zero,2338
    24854:	000251e0 	cmpeqi	zero,zero,2375
-   24858:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
+   24858:	000253c0 	call	253c <__reset-0x1dac4>
    2485c:	000251ec 	andhi	zero,zero,2375
-   24860:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
+   24860:	000253c0 	call	253c <__reset-0x1dac4>
    24864:	00025250 	cmplti	zero,zero,2377
-   24868:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
-   2486c:	000253c0 	call	253c <__alt_mem_onchip_memory2_0-0x1dac4>
+   24868:	000253c0 	call	253c <__reset-0x1dac4>
+   2486c:	000253c0 	call	253c <__reset-0x1dac4>
    24870:	00025270 	cmpltui	zero,zero,2377
    24874:	d8c03117 	ldw	r3,196(sp)
    24878:	d8802e15 	stw	r2,184(sp)
@@ -13525,15 +13525,15 @@ void uart_output(void) {
    2b520:	0002bcf8 	rdprs	zero,zero,2803
    2b524:	0002bcbc 	xorhi	zero,zero,2802
    2b528:	0002bcec 	andhi	zero,zero,2803
-   2b52c:	0002bc80 	call	2bc8 <__alt_mem_onchip_memory2_0-0x1d438>
-   2b530:	0002bc80 	call	2bc8 <__alt_mem_onchip_memory2_0-0x1d438>
-   2b534:	0002bc80 	call	2bc8 <__alt_mem_onchip_memory2_0-0x1d438>
-   2b538:	0002bc80 	call	2bc8 <__alt_mem_onchip_memory2_0-0x1d438>
-   2b53c:	0002bc80 	call	2bc8 <__alt_mem_onchip_memory2_0-0x1d438>
-   2b540:	0002bc80 	call	2bc8 <__alt_mem_onchip_memory2_0-0x1d438>
-   2b544:	0002bc80 	call	2bc8 <__alt_mem_onchip_memory2_0-0x1d438>
-   2b548:	0002bc80 	call	2bc8 <__alt_mem_onchip_memory2_0-0x1d438>
-   2b54c:	0002bc80 	call	2bc8 <__alt_mem_onchip_memory2_0-0x1d438>
+   2b52c:	0002bc80 	call	2bc8 <__reset-0x1d438>
+   2b530:	0002bc80 	call	2bc8 <__reset-0x1d438>
+   2b534:	0002bc80 	call	2bc8 <__reset-0x1d438>
+   2b538:	0002bc80 	call	2bc8 <__reset-0x1d438>
+   2b53c:	0002bc80 	call	2bc8 <__reset-0x1d438>
+   2b540:	0002bc80 	call	2bc8 <__reset-0x1d438>
+   2b544:	0002bc80 	call	2bc8 <__reset-0x1d438>
+   2b548:	0002bc80 	call	2bc8 <__reset-0x1d438>
+   2b54c:	0002bc80 	call	2bc8 <__reset-0x1d438>
    2b550:	0002bcbc 	xorhi	zero,zero,2802
    2b554:	0002bcbc 	xorhi	zero,zero,2802
    2b558:	0002bcbc 	xorhi	zero,zero,2802
@@ -13561,10 +13561,10 @@ void uart_output(void) {
    2b5b0:	0002bcbc 	xorhi	zero,zero,2802
    2b5b4:	0002bcbc 	xorhi	zero,zero,2802
    2b5b8:	0002bcbc 	xorhi	zero,zero,2802
-   2b5bc:	0002bd40 	call	2bd4 <__alt_mem_onchip_memory2_0-0x1d42c>
+   2b5bc:	0002bd40 	call	2bd4 <__reset-0x1d42c>
    2b5c0:	0002bcbc 	xorhi	zero,zero,2802
    2b5c4:	0002bcbc 	xorhi	zero,zero,2802
-   2b5c8:	0002ba40 	call	2ba4 <__alt_mem_onchip_memory2_0-0x1d45c>
+   2b5c8:	0002ba40 	call	2ba4 <__reset-0x1d45c>
    2b5cc:	0002bcbc 	xorhi	zero,zero,2802
    2b5d0:	0002bcbc 	xorhi	zero,zero,2802
    2b5d4:	0002bcbc 	xorhi	zero,zero,2802
@@ -13588,12 +13588,12 @@ void uart_output(void) {
    2b61c:	0002bcbc 	xorhi	zero,zero,2802
    2b620:	0002ba90 	cmplti	zero,zero,2794
    2b624:	0002b85c 	xori	zero,zero,2785
-   2b628:	0002b680 	call	2b68 <__alt_mem_onchip_memory2_0-0x1d498>
+   2b628:	0002b680 	call	2b68 <__reset-0x1d498>
    2b62c:	0002bbf8 	rdprs	zero,zero,2799
    2b630:	0002bcbc 	xorhi	zero,zero,2802
    2b634:	0002bba4 	muli	zero,zero,2798
    2b638:	0002bcbc 	xorhi	zero,zero,2802
-   2b63c:	0002b7c0 	call	2b7c <__alt_mem_onchip_memory2_0-0x1d484>
+   2b63c:	0002b7c0 	call	2b7c <__reset-0x1d484>
    2b640:	0002bcbc 	xorhi	zero,zero,2802
    2b644:	0002bcbc 	xorhi	zero,zero,2802
    2b648:	0002b70c 	andi	zero,zero,2780
@@ -14859,7 +14859,7 @@ void uart_output(void) {
    2c9e0:	0002d0a4 	muli	zero,zero,2882
    2c9e4:	0002d3a4 	muli	zero,zero,2894
    2c9e8:	0002d3a4 	muli	zero,zero,2894
-   2c9ec:	0002d0c0 	call	2d0c <__alt_mem_onchip_memory2_0-0x1d2f4>
+   2c9ec:	0002d0c0 	call	2d0c <__reset-0x1d2f4>
    2c9f0:	0002d3a4 	muli	zero,zero,2894
    2c9f4:	0002d3a4 	muli	zero,zero,2894
    2c9f8:	0002d3a4 	muli	zero,zero,2894
@@ -14870,7 +14870,7 @@ void uart_output(void) {
    2ca0c:	0002d2ec 	andhi	zero,zero,2891
    2ca10:	0002d3a4 	muli	zero,zero,2894
    2ca14:	0002cbe4 	muli	zero,zero,2863
-   2ca18:	0002d300 	call	2d30 <__alt_mem_onchip_memory2_0-0x1d2d0>
+   2ca18:	0002d300 	call	2d30 <__reset-0x1d2d0>
    2ca1c:	0002d3a4 	muli	zero,zero,2894
    2ca20:	0002d0cc 	andi	zero,zero,2883
    2ca24:	0002d0d8 	cmpnei	zero,zero,2883
