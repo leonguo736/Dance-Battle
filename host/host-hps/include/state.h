@@ -25,6 +25,13 @@ struct LobbyScreenState {
 };
 
 struct GameScreenState {
+    int pressedStart;
+    int threeDone;
+    int twoDone;
+    int oneDone;
+    int goDone;
+    int score;
+
     int pBarWidth;
     int earlyPoseA;
     int earlyPoseD;
@@ -55,11 +62,19 @@ struct LobbyState {
 };
 
 struct GameState {
+    int pressedStart;
+    int threeDone;
+    int twoDone;
+    int oneDone;
+    int goDone;
+    int score;
+
+    int countdown;
+
     int earlyPoseA;
     int earlyPoseD;
     int latePoseA;
     int latePoseD;
-    int gameStarted;
     struct GameScreenState gameScreenStates[2];
 };
 

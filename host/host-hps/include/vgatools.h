@@ -51,15 +51,19 @@
 #define LOBBY_MODE_BORDER 4
 #define LOBBY_MODE_SCALE 1
 #define LOBBY_MODE_KERNING 1
+#define LOBBY_MODE_SW_X 280
 
 #define LOBBY_SONG_X 77
 #define LOBBY_SONG_Y 149
 #define LOBBY_SONG_W 166
 #define LOBBY_SONG_H 22
+#define LOBBY_SONG_KEY_X 280
 
 #define GAME_VLINE_MARGIN 50
 #define GAME_HLINE_MARGIN 50
 #define GAME_POSE_Y 120
+#define GAME_TOP_X 160
+#define GAME_TOP_Y 30
 
 // Colors
 
