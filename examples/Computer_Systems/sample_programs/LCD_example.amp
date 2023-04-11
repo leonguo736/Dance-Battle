@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><intel_fpga_monitor_program_sample_program version="1.0">
+	<sample_text>
+		<sample_title>LCD Example</sample_title>
+		<sample_description>This program demonstrates use of the LCD in the Computer System.</sample_description>
+		<sample_details>
+   			It performs the following:
+  			1. Writes INTEL FPGA COMPUTER SYSTEMS to the top of the LCD.
+  			2. Bounces a filled in rectangle around the display and off the displayed text.
+		</sample_details>
+	</sample_text>
+	<arch_version>
+		<architecture>ARM Cortex-A9</architecture>
+		<associated_sample_systems>	
+			<associated_sample_system>DE10-Standard Computer for ARM Cortex-A9</associated_sample_system>
+		</associated_sample_systems>
+		<linker_sections_type>Basic</linker_sections_type>
+		<program>
+			<type>C Program</type>
+			<source_files>
+				<source_file filepath="true">arm/c/LCD_example/lcd.c</source_file>
+				<header_file filepath="true">arm/c/LCD_example/chars.h</header_file>
+				<source_file filepath="true">arm/c/LCD_example/lcd_driver.c</source_file>
+				<header_file filepath="true">arm/c/LCD_example/lcd_driver.h</header_file>
+				<source_file filepath="true">arm/c/LCD_example/lcd_graphic.c</source_file>
+				<header_file filepath="true">arm/c/LCD_example/lcd_graphic.h</header_file>
+			</source_files>
+			<options>
+				<compiler_flags>-g -O1</compiler_flags>
+				<emulate_unimpl_instructions>true</emulate_unimpl_instructions>
+				<use_small_c_library>false</use_small_c_library>
+			</options>
+		</program>
+	</arch_version>
+</intel_fpga_monitor_program_sample_program>

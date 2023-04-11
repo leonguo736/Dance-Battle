@@ -1,0 +1,110 @@
+*.swp
+.DS_Store
+transcript
+tcl_stacktrace.txt
+c5_pin_model_dump.txt
+*.mti
+*.mpf
+*.wlf
+*.qdb
+*.qpg
+*.qtl
+# *.qsf
+# *.qpf
+*.qws
+# *.sof
+*.bak
+work/
+db/
+incremental_db/
+simulation/
+output_files/
+!output_files/*.sof
+
+# Prerequisites
+*.d
+
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+*.objdump
+
+# Linker output
+*.ilk
+*.map
+*.exp
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Kernel Module Compile Results
+*.mod*
+*.cmd
+.tmp_versions/
+modules.order
+Module.symvers
+Mkfile.old
+dkms.conf
+
+# qsys_edit
+.qsys_edit
+
+*.xml
+language.settings.xml
+*.html
+*.x
+
+*.flock
+*.exe
+
+# nios eclipse
+.history
+.plugins
+RemoteSystemsTempFiles
+.safetable
+debugger/
+
+# esp fw
+credentials.lua
+
+# eclipse metadata
+.metadata
+
+.vscode
+
+# Python stuff
+__pycache__
+*.pyc
+
+
+# Node stuff
+node_modules/

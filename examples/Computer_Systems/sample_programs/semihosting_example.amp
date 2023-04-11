@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?><intel_fpga_monitor_program_sample_program version="1.0">
+	<sample_text>
+		<sample_title>Semihosting Example</sample_title>
+		<sample_description>This program demonstrates use of functions in C Standard Library through semihosting of Arm A9.</sample_description>
+		<sample_details>
+			The program performs the following:
+			1. prints characters to the terminal of the host computer
+			2. reads characters from host computer to target system
+		</sample_details>
+	</sample_text>
+	<arch_version>
+		<architecture>ARM Cortex-A9</architecture>
+		<associated_sample_systems>
+			<associated_sample_system>ARM Cortex-A9 System</associated_sample_system>
+			<associated_sample_system>DE0-Nano-SoC Computer for ARM Cortex-A9</associated_sample_system>
+			<associated_sample_system>DE1-SoC Computer for ARM Cortex-A9</associated_sample_system>
+			<associated_sample_system>DE10-Nano Computer for ARM Cortex-A9</associated_sample_system>
+			<associated_sample_system>DE10-Standard Computer for ARM Cortex-A9</associated_sample_system>
+		</associated_sample_systems>
+		<system_overrides>
+			<terminal>Semihosting</terminal>
+		</system_overrides>
+		<linker_sections_type>Basic</linker_sections_type>
+		<program>
+			<type>C Program</type>
+			<source_files>
+				<source_file filepath="true">arm/c/semihosting_example/semihosting_example.c</source_file>
+			</source_files>
+			<options>
+				<compiler_flags>-g -O1</compiler_flags>
+				<emulate_unimpl_instructions>false</emulate_unimpl_instructions>
+				<use_small_c_library>false</use_small_c_library>
+			</options>
+		</program>
+	</arch_version>
+</intel_fpga_monitor_program_sample_program>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><intel_fpga_monitor_program_sample_program version="1.0">
+	<sample_text>
+		<sample_title>Video Animation</sample_title>
+		<sample_description>This program demonstrates animation with the video out port in the Computer System.</sample_description>
+		<sample_details>
+			It performs the following:
+				1. places a blue box on the VGA display, and places a text string inside the box.
+				2. draws a big A on the screen
+				3. "bounces" a collapsible box around the screen
+		</sample_details>
+	</sample_text>
+	<arch_version>
+		<architecture>Nios II</architecture>
+		<associated_sample_systems>
+			<associated_sample_system>DE0-CV Computer for Nios II</associated_sample_system>	
+			<associated_sample_system>DE1-SoC Computer for Nios II</associated_sample_system>
+			<associated_sample_system>DE2-115 Computer for Nios II</associated_sample_system>
+			<associated_sample_system>DE10-Lite Computer for Nios II</associated_sample_system>
+			<associated_sample_system>DE10-Nano Computer for Nios II</associated_sample_system>
+			<associated_sample_system>DE10-Standard Computer for Nios II</associated_sample_system>
+			<associated_sample_system>VEEK Computer for Nios II</associated_sample_system>	
+		</associated_sample_systems>
+		<linker_sections_type>Basic</linker_sections_type>
+		<program>
+			<type>Program with Device Driver Support</type>
+			<source_files>
+				<source_file filepath="true">nios2/hal/video_animation/video_animation.c</source_file>
+			</source_files>
+		</program>
+	</arch_version>
+</intel_fpga_monitor_program_sample_program>
