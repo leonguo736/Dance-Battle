@@ -504,7 +504,7 @@ ball_detector  ball_detector_0(
    .iPixelAddress( VGA_ADDRESS ),
    .iVgaRequest( READ_Request ),
    .iVgaClk( VGA_CLK ),
-   .iVgaHRequest( READ_Request ),  // Can use H_active_area or READ_Request here.
+   .iVgaHRequest( READ_Request ),  
    .iVgaVRequest( V_active_area ),
    .oVideo8bRgb( oVideo8bRgb[0] ),
    .iVideoSelect( SW[9] ),
@@ -521,11 +521,11 @@ ball_detector  ball_detector_0(
  ); 
 ball_detector  ball_detector_1( 
    .reset( KEY[0] ),
-   .iVideo12bRgb( { RED12b, GREEN12b, BLUE12b } ),
+   .iVideo12bRgb( { hIndex <= 320 ? RED12b : 12'd0, hIndex <= 320 ? GREEN12b : 12'd0, hIndex <= 320 ? BLUE12b : 12'd0 } ), // left
    .iPixelAddress( VGA_ADDRESS ),
    .iVgaRequest( READ_Request ),
    .iVgaClk( VGA_CLK ),
-   .iVgaHRequest( READ_Request ),  // Can use H_active_area or READ_Request here.
+   .iVgaHRequest( READ_Request ),  
    .iVgaVRequest( V_active_area ),
    .oVideo8bRgb( oVideo8bRgb[1] ),
    .iVideoSelect( SW[9] ),
@@ -541,21 +541,21 @@ ball_detector  ball_detector_1(
    .oVIndex(  )
  );
 ball_detector ball_detector_2(
-	   .reset( KEY[0] ),
-   .iVideo12bRgb( { RED12b, GREEN12b, BLUE12b } ),
+   .reset( KEY[0] ),
+   .iVideo12bRgb( { hIndex >= 320 ? RED12b : 12'd0, hIndex >= 320 ? GREEN12b : 12'd0, hIndex >= 320 ? BLUE12b : 12'd0 } ), // right
    .iPixelAddress( VGA_ADDRESS ),
    .iVgaRequest( READ_Request ),
    .iVgaClk( VGA_CLK ),
-   .iVgaHRequest( READ_Request ),  // Can use H_active_area or READ_Request here.
+   .iVgaHRequest( READ_Request ),  
    .iVgaVRequest( V_active_area ),
    .oVideo8bRgb( oVideo8bRgb[2] ),
    .iVideoSelect( SW[9] ),
    .iFreezeRam(  ),
    .iFilterOn(  ), 
-   .iCrLow( crLow[2] ),
-   .iCrHigh( crHigh[2] ),
-   .iCbLow( cbLow[2] ),
-   .iCbHigh( cbHigh[2] ),
+   .iCrLow( crLow[1] ), // Follows previous ball detector
+   .iCrHigh( crHigh[1] ),
+   .iCbLow( cbLow[1] ),
+   .iCbHigh( cbHigh[1] ),
    .oRedPixelHIndex( redPixelHIndex[2] ),
    .oRedPixelVIndex( redPixelVIndex[2] ), 
    .oHIndex(  ),
@@ -563,12 +563,12 @@ ball_detector ball_detector_2(
  );
 
 ball_detector ball_detector_3(
-	   .reset( KEY[0] ),
+   .reset( KEY[0] ),
    .iVideo12bRgb( { RED12b, GREEN12b, BLUE12b } ),
    .iPixelAddress( VGA_ADDRESS ),
    .iVgaRequest( READ_Request ),
    .iVgaClk( VGA_CLK ),
-   .iVgaHRequest( READ_Request ),  // Can use H_active_area or READ_Request here.
+   .iVgaHRequest( READ_Request ),  
    .iVgaVRequest( V_active_area ),
    .oVideo8bRgb( oVideo8bRgb[3] ),
    .iVideoSelect( SW[9] ),
@@ -584,12 +584,12 @@ ball_detector ball_detector_3(
    .oVIndex(  )
  );
 ball_detector ball_detector_4(
-	   .reset( KEY[0] ),
-   .iVideo12bRgb( { RED12b, GREEN12b, BLUE12b } ),
+   .reset( KEY[0] ),
+   .iVideo12bRgb( { hIndex <= 320 ? RED12b : 12'd0, hIndex <= 320 ? GREEN12b : 12'd0, hIndex <= 320 ? BLUE12b : 12'd0 } ), // left
    .iPixelAddress( VGA_ADDRESS ),
    .iVgaRequest( READ_Request ),
    .iVgaClk( VGA_CLK ),
-   .iVgaHRequest( READ_Request ),  // Can use H_active_area or READ_Request here.
+   .iVgaHRequest( READ_Request ),  
    .iVgaVRequest( V_active_area ),
    .oVideo8bRgb( oVideo8bRgb[4] ),
    .iVideoSelect( SW[9] ),
@@ -605,21 +605,21 @@ ball_detector ball_detector_4(
    .oVIndex(  )
  );
 ball_detector ball_detector_5(
-	   .reset( KEY[0] ),
-   .iVideo12bRgb( { RED12b, GREEN12b, BLUE12b } ),
+   .reset( KEY[0] ),
+   .iVideo12bRgb( { hIndex >= 320 ? RED12b : 12'd0, hIndex >= 320 ? GREEN12b : 12'd0, hIndex >= 320 ? BLUE12b : 12'd0 } ), // right
    .iPixelAddress( VGA_ADDRESS ),
    .iVgaRequest( READ_Request ),
    .iVgaClk( VGA_CLK ),
-   .iVgaHRequest( READ_Request ),  // Can use H_active_area or READ_Request here.
+   .iVgaHRequest( READ_Request ),  
    .iVgaVRequest( V_active_area ),
    .oVideo8bRgb( oVideo8bRgb[5] ),
    .iVideoSelect( SW[9] ),
    .iFreezeRam(  ),
    .iFilterOn(  ), 
-   .iCrLow( crLow[5] ),
-   .iCrHigh( crHigh[5] ),
-   .iCbLow( cbLow[5] ),
-   .iCbHigh( cbHigh[5] ),
+   .iCrLow( crLow[4] ), // Follows previous ball detector
+   .iCrHigh( crHigh[4] ),
+   .iCbLow( cbLow[4] ),
+   .iCbHigh( cbHigh[4] ),
    .oRedPixelHIndex( redPixelHIndex[5] ),
    .oRedPixelVIndex( redPixelVIndex[5] ), 
    .oHIndex(  ),

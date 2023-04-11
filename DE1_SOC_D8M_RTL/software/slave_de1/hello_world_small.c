@@ -123,12 +123,21 @@ int main(int argc, char **argv)
       } else if (strcmp(cmd, "c") == 0) {
         printf("WARNING `main` esp disconnected, reconnecting...\n"); 
         esp_init(argc, argv);
+        esp_write("{\"command\":\"setType\",\"identifier\":\"camera\"}");
       }
       else {
         printf("WARNING `main` unknown cmd: cmd %s, data %s\n", cmd, data);
       }
       free(data);
       free(uartReadData);
+    } else {
+//        int uartWriteLen = 500;
+//        char *cameraWriteBuf = malloc(sizeof(*cameraWriteBuf) * uartWriteLen);
+//        CameraInterface_updateMedian(cameraInterface);
+//        CameraInterface_getMedianStr(cameraInterface, cameraWriteBuf);
+//
+//        printf("INFO `main` Medians %s\n", cameraWriteBuf);
+//        free(cameraWriteBuf);
     }
   }
   free(cameraInterface);
