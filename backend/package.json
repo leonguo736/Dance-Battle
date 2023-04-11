@@ -1,0 +1,28 @@
+{
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongo": "^0.1.0",
+    "mongodb": "^5.1.0",
+    "mongoose": "^7.0.2",
+    "mysql": "^2.18.1",
+    "uuid-random": "^1.3.2",
+    "ws": "^8.12.1"
+  },
+  "name": "l2b-34-elur",
+  "version": "1.0.0",
+  "description": "cpen391 project",
+  "main": "nodeserver.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UBC-CPEN391/l2b-34-elur.git"
+  },
+  "author": "Leon Guo",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/UBC-CPEN391/l2b-34-elur/issues"
+  },
+  "homepage": "https://github.com/UBC-CPEN391/l2b-34-elur#readme"
+}
