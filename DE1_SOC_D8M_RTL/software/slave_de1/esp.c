@@ -53,9 +53,7 @@ bool init_connection(char* serverIP) {
 
 /* Public Function Definitions */
 bool esp_init(int argc, char** argv) {
-#ifdef DEBUG
-  printf("ESP Init\n");
-#endif
+  DEBUGPRINT("INFO: Initializing ESP ... ", 0);
 
   reset_esp();
 
@@ -67,19 +65,16 @@ bool esp_init(int argc, char** argv) {
     failCount += !connected;
 
     if (!connected && failCount > 0) {
-      printf("Failed to connect to backend %d/10 times. Retrying ...\n",
+      DEBUGPRINT("fail %d ",
              failCount);
     }
 
   } while (!connected && failCount < 10);
-
-#ifdef DEBUG
-  if (!connected) {
-    printf("ESP Failed to connect to backend. Quitting ...\n");
+  if (connected) {
+    DEBUGPRINT("connected", 0);    
   } else {
-    printf("Connected to backend\n");
+    DEBUGPRINT("failed, quitting\n", 0);
   }
-#endif
 
   return connected;
 }
