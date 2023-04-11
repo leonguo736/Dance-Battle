@@ -68,7 +68,7 @@ int main(int argc, char **argv)
     char *uartReadData;
     if (++randomCounter % 2 == 0)
     {
-      char text[] = "cap";
+      char text[] = "cap,420";
       uartReadLen = strlen(text);
       uartReadData = malloc(sizeof(*uartReadData) * uartReadLen);
       memcpy(uartReadData, text, uartReadLen);
