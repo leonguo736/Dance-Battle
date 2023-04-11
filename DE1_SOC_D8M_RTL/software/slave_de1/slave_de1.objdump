@@ -51,27 +51,25 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING
  16 .debug_ranges 00001c58  00000000  00000000  000737b0  2**3
                   CONTENTS, READONLY, DEBUGGING
- 17 .thread_model 00000003  00000000  00000000  000783b6  2**0
+ 17 .thread_model 00000003  00000000  00000000  00078389  2**0
                   CONTENTS, READONLY
- 18 .cpu          0000000c  00000000  00000000  000783b9  2**0
+ 18 .cpu          0000000c  00000000  00000000  0007838c  2**0
                   CONTENTS, READONLY
- 19 .qsys         00000001  00000000  00000000  000783c5  2**0
+ 19 .qsys         00000001  00000000  00000000  00078398  2**0
                   CONTENTS, READONLY
- 20 .simulation_enabled 00000001  00000000  00000000  000783c6  2**0
+ 20 .simulation_enabled 00000001  00000000  00000000  00078399  2**0
                   CONTENTS, READONLY
- 21 .stderr_dev   0000000b  00000000  00000000  000783c7  2**0
+ 21 .stderr_dev   0000000b  00000000  00000000  0007839a  2**0
                   CONTENTS, READONLY
- 22 .stdin_dev    0000000b  00000000  00000000  000783d2  2**0
+ 22 .stdin_dev    0000000b  00000000  00000000  000783a5  2**0
                   CONTENTS, READONLY
- 23 .stdout_dev   0000000b  00000000  00000000  000783dd  2**0
+ 23 .stdout_dev   0000000b  00000000  00000000  000783b0  2**0
                   CONTENTS, READONLY
- 24 .sopc_system_name 0000000c  00000000  00000000  000783e8  2**0
+ 24 .sopc_system_name 0000000c  00000000  00000000  000783bb  2**0
                   CONTENTS, READONLY
- 25 .quartus_project_dir 00000030  00000000  00000000  000783f4  2**0
+ 25 .quartus_project_dir 00000030  00000000  00000000  000783c7  2**0
                   CONTENTS, READONLY
- 26 .jdi          000053cc  00000000  00000000  00078424  2**0
-                  CONTENTS, READONLY
- 27 .sopcinfo     000410c1  00000000  00000000  0007d7f0  2**0
+ 26 .sopcinfo     000410c1  00000000  00000000  000783f7  2**0
                   CONTENTS, READONLY
 SYMBOL TABLE:
 00020000 l    d  .entry	00000000 .entry
