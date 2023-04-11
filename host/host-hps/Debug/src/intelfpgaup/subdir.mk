@@ -35,7 +35,7 @@ C_DEPS += \
 src/intelfpgaup/%.o: ../src/intelfpgaup/%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C Compiler 10.3.1 [arm-none-linux-gnueabihf]'
-	arm-none-linux-gnueabihf-gcc.exe -std=c99 -Dsoc_cv_av -D_GNU_SOURCE -DGCC -DDEBUG -I"C:\Users\Haxrox\Documents\UBC\CPEN-391\l2b-34-elur\host\host-hps\include\hwlib\include\soc_cv_av" -I"C:\Users\Haxrox\Documents\UBC\CPEN-391\l2b-34-elur\host\host-hps\include\drivers" -I"C:\Users\Haxrox\Documents\UBC\CPEN-391\l2b-34-elur\host\host-hps\include" -I"C:\Users\Haxrox\Documents\UBC\CPEN-391\l2b-34-elur\host\host-hps\include\hwlib\include" -I"C:\Users\Haxrox\Documents\UBC\CPEN-391\l2b-34-elur\host\host-hps\include\intelfpgaup" -O0 -g -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -o "$@" "$<"
+	arm-none-linux-gnueabihf-gcc.exe -std=c99 -Dsoc_cv_av -D_GNU_SOURCE -DGCC -DDEBUG -I"C:\Users\dalex\OneDrive\Documents\GitHub\l2b-34-elur\host\host-hps\include\hwlib\include\soc_cv_av" -I"C:\Users\dalex\OneDrive\Documents\GitHub\l2b-34-elur\host\host-hps\include\drivers" -I"C:\Users\dalex\OneDrive\Documents\GitHub\l2b-34-elur\host\host-hps\include" -I"C:\Users\dalex\OneDrive\Documents\GitHub\l2b-34-elur\host\host-hps\include\hwlib\include" -I"C:\Users\dalex\OneDrive\Documents\GitHub\l2b-34-elur\host\host-hps\include\intelfpgaup" -O0 -g -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

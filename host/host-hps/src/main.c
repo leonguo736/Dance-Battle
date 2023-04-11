@@ -55,10 +55,10 @@ int buffer = 0;  // 0 or 1
 int numSongs = 3;
 char* song_displaynames[] = {"tetris 99 theme", "groovy gray",
                              "super treadmill"};
-double song_spbs[] = {AUDIO_RATE / (140.0 / 60)};
-int song_offsets[] = {0};
+double song_spbs[] = {AUDIO_RATE / (140.0 / 60), 10, AUDIO_RATE / (77.0 / 60)};
+int song_offsets[] = {0, 6000, 0};
 char* menu_filename = "shop.txt";
-char* song_filenames[] = {"tetris.txt", "groovy.txt", "treadmill.txt"};
+char* song_filenames[] = {"tetris-long.txt", "tetris.txt", "treadmill.txt"};
 
 int numSamples;
 int sampleNo;
@@ -82,7 +82,7 @@ void loadSong(char* filename) {
 
   int count = 0;
   int left = true;
-  while (getline(&sampleLine, &sampleLen, fp) != -1) {
+  while (count < MAX_SAMPLES && getline(&sampleLine, &sampleLen, fp) != -1) {
     if (left) {
       samplesL[count] = (int)(VOLUME * atof(sampleLine));
     } else {
@@ -251,12 +251,12 @@ void insertDefenderPose(int id, double larm, double rarm, double lleg,
   struct Pose pose;
   pose.larmx = POSE_ARM_LENGTH * cos(larm);
   pose.rarmx = POSE_ARM_LENGTH * cos(rarm);
-  pose.larmy = POSE_CHEST_Y - POSE_ARM_LENGTH * sin(larm);
-  pose.rarmy = POSE_CHEST_Y - POSE_ARM_LENGTH * sin(rarm);
+  pose.larmy = POSE_ARM_LENGTH * sin(larm);
+  pose.rarmy = POSE_ARM_LENGTH * sin(rarm);
   pose.llegx = POSE_LEG_LENGTH * cos(lleg);
   pose.rlegx = POSE_LEG_LENGTH * cos(rleg);
-  pose.llegy = POSE_PELVIS_Y - POSE_LEG_LENGTH * sin(lleg);
-  pose.rlegy = POSE_PELVIS_Y - POSE_LEG_LENGTH * sin(rleg);
+  pose.llegy = POSE_LEG_LENGTH * sin(lleg);
+  pose.rlegy = POSE_LEG_LENGTH * sin(rleg);
   pose.sample = defenderPoses[id].sample;
   pose.isDefender = 1;
 
@@ -268,7 +268,7 @@ void addScore(int score) { gameState.score += score; }
 int getPoseX(struct Pose p) {
   int x = (int)(GAME_VLINE_MARGIN +
                 PIXELS_PER_SAMPLE *
-                    (p.sample - sampleNo + song_offsets[lobbyState.songId]));
+                    (p.sample - sampleNo));
   if (x >= GAME_VLINE_MARGIN && x <= WIDTH - GAME_VLINE_MARGIN) {
     return x;
   }
@@ -325,7 +325,7 @@ void initGraphics(int s) {
 
       drawStringCenter(basicFont, "sw0", LOBBY_MODE_SW_X, LOBBY_MODE_Y + 10,
                        COLOR_LOBBY_MODE_BORDER, 1, 1);
-      drawStringCenter(basicFont, "key1", 50, LOBBY_SONG_Y + 10,
+      drawStringCenter(basicFont, "key1", 40, LOBBY_SONG_Y + 10,
                        COLOR_LOBBY_MODE_BORDER, 1, 1);
       drawStringCenter(basicFont, "key2", LOBBY_SONG_KEY_X, LOBBY_SONG_Y + 10,
                        COLOR_LOBBY_MODE_BORDER, 1, 1);
@@ -350,7 +350,6 @@ void initGraphics(int s) {
       }
 
     } else if (s == 2) {  // Game
-      resetGameState();
       drawBackground();
 
       // Straight lines
@@ -427,12 +426,12 @@ void updateGraphics(void) {
       }
     } else if (!initState.statusSlideDone) {
       int sy = (int)round(prevState->statusY);
-      drawString(basicFont, "waiting for server connection", INIT_STATUS_X, sy,
+      drawStringCenter(basicFont, "waiting for server connection", 160, sy,
                  COLOR_BG, INIT_STATUS_SCALE, INIT_STATUS_KERNING);
       prevState->statusY =
           lerp(otherState->statusY, INIT_STATUS_Y, INIT_TITLE_LERP);
       sy = (int)round(prevState->statusY);
-      drawString(basicFont, "waiting for server connection", INIT_STATUS_X, sy,
+      drawStringCenter(basicFont, "waiting for server connection", 160, sy,
                  COLOR_INIT_STATUS, INIT_STATUS_SCALE, INIT_STATUS_KERNING);
 
       if (sy == INIT_STATUS_Y &&
@@ -440,6 +439,14 @@ void updateGraphics(void) {
         initState.statusSlideDone = 1;
       }
     } else {
+      if (esp_ready) {
+        int sy = (int)round(prevState->statusY);
+        drawStringCenter(basicFont, "waiting for server connection", 160, sy,
+                 COLOR_BG, INIT_STATUS_SCALE, INIT_STATUS_KERNING);
+        drawStringCenter(basicFont, "press key0", 160, sy,
+                 COLOR_INIT_STATUS, INIT_STATUS_SCALE, INIT_STATUS_KERNING);
+      }
+
       for (int n = 0; n < 4; n++) {
         for (int c = 0; c < 4; c++) {
           if ((prevState->namePositions)[n][c][1] != 0) {
@@ -556,7 +563,7 @@ void updateGraphics(void) {
     struct GameScreenState* prevState = &(gameState.gameScreenStates[buffer]);
 
     // Update progress bar
-    int newPBarWidth = (int)(157 * (double)sampleNo / NUM_SAMPLES);
+    int newPBarWidth = (int)(157 * (double)sampleNo / numSamples);
     drawPBarFill(prevState->pBarWidth, newPBarWidth);
     prevState->pBarWidth = newPBarWidth;
 
@@ -783,7 +790,6 @@ int main(int argc, char** argv) {
 
       // Tell host what device I am
       if (esp_ready) {
-        // TODO: UPDATE TEXT HERE @ ALEX
         esp_write("{\"command\":\"setType\",\"identifier\":\"host\"}");
       }
     } else {
@@ -834,6 +840,7 @@ int main(int argc, char** argv) {
             break;
           case ESP_CLOSE_COMMAND:
             newScreen = 0;
+            loadSong("shop.txt");
             // initGraphics(0);
             esp_close(argc > 1 ? argv[1] : NULL);
             break;
@@ -869,6 +876,7 @@ int main(int argc, char** argv) {
           loadSong(song_filenames[lobbyState.songId]);
           loadPoses(song_filenames[lobbyState.songId]);
           // initGraphics(2);
+          resetGameState();
           newScreen = 2;
         }
       } else if (screen == 2) {
