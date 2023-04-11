@@ -35,6 +35,20 @@ var point2 = new Object();
 point2.x = 1;
 point2.y = 0;
 console.log("angle: " + find_angle(point1, point2, center));
+class Pose {
+    constructor(beat, leftArm, rightArm) { 
+		this.beat = beat;
+        this.leftArm = leftArm;
+        this.rightArm = rightArm;
+    }
+}
+
+class Point {
+	constructor(x, y) {
+		this.x = x;
+		this.y = y;
+	}
+}
 
 var beatArray_atk = [];
 var leftArray_atk = [];
@@ -90,43 +104,54 @@ for (var i = 0; i < numPoses; i++) {
 console.log("qweq");
 console.log("round: " + Math.round(12.23443));
 
+var parsedData = new Object();
+parsedData.command = "camera";
+parsedData.median = [[0, 0], [1, 1], [2, 2], [3, 3], [4, 4]];
 // client.on('message', (data) => {
 //     parsedData = JSON.parse(data); // coordinate array looks like this: [[0,0], [1,1], [2,2]]
 
-//     /* determine what to do based on command field */
-//     if (parsedData.command == "camera") {
-//         /* set up the 5 points. chest left right */ 
-//         var leftArm = new Point(parsedData.median[0], parsedData.median[1]);
-//         var leftElbow = new Point(parsedData.median[2], parsedData.median[3]);
-//         var rightArm = new Point(parsedData.median[4], parsedData.median[5]);
-//         var rightElbow = new Point(parsedData.median[6], parsedData.median[7]);
-//         var chest = new Point(parsedData.median[8], parsedData.median[9]);
+    /* determine what to do based on command field */
+    if (parsedData.command == "camera") {
+        /* set up the 5 points. chest left right */ 
+        var chest = new Point(parsedData.median[0][0], parsedData.median[0][1]);
+        console.log("chest: " + chest);
+        var leftArm = new Point(parsedData.median[1][0], parsedData.median[1][1]);
+        console.log("left arm: " + leftArm);
+        var leftElbow = new Point(parsedData.median[2][0], parsedData.median[2][1]);
+        console.log("left elbow: " + leftElbow);
+        var rightArm = new Point(parsedData.median[3][0], parsedData.median[3][1]);
+        console.log("right arm: " + rightArm);
+        var rightElbow = new Point(parsedData.median[4][0], parsedData.median[4][1]);
+        console.log("right elbow: " + rightElbow);
 
-//         /* calculate the 2 angles and store data in Pose objects */
-//         var leftarm_angle = find_angle(leftArm, chest, leftElbow);
-//         var rightarm_angle = find_angle(rightArm, chest, rightElbow);
-//         var beat = 1; // temporary placeholder
-//         var pose = new Pose(beat, leftarm_angle, rightarm_angle);
+        /* calculate the 2 angles and store data in Pose objects */
+        var leftarm_angle = find_angle(leftArm, chest, leftElbow);
+        console.log("left arm angle: " + leftarm_angle);
+        var rightarm_angle = find_angle(rightArm, chest, rightElbow);
+        console.log("right arm angle: " + rightarm_angle);
+        var beat = 1; // temporary placeholder
+        var pose = new Pose(beat, leftarm_angle, rightarm_angle);
+        console.log("pose: " + pose.leftarm_angle + " " + pose.rightarm_angle);
         
 //         /* send message to front end (sends to everyone connected for now) */
 //         for (client of wss.clients.values()) {
 //             client.send(JSON.stringify(pose));
 //         }
-//     }
+    }
 // });
 
-/* For lobby init. Reponds to the Host with info regarding to connected players */
-if (parsedData.command == "lobbyInit") {
-    console.log("entered init");
-    hostConnected = 1;
-    var connections = new Object();
-    connections.command = "lobbyInit";
-    connections.connections = [atkConnected, defConnected];
-    setTimeout(() =>{
-        // for (client of wss.clients.values()) {
-        // 	client.send(JSON.stringify(connections));
-        // 	console.log("responded to lobbyInit");
-        // }
-        client.send(JSON.stringify(connections));
-    }, 1000);
-}
+// /* For lobby init. Reponds to the Host with info regarding to connected players */
+// if (parsedData.command == "lobbyInit") {
+//     console.log("entered init");
+//     hostConnected = 1;
+//     var connections = new Object();
+//     connections.command = "lobbyInit";
+//     connections.connections = [atkConnected, defConnected];
+//     setTimeout(() =>{
+//         // for (client of wss.clients.values()) {
+//         // 	client.send(JSON.stringify(connections));
+//         // 	console.log("responded to lobbyInit");
+//         // }
+//         client.send(JSON.stringify(connections));
+//     }, 1000);
+// }

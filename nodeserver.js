@@ -51,6 +51,7 @@ var connectionCount = 0;
 var atkConnected = 0; 
 var defConnected = 0;
 var hostConnected = 0;
+var expected_data = "default";
 
 // Object that stores pose information
 // 5 points --> 2 angles
@@ -130,12 +131,13 @@ wss.on('connection', function connection(client) {
 					client.id = "attacker";
 					var data = "id,1";
 					console.log("atk connected");
+					client.send(data);
 					
-					for (client of wss.clients.values()) {
-						console.log("client id: " + client.id);
-						if (client.id == "host") {
+					for (de1 of wss.clients.values()) {
+						// console.log("client id: " + client.id);
+						if (de1.id == "host") {
 							console.log("sending data to host");
-							client.send("l" + atkConnected + " " + defConnected);
+							de1.send("l" + atkConnected + " " + defConnected);
 						}
 					}
 				}
@@ -144,12 +146,13 @@ wss.on('connection', function connection(client) {
 					client.id = "defender";
 					var data = "id,2";
 					console.log("def connected");
+					client.send(data);
 
-					for (client of wss.clients.values()) {
-						console.log("client id: " + client.id);
-						if (client.id == "host") {
+					for (de1 of wss.clients.values()) {
+						// console.log("client id: " + client.id);
+						if (de1.id == "host") {
 							console.log("sending data to host");
-							client.send("l" + atkConnected + " " + defConnected);
+							de1.send("l" + atkConnected + " " + defConnected);
 						}
 					}
 				}
@@ -158,29 +161,60 @@ wss.on('connection', function connection(client) {
 					var data = "extra client";
 				}
 		
-				// var setCamera = new Object();
-				// setCamera.command = "giveId";
-				// setCamera.data = data;
-				setTimeout(() =>{
-					client.send(data);
-				}, 1000);
+				// setTimeout(() =>{
+				// 	client.send(data);
+				// }, 1000);
 			}
 		}
 		else if (parsedData.command == "captureAttacker") {
 			console.log("sending signal to attacker");
-			for (client of wss.clients.values()) {
-				if (client.id == "attacker") {
+			for (de1 of wss.clients.values()) {
+				if (de1.id == "attacker") {
 					console.log("msg to attacker");
-					client.send("cap," + parsedData.poseID);
+
+					/* work around for client id bug */
+					console.log("expected (180): " + expected_data);
+					expected_data = "attacker";
+					// if (expected_data == "default") {
+					// 	expected_data = "attacker";
+					// }
+					// else {
+					// 	console.log("tried to send signal to attacker while awaiting data");
+					// }
+					/* end of work around */
+
+					de1.send("cap," + parsedData.poseID);
 				}
 			}
 		}
 		else if (parsedData.command == "captureDefender") {
 			console.log("sending signal to defender");
-			for (client of wss.clients.values()) {
-				if (client.id == "defender") {
+			for (de1 of wss.clients.values()) {
+				if (de1.id == "defender") {
 					console.log("msg to defender");
-					client.send("cap," + parsedData.poseID);
+
+					/* work around for client id bug */
+					console.log("expected (200): " + expected_data);
+					expected_data = "defender";
+					// if (expected_data == "default") {
+					// 	expected_data = "defender";
+					// }
+					// else {
+					// 	console.log("tried to send signal to defender while awaiting data");
+					// }
+					/* end of work around */
+					// for (de2 of wss.clients.values()) {
+					// 	if (de2.id == "host") {
+					// 		expected_data = "default";
+					// 		// var msg = "s" + poseID + " " + score;
+					// 		var msg = "s1" + " " + "100";
+					// 		de2.send(msg);
+					// 	}
+					// 	else if (de2.id == "defender") {
+					// 		de2.send("cap," + parsedData.poseID);
+					// 	}
+					// }
+					de1.send("cap," + parsedData.poseID);
 				}
 			}
 		}
@@ -196,43 +230,96 @@ wss.on('connection', function connection(client) {
 			 * A pose object is then created using 2 angles and a beat, which is then passed to the host as a JSON string.
 			 */
 
-			/* set up the 5 points */ 
+			/* set up the 5 points: CENTER IS CEHST, ONE POINT IS ALWAYS ON X AXIS (5, 0) */ 
+			// var chest = new Point(parsedData.median[0][0], parsedData.median[0][1]);
+			// var leftArm = new Point(parsedData.median[1][0], parsedData.median[1][1]);
+			// var leftElbow = new Point(parsedData.median[2][0], parsedData.median[2][1]);
+			// var rightArm = new Point(parsedData.median[3][0], parsedData.median[3][1]);
+			// var rightElbow = new Point(parsedData.median[4][0], parsedData.median[4][1]);
+			// var leftLeg = new Point(parsedData.median[5][0], parsedData.median[5][1]);
+			// var leftKnee = new Point(parsedData.median[6][0], parsedData.median[6][1]);
+			// var rightLeg = new Point(parsedData.median[7][0], parsedData.median[7][1]);
+			// var rightKnee = new Point(parsedData.median[8][0], parsedData.median[8][1]);
+			// var pelvis = new Point(parsedData.median[9][0], parsedData.median[9][1]);
 			var chest = new Point(parsedData.median[0][0], parsedData.median[0][1]);
 			var leftArm = new Point(parsedData.median[1][0], parsedData.median[1][1]);
-			var leftElbow = new Point(parsedData.median[2][0], parsedData.median[2][1]);
-			var rightArm = new Point(parsedData.median[3][0], parsedData.median[3][1]);
-			var rightElbow = new Point(parsedData.median[4][0], parsedData.median[4][1]);
+			var rightArm = new Point(parsedData.median[2][0], parsedData.median[2][1]);
+			var pelvis = new Point(parsedData.median[3][0], parsedData.median[3][1]);
+			var leftLeg = new Point(parsedData.median[4][0], parsedData.median[4][1]);
+			var rightLeg = new Point(parsedData.median[5][0], parsedData.median[5][1]);
+			var tummy = new Point(chest.x, chest.y-10);
+			var xaxis = new Point(parsedData.median[0][0] + 25, parsedData.median[0][1]);
 
 			/* calculate the 2 angles and store data in a Pose object */
 			var poseID = parsedData.poseId; // temporary placeholder. This should be a field in JSON string
-			var leftarm_angle = find_angle(leftArm, chest, leftElbow);
-			var rightarm_angle = find_angle(rightArm, chest, rightElbow);
+			// var leftarm_angle = find_angle(leftArm, chest, leftElbow);
+			// var rightarm_angle = find_angle(rightArm, chest, rightElbow);
+			var leftarm_angle = find_angle(leftArm, xaxis, chest);
+			var rightarm_angle = find_angle(rightArm, xaxis, chest);
+			
+			// Start Kerry
+			console.log("chest x and y: " + chest.x + " " + chest.y);
+			function getAngle(a, b) {
+				const deltaX = b.x - a.x;
+				const deltaY = b.y - a.y;
+				return Math.atan2(deltaY, deltaX);
+			}
+
+			function createPoint(x, y) {
+				var point = new Point(x, 480 - y);
+				return point; // NOTE Y IS INVERTED
+			}
+
+			var mid = createPoint(chest.x, chest.y); // median[0]
+			var left = createPoint(leftArm.x, leftArm.y); // median[1]
+			var right = createPoint(rightArm.x, rightArm.y); // median[2]
+			console.log(
+				mid, left, right
+			)
+
+			leftarm_angle = getAngle(mid, left); // give to alex, counter-cw for alex
+
+			console.log(leftarm_angle * (180 / Math.PI)); // degrees for reference
+
+			rightarm_angle = getAngle(mid, right); // give to alex, counter-cw for alex
+
+			console.log(rightarm_angle * (180 / Math.PI)); // degrees for reference
+
+			// End Kerry
+
 			var pose = new Pose(poseID, leftarm_angle, rightarm_angle);
 
+			/* testing client.id vs expected_data */
 			console.log("current client IS: " + client.id);
-			if (client.id == "attacker") { // for getting attacker moves 
+			console.log("expected data IS: " + expected_data);
+			if (expected_data == "attacker") { // for getting attacker moves 
 				attackerPoses.push(pose);
 
 				/* send message to front end (sends to everyone connected for now) */
-				for (client of wss.clients.values()) {
-					if (client.id == "host") {
+				for (de1 of wss.clients.values()) {
+					if (de1.id == "host") {
+						expected_data = "default";
 						var msg = "p" + poseID + " " + leftarm_angle + " " + rightarm_angle;
-						client.send(msg);
+						de1.send(msg);
 					}
 				}
 			}
-			else if (client.id == "defender") { // for getting defender moves 
-				// var score = 100 - 16 * Math.round(abs(pose.leftarm_angle - attackerPoses[pose.beat].leftarm_angle));
-				var score = 100;
+			else if (expected_data == "defender") { // for getting defender moves 
+				var score = 100 - 16 * Math.round(abs(pose.leftArm - attackerPoses[pose.beat].leftArm));
+				console.log("score: " + score);
+				// var score = 100;
 				/* send message to front end (sends to everyone connected for now) */
-				for (client of wss.clients.values()) {
-					if (client.id == "host") {
+				for (de1 of wss.clients.values()) {
+					if (de1.id == "host") {
+						expected_data = "default";
 						var msg = "s" + poseID + " " + score;
-						client.send(msg);
+						// var msg = "s" + poseID + " " + "100";
+						de1.send(msg);
 					}
 				}
 			}
 			else {
+				expected_data = "default";
 				console.log("ERROR: CLIENT ID WHEN RECEIVING POSE IS BAD");
 			}
 		}
@@ -278,7 +365,12 @@ function find_angle(p0,p1,c) {
                         Math.pow(c.y-p1.y,2)); // p1->c (a)
     var p0p1 = Math.sqrt(Math.pow(p1.x-p0.x,2)+
                          Math.pow(p1.y-p0.y,2)); // p0->p1 (c)
-    return Math.acos((p1c*p1c+p0c*p0c-p0p1*p0p1)/(2*p1c*p0c));
+	if (p0.y > p1.y) { // desired angle is greater than 180 deg
+		return 2 * Math.PI - Math.acos((p1c*p1c+p0c*p0c-p0p1*p0p1)/(2*p1c*p0c))
+	}
+	else { // desired angle is less than 180 deg
+		return Math.acos((p1c*p1c+p0c*p0c-p0p1*p0p1)/(2*p1c*p0c));
+	}
 }
 
 /**
