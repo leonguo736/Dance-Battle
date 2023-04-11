@@ -783,6 +783,7 @@ int main(int argc, char** argv) {
 
       // Tell host what device I am
       if (esp_ready) {
+        // TODO: UPDATE TEXT HERE @ ALEX
         esp_write("{\"command\":\"setType\",\"identifier\":\"host\"}");
       }
     } else {
@@ -881,7 +882,7 @@ int main(int argc, char** argv) {
                   poseID);
           esp_write(sendBuffer);
           poseID++;
-          insertDefenderPose(poseID, 3.14 * poseID, 3.14, 3.14 * poseID, 3.14);
+          // insertDefenderPose(poseID, 3.14 * poseID, 3.14, 3.14 * poseID, 3.14);
         }
       }
     }
