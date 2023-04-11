@@ -103,6 +103,10 @@
 #define COLOR_POSE_DOT 0xefa9
 #define COLOR_POSE_HHAND 0xee3
 #define COLOR_POSE_MHAND 0xb3b
+#define COLOR_POSE_LARM 0xee3
+#define COLOR_POSE_RARM 0xee3
+#define COLOR_POSE_LLEG 0xb3b
+#define COLOR_POSE_RLEG 0xb3b
 
 // General Methods
 

@@ -89,10 +89,21 @@ void drawPose(struct Pose p, int x, int erase) {
     if (p.isDefender) {
         video_line(x, GAME_HLINE_MARGIN + 1, x, HEIGHT - GAME_HLINE_MARGIN - 1,
                    erase ? COLOR_BG : COLOR_GAME_HLINE);
-        video_line(x, GAME_POSE_Y, x + p.hx, GAME_POSE_Y + p.hy,
-                   erase ? COLOR_BG : COLOR_POSE_HHAND);
-        video_line(x, GAME_POSE_Y, x + p.mx, GAME_POSE_Y + p.my,
-                   erase ? COLOR_BG : COLOR_POSE_MHAND);
+
+        video_line(x, GAME_POSE_Y + POSE_CHEST_Y, x + p.larmx,
+                   GAME_POSE_Y + POSE_CHEST_Y + p.larmy,
+                   erase ? COLOR_BG : COLOR_POSE_LARM);
+        video_line(x, GAME_POSE_Y + POSE_CHEST_Y, x + p.rarmx,
+                   GAME_POSE_Y + POSE_CHEST_Y + p.rarmy,
+                   erase ? COLOR_BG : COLOR_POSE_RARM);
+
+        video_line(x, GAME_POSE_Y + POSE_PELVIS_Y, x + p.llegx,
+                   GAME_POSE_Y + POSE_CHEST_Y + p.llegy,
+                   erase ? COLOR_BG : COLOR_POSE_LLEG);
+        video_line(x, GAME_POSE_Y + POSE_PELVIS_Y, x + p.rlegx,
+                   GAME_POSE_Y + POSE_CHEST_Y + p.rlegy,
+                   erase ? COLOR_BG : COLOR_POSE_RLEG);
+
         video_pixel(x, GAME_POSE_Y, erase ? COLOR_BG : COLOR_POSE_DOT);
     } else {
         video_line(x, GAME_HLINE_MARGIN + 1, x, HEIGHT - GAME_HLINE_MARGIN - 1,

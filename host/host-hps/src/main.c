@@ -126,7 +126,7 @@ int writeAudio(int l, int r) {
 // State data
 
 const char* init_names[] = {"alex", "bell", "kery", "leon"};
-int init_name_speeds[] = {4, 4, -4, -4};
+int init_name_speeds[] = {2, 2, -2, -2};
 int init_name_offsets[] = {0, 0, 40, 40};
 short color_init_names[] = {0xe4a, 0xd19, 0xc641, 0x7859};
 
@@ -246,12 +246,17 @@ void loadPoses(char* filename) {
   fclose(fp);
 }
 
-void insertDefenderPose(int id, double ha, double ma) {
+void insertDefenderPose(int id, double larm, double rarm, double lleg,
+                        double rleg) {
   struct Pose pose;
-  pose.hx = POSE_HOUR_LENGTH * cos(ha);
-  pose.hy = POSE_HOUR_LENGTH * sin(ha);
-  pose.mx = POSE_MINUTE_LENGTH * cos(ma);
-  pose.my = POSE_MINUTE_LENGTH * sin(ma);
+  pose.larmx = POSE_ARM_LENGTH * cos(larm);
+  pose.rarmx = POSE_ARM_LENGTH * cos(rarm);
+  pose.larmy = POSE_CHEST_Y + POSE_ARM_LENGTH - sin(larm);
+  pose.rarmy = POSE_CHEST_Y + POSE_ARM_LENGTH - sin(rarm);
+  pose.llegx = POSE_LEG_LENGTH + cos(lleg);
+  pose.rlegx = POSE_LEG_LENGTH + cos(rleg);
+  pose.llegy = POSE_PELVIS_Y + POSE_LEG_LENGTH - sin(lleg);
+  pose.rlegy = POSE_PELVIS_Y + POSE_LEG_LENGTH - sin(rleg);
   pose.sample = defenderPoses[id].sample;
   pose.isDefender = 1;
 
@@ -376,7 +381,7 @@ void updateGraphics(void) {
   // graphicsUpdateLock = 1;
 
   char sendBuffer[ESP_BUFFER_SIZE];
-  if (newScreen == 0) {  // Init
+  if (screen == 0) {  // Init
     struct InitScreenState* prevState = &(initState.initScreenStates[buffer]);
     struct InitScreenState* otherState =
         &(initState.initScreenStates[(buffer + 1) % 2]);
@@ -459,7 +464,7 @@ void updateGraphics(void) {
         }
       }
     }
-  } else if (newScreen == 1) {  // Lobby
+  } else if (screen == 1) {  // Lobby
     struct LobbyScreenState* prevState =
         &(lobbyState.lobbyScreenStates[buffer]);
     // struct LobbyScreenState * otherState =
@@ -547,7 +552,7 @@ void updateGraphics(void) {
       prevState->songId = lobbyState.songId;
     }
 
-  } else if (newScreen == 2) {  // Game
+  } else if (screen == 2) {  // Game
     struct GameScreenState* prevState = &(gameState.gameScreenStates[buffer]);
 
     // Update progress bar
@@ -795,7 +800,7 @@ int main(int argc, char** argv) {
 
         unsigned int recvID = 0;
         unsigned int score = 0;
-        double angles[3];
+        double angles[4];
 
         switch (recvBuffer[0]) {
           case ESP_LOBBY_COMMAND:
@@ -810,13 +815,14 @@ int main(int argc, char** argv) {
 #endif
             break;
           case ESP_POSE_COMMAND:
-            sscanf(recvBuffer + 1, "%u %lf %lf %lf", &recvID, angles,
-                   angles + 1, angles + 2);
+            sscanf(recvBuffer + 1, "%u %lf %lf %lf %lf", &recvID, angles,
+                   angles + 1, angles + 2, angles + 3);
 
-            printf("Pose %u: %lf %lf %lf\n", recvID, angles[0], angles[1],
-                   angles[2]);
+            printf("Pose %u: %lf %lf %lf %lf\n", recvID, angles[0], angles[1],
+                   angles[2], angles[3]);
 
-            insertDefenderPose(recvID, angles[0], angles[1]);
+            insertDefenderPose(recvID, angles[0], angles[1], angles[2],
+                               angles[3]);
             break;
           case ESP_SCORE_COMMAND:
             sscanf(recvBuffer + 1, "%u %u", &recvID, &score);
@@ -875,20 +881,21 @@ int main(int argc, char** argv) {
                   poseID);
           esp_write(sendBuffer);
           poseID++;
-          insertDefenderPose(poseID, 3.14 * poseID, 3.14);
+          insertDefenderPose(poseID, 3.14 * poseID, 3.14, 3.14 * poseID, 3.14);
         }
       }
     }
 
     // Playing a song
-    if ((screen == 0) || (screen == 1) || (screen == 2 && gameState.oneDone)) {
+    if ((newScreen == 0) || (newScreen == 1) ||
+        (newScreen == 2 && gameState.oneDone)) {
       sampleNo =
           (sampleNo + writeAudio(samplesL[sampleNo], samplesR[sampleNo])) %
           numSamples;
     }
 
     // Countdown
-    if (screen == 2 && !gameState.oneDone && gameState.pressedStart) {
+    if (newScreen == 2 && !gameState.oneDone && gameState.pressedStart) {
       gameState.countdown += writeAudio(0, 0);
       if (gameState.countdown == AUDIO_RATE) {
         gameState.countdown = 0;
@@ -902,7 +909,7 @@ int main(int argc, char** argv) {
           gameState.goDone = 1;
         }
       }
-    } else if (screen == 2 && !gameState.goDone && gameState.oneDone) {
+    } else if (newScreen == 2 && !gameState.goDone && gameState.oneDone) {
       gameState.countdown += 1;
       if (gameState.countdown == AUDIO_RATE) {
         gameState.countdown = 0;
