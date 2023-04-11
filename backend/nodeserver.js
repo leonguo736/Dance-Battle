@@ -258,7 +258,6 @@ wss.on('connection', function connection(client) {
 			var rightarm_angle = find_angle(rightArm, xaxis, chest);
 			
 			// Start Kerry
-			console.log("chest x and y: " + chest.x + " " + chest.y);
 			function getAngle(a, b) {
 				const deltaX = b.x - a.x;
 				const deltaY = b.y - a.y;
@@ -266,24 +265,26 @@ wss.on('connection', function connection(client) {
 			}
 
 			function createPoint(x, y) {
-				var point = new Point(x, 480 - y);
-				return point; // NOTE Y IS INVERTED
+				return new Point(x, 480 - y);
 			}
 
 			var mid = createPoint(chest.x, chest.y); // median[0]
 			var left = createPoint(leftArm.x, leftArm.y); // median[1]
 			var right = createPoint(rightArm.x, rightArm.y); // median[2]
-			console.log(
-				mid, left, right
-			)
+			var pelvis = createPoint(pelvis.x, pelvis.y); // median[3]
+			var leftLeg = createPoint(leftLeg.x, leftLeg.y); // median[4]
+			var rightLeg = createPoint(rightLeg.x, rightLeg.y); // median[5]
 
 			leftarm_angle = getAngle(mid, left); // give to alex, counter-cw for alex
-
-			console.log(leftarm_angle * (180 / Math.PI)); // degrees for reference
-
 			rightarm_angle = getAngle(mid, right); // give to alex, counter-cw for alex
+			leftleg_angle = getAngle(pelvis, leftLeg); // give to alex, counter-cw for alex
+			rightleg_angle = getAngle(pelvis, rightLeg); // give to alex, counter-cw for alex
 
-			console.log(rightarm_angle * (180 / Math.PI)); // degrees for reference
+			function toDegree(r) {
+				return r * (180 / Math.PI);
+			}
+
+			console.log("leftarm_angle: " + toDegree(leftarm_angle) + " rightarm_angle: " + toDegree(rightarm_angle) + " leftleg_angle: " + toDegree(leftleg_angle) + " rightleg_angle: " + toDegree(rightleg_angle));
 
 			// End Kerry
 
