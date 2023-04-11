@@ -251,12 +251,12 @@ void insertDefenderPose(int id, double larm, double rarm, double lleg,
   struct Pose pose;
   pose.larmx = POSE_ARM_LENGTH * cos(larm);
   pose.rarmx = POSE_ARM_LENGTH * cos(rarm);
-  pose.larmy = POSE_CHEST_Y + POSE_ARM_LENGTH - sin(larm);
-  pose.rarmy = POSE_CHEST_Y + POSE_ARM_LENGTH - sin(rarm);
-  pose.llegx = POSE_LEG_LENGTH + cos(lleg);
-  pose.rlegx = POSE_LEG_LENGTH + cos(rleg);
-  pose.llegy = POSE_PELVIS_Y + POSE_LEG_LENGTH - sin(lleg);
-  pose.rlegy = POSE_PELVIS_Y + POSE_LEG_LENGTH - sin(rleg);
+  pose.larmy = POSE_CHEST_Y - POSE_ARM_LENGTH * sin(larm);
+  pose.rarmy = POSE_CHEST_Y - POSE_ARM_LENGTH * sin(rarm);
+  pose.llegx = POSE_LEG_LENGTH * cos(lleg);
+  pose.rlegx = POSE_LEG_LENGTH * cos(rleg);
+  pose.llegy = POSE_PELVIS_Y - POSE_LEG_LENGTH * sin(lleg);
+  pose.rlegy = POSE_PELVIS_Y - POSE_LEG_LENGTH * sin(rleg);
   pose.sample = defenderPoses[id].sample;
   pose.isDefender = 1;
 
