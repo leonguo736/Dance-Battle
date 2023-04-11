@@ -28,10 +28,11 @@
     
 --     return ws;
 -- end
- 
-ws = websocket.createClient()
+
+ws = nil
 
 function ws_connect(ip) 
+    ws = websocket.createClient()
     if (DEBUG) then
         print("Connecting to IP: " .. ip)
     end
@@ -49,6 +50,7 @@ function ws_connect(ip)
     end)
 
     ws:on("close", function(_, status)
+        ws = nil
         uart.write(0, "c\n")
         gpio.write(led, gpio.HIGH)
     end)
