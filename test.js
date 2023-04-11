@@ -16,6 +16,15 @@ function abs(number) {
  * @param p1 second point
  * @param c center point
  */
+// function find_angle(p0,p1,c) {
+//     var p0c = Math.sqrt(Math.pow(c.x-p0.x,2)+
+//                         Math.pow(c.y-p0.y,2)); // p0->c (b)   
+//     var p1c = Math.sqrt(Math.pow(c.x-p1.x,2)+
+//                         Math.pow(c.y-p1.y,2)); // p1->c (a)
+//     var p0p1 = Math.sqrt(Math.pow(p1.x-p0.x,2)+
+//                          Math.pow(p1.y-p0.y,2)); // p0->p1 (c)
+//     return Math.acos((p1c*p1c+p0c*p0c-p0p1*p0p1)/(2*p1c*p0c));
+// }
 function find_angle(p0,p1,c) {
     var p0c = Math.sqrt(Math.pow(c.x-p0.x,2)+
                         Math.pow(c.y-p0.y,2)); // p0->c (b)   
@@ -23,17 +32,23 @@ function find_angle(p0,p1,c) {
                         Math.pow(c.y-p1.y,2)); // p1->c (a)
     var p0p1 = Math.sqrt(Math.pow(p1.x-p0.x,2)+
                          Math.pow(p1.y-p0.y,2)); // p0->p1 (c)
-    return Math.acos((p1c*p1c+p0c*p0c-p0p1*p0p1)/(2*p1c*p0c));
+	if (p0.y > p1.y) { // desired angle is greater than 180 deg
+		return 2 * Math.PI - Math.acos((p1c*p1c+p0c*p0c-p0p1*p0p1)/(2*p1c*p0c))
+	}
+	else { // desired angle is less than 180 deg
+		return Math.acos((p1c*p1c+p0c*p0c-p0p1*p0p1)/(2*p1c*p0c));
+	}
 }
+
 var point1 = new Object();
 point1.x = 1;
-point1.y = 1;
+point1.y = 0;
 var center = new Object();
 center.x = 0;
 center.y = 0;
 var point2 = new Object();
-point2.x = 1;
-point2.y = 0;
+point2.x = -1;
+point2.y = -1;
 console.log("angle: " + find_angle(point1, point2, center));
 class Pose {
     constructor(beat, leftArm, rightArm) { 

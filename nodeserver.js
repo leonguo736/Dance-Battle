@@ -228,6 +228,7 @@ wss.on('connection', function connection(client) {
 			 * Function takes numbers from "median" array and uses them to create 5 Point objects. 
 			 * The points are passed through find_angle() which computes and angle in radians (more info on implementation at bottom).
 			 * A pose object is then created using 2 angles and a beat, which is then passed to the host as a JSON string.
+			 * Camera sets top left of grid is [0,0], so invert y-value for proper angle calculation
 			 */
 
 			/* set up the 5 points: CENTER IS CEHST, ONE POINT IS ALWAYS ON X AXIS (5, 0) */ 
@@ -241,12 +242,12 @@ wss.on('connection', function connection(client) {
 			// var rightLeg = new Point(parsedData.median[7][0], parsedData.median[7][1]);
 			// var rightKnee = new Point(parsedData.median[8][0], parsedData.median[8][1]);
 			// var pelvis = new Point(parsedData.median[9][0], parsedData.median[9][1]);
-			var chest = new Point(parsedData.median[0][0], parsedData.median[0][1]);
-			var leftArm = new Point(parsedData.median[1][0], parsedData.median[1][1]);
-			var rightArm = new Point(parsedData.median[2][0], parsedData.median[2][1]);
-			var pelvis = new Point(parsedData.median[3][0], parsedData.median[3][1]);
-			var leftLeg = new Point(parsedData.median[4][0], parsedData.median[4][1]);
-			var rightLeg = new Point(parsedData.median[5][0], parsedData.median[5][1]);
+			var chest = new Point(parsedData.median[0][0], -1 * parsedData.median[0][1]);
+			var leftArm = new Point(parsedData.median[1][0], -1 * parsedData.median[1][1]);
+			var rightArm = new Point(parsedData.median[2][0], -1 * parsedData.median[2][1]);
+			var pelvis = new Point(parsedData.median[3][0], -1 * parsedData.median[3][1]);
+			var leftLeg = new Point(parsedData.median[4][0], -1 * parsedData.median[4][1]);
+			var rightLeg = new Point(parsedData.median[5][0], -1 * parsedData.median[5][1]);
 			var tummy = new Point(chest.x, chest.y-10);
 			var xaxis = new Point(parsedData.median[0][0] + 25, parsedData.median[0][1]);
 
