@@ -13,7 +13,15 @@ stateMachine = switch()
         ws_connect(ip)
     end)
     :case("r", function(command)
-        node.restart()
+        if (ws) then
+            ws:close()
+        end
+        
+        if (DEBUG) then
+            print("Restarting in 3 seconds")
+        end
+        
+        tmr.create():alarm(3000, tmr.ALARM_SINGLE, node.restart)
     end)
     :case("q", function(command) 
         print("Closing UART")
@@ -24,10 +32,19 @@ stateMachine = switch()
         print("Debug: " .. tostring(DEBUG))
     end)
     :case("j", function(command, json)
-        ws:send(json)
+        if (ws) then
+            ws:send(json)
+        end
+    end)
+    :case("s", function(command)
+        if (ws) then
+            ws:close()
+        end
     end)
     :default(function(command, ...)
-        ws:send(command .. table.concat({...} or {}, " "))
+        if (ws) then
+            ws:send(command .. table.concat({...} or {}, " "))
+        end
     end)
 
 uart.on("data", "\r", function(data)
