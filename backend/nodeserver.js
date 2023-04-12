@@ -115,6 +115,39 @@ wss.on('connection', function connection(client) {
 			parsedData.command = "garbage";
 		}
 
+		/* for forcefully setting a client as the attacker */
+		if (parsedData.force != undefined) {
+			/* kick out existing attacker. if defender exists, do nothing. otherwise set prev attacker as defender */
+			if (atkConnected) {
+				for (de1 of wss.clients.values()) {
+					if (de1.id == "attacker") {
+						if (defConnected) {
+							console.log("setting old attacker as zombie");
+							de1.id = "zombie";
+						}
+						else {
+							console.log("setting old attacker as defender");
+							de1.id = "defender";
+							defConnected = 1;
+						}
+					}
+				}
+			}
+			atkConnected = 1;
+			client.id = "attacker";
+			var data = "id,1";
+			console.log("atk connected. id,1");
+			client.send(data);
+
+			for (de1 of wss.clients.values()) {
+				// console.log("client id: " + client.id);
+				if (de1.id == "host") {
+					console.log("sending data to host");
+					de1.send("l" + atkConnected + " " + defConnected);
+				}
+			}
+		}
+
 		/* For lobby init. Reponds to the Host with info regarding to connected players */
 		if (parsedData.command == "lobbyInit") {
 			console.log("entered init");
@@ -237,11 +270,20 @@ wss.on('connection', function connection(client) {
 
 			/* set up points: CENTER IS CEHST, ONE POINT IS ALWAYS ON X AXIS */
 			var chest = new Point(parsedData.median[0][0], parsedData.median[0][1]);
-			var leftArm = new Point(parsedData.median[1][0], parsedData.median[1][1]);
-			var rightArm = new Point(parsedData.median[2][0], parsedData.median[2][1]);
+			var leftHand = new Point(parsedData.median[1][0], parsedData.median[1][1]);
+			var rightHand = new Point(parsedData.median[2][0], parsedData.median[2][1]);
 			var pelvis = new Point(parsedData.median[3][0], parsedData.median[3][1]);
 			var leftLeg = new Point(parsedData.median[4][0], parsedData.median[4][1]);
 			var rightLeg = new Point(parsedData.median[5][0], parsedData.median[5][1]);
+			var leftElbow = new Point(parsedData.median[1][0], parsedData.median[1][1]);
+			var rightElbow = new Point(parsedData.median[2][0], parsedData.median[2][1]);
+			try {
+				leftElbow = new Point(parsedData.median[6][0], parsedData.median[6][1]);
+				rightElbow = new Point(parsedData.median[7][0], parsedData.median[7][1]);
+			}
+			catch(e) {
+				console.log("elbow data does not exist!");
+			}
 			var tummy = new Point(chest.x, chest.y - 10);
 			var xaxis_upper = new Point(parsedData.median[0][0] + 25, parsedData.median[0][1]);
 			var xaxis_lower = new Point(parsedData.median[3][0] + 25, parsedData.median[3][1]);
@@ -264,18 +306,43 @@ wss.on('connection', function connection(client) {
 				return new Point(x, 480 - y);
 			}
 
-			var mid = createPoint(chest.x, chest.y); // median[0]
-			var left = createPoint(leftArm.x, leftArm.y); // median[1]
-			var right = createPoint(rightArm.x, rightArm.y); // median[2]
-			var pelvis = createPoint(pelvis.x, pelvis.y); // median[3]
-			var leftLeg = createPoint(leftLeg.x, leftLeg.y); // median[4]
-			var rightLeg = createPoint(rightLeg.x, rightLeg.y); // median[5]
+			try {
+				var chest_adj = createPoint(chest.x, chest.y); // median[0]
+				var leftHand_adj = createPoint(leftHand.x, leftHand.y); // median[1]
+				var rightHand_adj = createPoint(rightHand.x, rightHand.y); // median[2]
+				var pelvis_adj = createPoint(pelvis.x, pelvis.y); // median[3]
+				var leftLeg_adj = createPoint(leftLeg.x, leftLeg.y); // median[4]
+				var rightLeg_adj = createPoint(rightLeg.x, rightLeg.y); // median[5]
+				var rightElbow_adj = createPoint(rightElbow.x, rightElbow.y);
+				var leftElbow_adj = createPoint(leftElbow.x, leftElbow.y);
+				console.log("adjusted angles (rightElbow): " + rightElbow_adj.x + " " + rightElbow_adj.y);
+				console.log("adjusted angles (rightHand): " + rightHand_adj.x + " " + rightHand_adj.y);
+				console.log("adjusted angles (leftElbow): " + leftElbow_adj.x + " " + leftElbow_adj.y);
+				console.log("adjusted angles (leftHand): " + leftHand_adj.x + " " + leftHand_adj.y);
+	
+				leftarm_angle = getAngle(chest_adj, leftElbow_adj); // give to alex, counter-cw for alex
+				rightarm_angle = getAngle(chest_adj, rightElbow_adj); // give to alex, counter-cw for alex
+				leftleg_angle = getAngle(pelvis_adj, leftLeg_adj); // give to alex, counter-cw for alex
+				rightleg_angle = getAngle(pelvis_adj, rightLeg_adj); // give to alex, counter-cw for alex
+				leftelbow_angle = getAngle(leftElbow_adj, leftHand_adj);
+				rightelbow_angle = getAngle(rightElbow_adj, rightHand_adj);
 
-			leftarm_angle = getAngle(mid, left); // give to alex, counter-cw for alex
-			rightarm_angle = getAngle(mid, right); // give to alex, counter-cw for alex
-			leftleg_angle = getAngle(pelvis, leftLeg); // give to alex, counter-cw for alex
-			rightleg_angle = getAngle(pelvis, rightLeg); // give to alex, counter-cw for alex
-
+				console.log("leftelbow_angle: " + toDegree(leftelbow_angle) + " rightelbow_angle: " + toDegree(rightelbow_angle));
+			}
+			catch(e) {
+				console.log("elbow data deosnt not exist 1 ");
+				var chest_adj = createPoint(chest.x, chest.y); // median[0]
+				var leftHand_adj = createPoint(leftHand.x, leftHand.y); // median[1]
+				var rightHand_adj = createPoint(rightHand.x, rightHand.y); // median[2]
+				var pelvis_adj = createPoint(pelvis.x, pelvis.y); // median[3]
+				var leftLeg_adj = createPoint(leftLeg.x, leftLeg.y); // median[4]
+				var rightLeg_adj = createPoint(rightLeg.x, rightLeg.y); // median[5]
+	
+				leftarm_angle = getAngle(chest_adj, leftElbow_adj); // give to alex, counter-cw for alex
+				rightarm_angle = getAngle(chest_adj, rightElbow_adj); // give to alex, counter-cw for alex
+				leftleg_angle = getAngle(pelvis_adj, leftLeg_adj); // give to alex, counter-cw for alex
+				rightleg_angle = getAngle(pelvis_adj, rightLeg_adj); // give to alex, counter-cw for alex
+			}
 			var pose = new Pose()
 			function toDegree(r) {
 				return r * (180 / Math.PI);
@@ -418,5 +485,8 @@ function getScore(angle_atk, angle_def) {
 	console.log("computing score");
 	var score_raw = 25 - 4 * Math.round(abs(angle_atk - angle_def));
 	var score = score_raw;
+	if (score_raw > 23) {
+		score = 25;
+	}
 	return score;
 }
