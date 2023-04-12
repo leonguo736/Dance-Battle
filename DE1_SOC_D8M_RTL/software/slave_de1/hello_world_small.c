@@ -19,45 +19,44 @@
 
 void setupCameraThresholds()
 {
-  int reduceRange = 0;
-//  writeThresholds(0, 84+reduceRange, 104-reduceRange, 137+reduceRange, 157-reduceRange); // Yellow Foam
-//  writeThresholds(1, 110+reduceRange, 130-reduceRange, 143+reduceRange, 163-reduceRange); // Red Foam
-//  writeThresholds(2, 109+reduceRange, 129-reduceRange, 127+reduceRange, 147-reduceRange); // Brown Foam
-
-  // for (int i = 1; i < CAMERA_NUM_DETECTORS; i++)
-  // {
-  //   writeThresholds(i, 64, 93, 156, 175); // Kerry's Dark Red
-  // }
+  int reduceRange = 4;
+  //  writeThresholds(0, 84+reduceRange, 104-reduceRange, 137+reduceRange, 157-reduceRange); // Yellow Foam
+  //  writeThresholds(1, 110+reduceRange, 130-reduceRange, 143+reduceRange, 163-reduceRange); // Red Foam
+  //  writeThresholds(2, 109+reduceRange, 129-reduceRange, 127+reduceRange, 147-reduceRange); // Brown Foam
+  //  writeThresholds(3, 84+reduceRange, 104-reduceRange, 137+reduceRange, 157-reduceRange); // Yellow Foam
+  //  writeThresholds(4, 110+reduceRange, 130-reduceRange, 143+reduceRange, 163-reduceRange); // Red Foam
+  //  writeThresholds(5, 109+reduceRange, 129-reduceRange, 127+reduceRange, 147-reduceRange); // Brown Foam
 }
 
 int main(int argc, char **argv)
 {
-#ifdef DEBUG
-  srand(time(NULL));
-  const unsigned int __programId__ = rand() % 100;
-  printf("\n === Program start id: %i === \n", __programId__);
-#endif
+  DEBUGPRINT("Running Main\n");
+
+  // camera setup
+  setupCameraThresholds();
+  CameraInterface *cameraInterface = CameraInterface_new(9); // param is devId (DE1 slave number displayed on HEX)
+  DEBUGPRINT("INFO: Initializing timer (quartus reprogram if not done) ... ");
+  initCameraTimer(cameraInterface);
+  DEBUGPRINT("done\n");
 
 #ifndef ESP_DEBUG
   uart_init();
+  DEBUGPRINT("INFO: UART initialized\n");
   if (!esp_init(argc, argv))
   {
-    printf("ESP Init failed\n");
+    DEBUGPRINT("ERROR: ESP Init failed\n");
     while (1)
       ;
   }
+#else
+  DEBUGPRINT("WARNING: ESP_DEBUG enabled\n");
 #endif
 
-  printf("INFO: ESP initialized\n");
-  // camera setup
-  setupCameraThresholds();
-  CameraInterface *cameraInterface = CameraInterface_new(6); // param is devId (DE1 slave number displayed on HEX)
-  initCameraTimer(cameraInterface);
-
-  // super loop
 #ifndef ESP_DEBUG
   esp_write("{\"command\":\"setType\",\"identifier\":\"camera\"}");
 #endif
+
+  // super loop
   while (1)
   {
     unsigned int uartReadLen = 10; // -1;
@@ -81,13 +80,14 @@ int main(int argc, char **argv)
       memcpy(uartReadData, text, uartReadLen);
     }
 #endif
+    // DEBUGPRINT("INFO: while\n");
     if (uartReadData != NULL)
     {
       // Parse data from backend
       char *cmd = strtok(uartReadData, ",");
       if (cmd == NULL)
       {
-        printf("ERROR `main`: cmd is NULL\n");
+        DEBUGPRINT("ERROR: cmd is NULL\n");
         free(uartReadData);
         continue;
       }
@@ -102,49 +102,46 @@ int main(int argc, char **argv)
       }
       if (strcmp(cmd, "id") == 0)
       {
-        printf("INFO `main` received cmd id: %i\n", atoi(data));
+        DEBUGPRINT("INFO: cmd id %i\n", atoi(data));
         writeDeviceNumber(atoi(data));
       }
       else if (strcmp(cmd, "cap") == 0)
       {
-        int uartWriteLen = 500;
-        char *cameraWriteBuf = malloc(sizeof(*cameraWriteBuf) * uartWriteLen);
+        int cameraWriteLen = 500;
+        char *cameraWriteBuf = malloc(sizeof(*cameraWriteBuf) * cameraWriteLen);
         CameraInterface_updateMedian(cameraInterface);
-        CameraInterface_getMedianStr(cameraInterface, cameraWriteBuf);        
-        
-        char *uartWriteBuf = malloc(sizeof(*uartWriteBuf) * uartWriteLen);
+        CameraInterface_getMedianStr(cameraInterface, cameraWriteBuf);
+
+        char *uartWriteBuf = malloc(sizeof(*uartWriteBuf) * cameraWriteLen);
         sprintf(uartWriteBuf, "{%s,\"poseId\":%s,\"command\":\"poseData\"}", cameraWriteBuf, data);
 
-        printf("INFO `main` received cap cmd: uartWriteBuf %s\n", uartWriteBuf);
+        DEBUGPRINT("INFO: cmd cap, sent %s\n", uartWriteBuf);
 
         esp_write(uartWriteBuf);
         free(cameraWriteBuf);
         free(uartWriteBuf);
-      } else if (strcmp(cmd, "c") == 0) {
-        printf("WARNING `main` esp disconnected, reconnecting...\n"); 
-        esp_init(argc, argv);
+      }
+      else if (strcmp(cmd, "c") == 0)
+      {
+        DEBUGPRINT("WARNING: esp disconnected, reconnecting ... \n");
+        writeDeviceNumber(9);
+        if (!esp_init(argc, argv))
+        {
+          DEBUGPRINT("failed\n");
+          while (1)
+            ;
+        }
         esp_write("{\"command\":\"setType\",\"identifier\":\"camera\"}");
       }
-      else {
-        printf("WARNING `main` unknown cmd: cmd %s, data %s\n", cmd, data);
+      else
+      {
+        DEBUGPRINT("WARNING: unknown cmd %s, data %s\n", cmd, data);
       }
       free(data);
       free(uartReadData);
-    } else {
-//        int uartWriteLen = 500;
-//        char *cameraWriteBuf = malloc(sizeof(*cameraWriteBuf) * uartWriteLen);
-//        CameraInterface_updateMedian(cameraInterface);
-//        CameraInterface_getMedianStr(cameraInterface, cameraWriteBuf);
-//
-//        printf("INFO `main` Medians %s\n", cameraWriteBuf);
-//        free(cameraWriteBuf);
     }
   }
   free(cameraInterface);
-
-#ifdef DEBUG
-  printf("\n === Program end id: %i === \n", __programId__);
-#endif
 
   return 0;
 }

@@ -460,10 +460,10 @@ always @(posedge CLOCK2_50) begin
 			end
 		end
 		if (~KEY[3]) begin
-			cbLow[SW[8:5]] <= Cb - 3 >= 0 ? Cb - 3 : 0;
-			cbHigh[SW[8:5]] <= Cb + 3 <= 255 ? Cb + 3 : 255;
-			crLow[SW[8:5]] <= Cr - 3 >= 0 ? Cr - 3 : 0;
-			crHigh[SW[8:5]] <= Cr + 3 <= 255 ? Cr + 3 : 255;
+			cbLow[SW[8:5]] <= Cb - 4 >= 0 ? Cb - 4 : 0;
+			cbHigh[SW[8:5]] <= Cb + 4 <= 255 ? Cb + 4 : 255;
+			crLow[SW[8:5]] <= Cr - 4 >= 0 ? Cr - 4 : 0;
+			crHigh[SW[8:5]] <= Cr + 4 <= 255 ? Cr + 4 : 255;
 		end		
 		if (hIndex == 320 && vIndex == 240) begin
 			RED8b_cached <= RED12b[7:0]; 
@@ -477,15 +477,20 @@ wire [23:0] oVideo8bRgb [0:5];
 wire [31:0] radius = 3; 
 always @(*) begin
 	if (SW[8:5] == 4'b1111) begin
-		{ R_to_vga, G_to_vga, B_to_vga } = { 2'd0, RED12b[8:1], 2'd0, GREEN12b[8:1], 2'd0, BLUE12b[8:1] }; 
+		{ R_to_vga, G_to_vga, B_to_vga } = { 2'd0, RED12b[7:0], 2'd0, GREEN12b[7:0], 2'd0, BLUE12b[7:0] }; 
 		
     	// display a square with radius 3 around the center of the object
 		if (hIndex <= redPixelVIndex[0] + radius && hIndex >= redPixelVIndex[0] - radius && vIndex <= redPixelHIndex[0] + radius && vIndex >= redPixelHIndex[0] - radius) begin
-			// { R_to_vga, G_to_vga, B_to_vga } = { 10'd0, 10'd255, 10'd255 }; 
 			{ R_to_vga, G_to_vga, B_to_vga } = { 2'd0, (8'd255 - RED12b[7:0]), 2'd0, (8'd255 - GREEN12b[7:0]), 2'd0, (8'd255 - BLUE12b[7:0]) };
 		end else if (hIndex <= redPixelVIndex[1] + radius && hIndex >= redPixelVIndex[1] - radius && vIndex <= redPixelHIndex[1] + radius && vIndex >= redPixelHIndex[1] - radius) begin
 			{ R_to_vga, G_to_vga, B_to_vga } = { 2'd0, (8'd255 - RED12b[7:0]), 2'd0, (8'd255 - GREEN12b[7:0]), 2'd0, (8'd255 - BLUE12b[7:0]) };
 		end else if (hIndex <= redPixelVIndex[2] + radius && hIndex >= redPixelVIndex[2] - radius && vIndex <= redPixelHIndex[2] + radius && vIndex >= redPixelHIndex[2] - radius) begin
+			{ R_to_vga, G_to_vga, B_to_vga } = { 2'd0, (8'd255 - RED12b[7:0]), 2'd0, (8'd255 - GREEN12b[7:0]), 2'd0, (8'd255 - BLUE12b[7:0]) };
+		end else if (hIndex <= redPixelVIndex[3] + radius && hIndex >= redPixelVIndex[3] - radius && vIndex <= redPixelHIndex[3] + radius && vIndex >= redPixelHIndex[3] - radius) begin
+			{ R_to_vga, G_to_vga, B_to_vga } = { 2'd0, (8'd255 - RED12b[7:0]), 2'd0, (8'd255 - GREEN12b[7:0]), 2'd0, (8'd255 - BLUE12b[7:0]) };
+		end else if (hIndex <= redPixelVIndex[4] + radius && hIndex >= redPixelVIndex[4] - radius && vIndex <= redPixelHIndex[4] + radius && vIndex >= redPixelHIndex[4] - radius) begin
+			{ R_to_vga, G_to_vga, B_to_vga } = { 2'd0, (8'd255 - RED12b[7:0]), 2'd0, (8'd255 - GREEN12b[7:0]), 2'd0, (8'd255 - BLUE12b[7:0]) };
+		end else if (hIndex <= redPixelVIndex[5] + radius && hIndex >= redPixelVIndex[5] - radius && vIndex <= redPixelHIndex[5] + radius && vIndex >= redPixelHIndex[5] - radius) begin
 			{ R_to_vga, G_to_vga, B_to_vga } = { 2'd0, (8'd255 - RED12b[7:0]), 2'd0, (8'd255 - GREEN12b[7:0]), 2'd0, (8'd255 - BLUE12b[7:0]) };
 		end else if (SW[9] && (hIndex == 320 || vIndex == 240)) begin
 			{ R_to_vga, G_to_vga, B_to_vga } = { 10'd255, 10'd0, 10'd0 }; 
