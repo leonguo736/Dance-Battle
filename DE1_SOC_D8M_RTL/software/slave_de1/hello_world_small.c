@@ -30,9 +30,18 @@ void setupCameraThresholds()
 
 int main(int argc, char **argv)
 {
-  DEBUGPRINT("Running Main\n"); 
+  DEBUGPRINT("Running Main\n");
+
+  // camera setup
+  setupCameraThresholds();
+  CameraInterface *cameraInterface = CameraInterface_new(9); // param is devId (DE1 slave number displayed on HEX)
+  DEBUGPRINT("INFO: Initializing timer (quartus reprogram if not done) ... ");
+  initCameraTimer(cameraInterface);
+  DEBUGPRINT("done\n");
+
 #ifndef ESP_DEBUG
   uart_init();
+  DEBUGPRINT("INFO: UART initialized\n");
   if (!esp_init(argc, argv))
   {
     DEBUGPRINT("ERROR: ESP Init failed\n");
@@ -42,13 +51,6 @@ int main(int argc, char **argv)
 #else
   DEBUGPRINT("WARNING: ESP_DEBUG enabled\n");
 #endif
-
-  // camera setup
-  setupCameraThresholds();
-  CameraInterface *cameraInterface = CameraInterface_new(6); // param is devId (DE1 slave number displayed on HEX)
-  DEBUGPRINT("INFO: Initializing timer (quartus reprogram if not done) ... ");
-  initCameraTimer(cameraInterface);
-  DEBUGPRINT("done\n");
 
 #ifndef ESP_DEBUG
   esp_write("{\"command\":\"setType\",\"identifier\":\"camera\"}");
@@ -121,13 +123,13 @@ int main(int argc, char **argv)
       else if (strcmp(cmd, "c") == 0)
       {
         DEBUGPRINT("WARNING: esp disconnected, reconnecting ... \n");
+        writeDeviceNumber(9);
         if (!esp_init(argc, argv))
         {
           DEBUGPRINT("failed\n");
           while (1)
             ;
         }
-        DEBUGPRINT("done\n");
         esp_write("{\"command\":\"setType\",\"identifier\":\"camera\"}");
       }
       else

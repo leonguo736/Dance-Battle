@@ -9,7 +9,7 @@
 #include "const.h"
 #include "uart.h"
 
-#define SERVER_IP "192.168.0.197:8080"
+#define SERVER_IP "192.168.0.194:8080"
 
 /* Private Function Prototypes */
 /*
@@ -53,15 +53,22 @@ bool init_connection(char* serverIP) {
 
 /* Public Function Definitions */
 bool esp_init(int argc, char** argv) {
-  DEBUGPRINT("INFO: Initializing ESP ... ", 0);
+  DEBUGPRINT("INFO: Initializing ESP ... "); 
 
   reset_esp();
+
+  // DEBUGPRINT("DEBUG: here1\n"); 
 
   unsigned int failCount = 0;
   bool connected = false;
 
   do {
+    // DEBUGPRINT("DEBUG: here2\n", 0);
+
     connected = init_connection(argc > 1 ? argv[1] : SERVER_IP);
+
+    // DEBUGPRINT("DEBUG: here3\n", 0);
+
     failCount += !connected;
 
     if (!connected && failCount > 0) {
@@ -69,9 +76,12 @@ bool esp_init(int argc, char** argv) {
              failCount);
     }
 
-  } while (!connected && failCount < 10);
+  } while (!connected);
+
+  // DEBUGPRINT("DEBUG: here4\n", 0);
+
   if (connected) {
-    DEBUGPRINT("connected", 0);    
+    DEBUGPRINT("connected\n", 0);    
   } else {
     DEBUGPRINT("failed, quitting\n", 0);
   }
