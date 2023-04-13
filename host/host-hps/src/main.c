@@ -961,6 +961,10 @@ int main(int argc, char** argv) {
         // lobbyState.p2Connected = (swState >> 2) & 1;
 
         if (keyState == 1) {
+          sprintf(sendBuffer, "{\"command\":\"setMode\",\"type\":%u}",
+                  lobbyState.mode);
+          esp_write(sendBuffer);
+
           loadSong(song_filenames[lobbyState.songId], samplesGameL, samplesGameR, &numGameSamples);
           loadPoses(song_filenames[lobbyState.songId]);
           // initGraphics(2);
