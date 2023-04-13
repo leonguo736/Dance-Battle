@@ -55,9 +55,7 @@ void esp_init(char* server_ip) {
       esp_send_command(ESP_CONNECT_BACKEND_COMMAND, (char*[]){server_ip}, 1);
       esp_initialized = true;
     } else if (strcmp(data, ESP_READY_COMMAND) == 0) {
-#ifdef DEBUG
       printf("ESP connected to backend @ %s\n", server_ip);
-#endif
       esp_ready = true;
     } else if (strcmp(data, ESP_FAILED_COMMAND) == 0) {
       fail_count++;

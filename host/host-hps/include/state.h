@@ -31,7 +31,11 @@ struct GameScreenState {
     int oneDone;
     int goDone;
     int score;
+    int score2;
     double messageKerning;
+    double messageKerning2;
+    int goodVibes;
+    int goodVibes2;
 
     int pBarWidth;
     int earlyPoseA;
@@ -72,11 +76,14 @@ struct GameState {
     int oneDone;
     int goDone;
     int score;
+    int score2;
     int goodVibes;
+    int goodVibes2;
 
     int countdown;
     int flashTimer;
     int messageTimer;
+    int messageTimer2;
 
     int earlyPoseA;
     int earlyPoseD;

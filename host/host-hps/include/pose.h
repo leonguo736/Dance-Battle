@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stddef.h>
 
-#define MAX_POSES 50
+#define MAX_POSES 100
 
 #define POSE_HOUR_LENGTH 25
 #define POSE_MINUTE_LENGTH 40
