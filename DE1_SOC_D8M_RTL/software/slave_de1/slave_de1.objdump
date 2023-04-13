@@ -882,7 +882,7 @@ void writeThresholds(unsigned int detectorNum, uint8_t cbLow, uint8_t cbHigh, ui
 
 void getCoordsFromHW(unsigned int detectorNum, unsigned int* x, unsigned int* y) {
     if (detectorNum < CAMERA_HW_MODULES) {
-   201f8:	00800144 	movi	r2,5
+   201f8:	00800084 	movi	r2,2
    201fc:	11000f36 	bltu	r2,r4,2023c <getCoordsFromHW+0x44>
         uint32_t raw_coords = *(camera_base + detectorNum);
    20200:	d0a00017 	ldw	r2,-32768(gp)
