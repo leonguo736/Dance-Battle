@@ -31,6 +31,7 @@ struct GameScreenState {
     int oneDone;
     int goDone;
     int score;
+    double messageKerning;
 
     int pBarWidth;
     int earlyPoseA;
@@ -42,7 +43,10 @@ struct GameScreenState {
 };
 
 struct ResultsScreenState {
-
+    int timer;
+    double oldGameoverY;
+    double oldContinueY;
+    int waveYs[18];
 };
 
 // Overall states
@@ -68,17 +72,25 @@ struct GameState {
     int oneDone;
     int goDone;
     int score;
+    int goodVibes;
 
     int countdown;
+    int flashTimer;
+    int messageTimer;
 
     int earlyPoseA;
     int earlyPoseD;
     int latePoseA;
     int latePoseD;
+    int nextPoseSendA;
+    int nextPoseSendD;
     struct GameScreenState gameScreenStates[2];
 };
 
 struct ResultsState {
+    int timer;
+    char *winMessage;
+    char *winMessageComplete;
     struct ResultsScreenState resultsScreenStates[2];
 };
 
