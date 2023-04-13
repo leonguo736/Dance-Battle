@@ -11,11 +11,15 @@
 
 int game_pbar_rect[] = {80, 210, 160, 15};
 
+void drawBorder(short color) {
+    video_box(0, 0, WIDTH - 1, BORDER, color);
+    video_box(0, HEIGHT - 1 - BORDER, WIDTH - 1, HEIGHT - 1, color);
+    video_box(0, BORDER, BORDER, HEIGHT - 1 - BORDER, color);
+    video_box(WIDTH - 1 - BORDER, BORDER, WIDTH - 1, HEIGHT - 1 - BORDER, color);
+}
+
 void drawBackground(void) {
-    video_box(0, 0, WIDTH - 1, BORDER, COLOR_BORDER);
-    video_box(0, HEIGHT - 1 - BORDER, WIDTH - 1, HEIGHT - 1, COLOR_BORDER);
-    video_box(0, BORDER, BORDER, HEIGHT - 1 - BORDER, COLOR_BORDER);
-    video_box(WIDTH - 1 - BORDER, BORDER, WIDTH - 1, HEIGHT - 1 - BORDER, COLOR_BORDER);
+    drawBorder(COLOR_BORDER);
     video_box(BORDER + 1, BORDER + 1, WIDTH - 1 - BORDER, HEIGHT - 1 - BORDER, COLOR_BG);
 }
 
@@ -24,6 +28,14 @@ void drawPixel(int x, int y, short color) {
         return;
     } else {
         video_pixel(x, y, color);
+    }
+}
+
+void drawResultsPixel(int x, int y, int offset) {
+    if ((int)((x - y + offset) % (RESULTS_BAR_WIDTH * 2)) / RESULTS_BAR_WIDTH) {
+        video_pixel(x, y, COLOR_RESULTS_BG1);
+    } else {
+        video_pixel(x, y, COLOR_RESULTS_BG2);
     }
 }
 
@@ -77,7 +89,7 @@ void drawPBarOutline(void) {
 
 void drawPBarFill(int prevWidth, int currWidth) {
     int r[] = {game_pbar_rect[0], game_pbar_rect[1], game_pbar_rect[2], game_pbar_rect[3]};
-    video_box(r[0] + prevWidth + 1, r[1] + 1, r[0] + currWidth, r[1] + r[3] - 1, COLOR_GAME_PBAR_FILL);
+    video_box(r[0] + prevWidth + 1, r[1] + 1, r[0] + currWidth + 2, r[1] + r[3] - 1, COLOR_GAME_PBAR_FILL);
 }
 
 void drawGameVLines(void) {

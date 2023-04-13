@@ -63,7 +63,18 @@
 #define GAME_HLINE_MARGIN 50
 #define GAME_POSE_Y 120
 #define GAME_TOP_X 160
-#define GAME_TOP_Y 30
+#define GAME_TOP_Y 20
+#define GAME_FLASH_DURATION 4
+
+#define RESULTS_BAR_WIDTH 10
+#define RESULTS_GAMEOVER_AMPLITUDE 100
+#define RESULTS_GAMEOVER_ENDY 80
+#define RESULTS_GAMEOVER_WAVELENGTH 30000
+#define RESULTS_CONTINUE_ENDY 210
+#define RESULTS_WAVEY 145
+#define RESULTS_WAVE_AMPLITUDE 10
+#define RESULTS_WAVE_WAVELENGTH_X 50
+#define RESULTS_WAVE_WAVELENGTH_TIME 5000
 
 // Colors
 
@@ -94,21 +105,35 @@
 #define COLOR_LOBBY_SONG_FILL 0x2044
 #define COLOR_LOBBY_SONG_TEXT 0xde92
 #define COLOR_LOBBY_SONG_ARROW 0xf72c
+#define COLOR_LOBBY_GO_OFF 0x0000
+#define COLOR_LOBBY_GO_ON 0x5f67
 
 #define COLOR_GAME_HLINE 0xffd8
 #define COLOR_GAME_VLINE 0x50a7
 #define COLOR_GAME_PBAR_BORDER 0xb194
 #define COLOR_GAME_PBAR_FILL 0xfab4
+#define COLOR_GAME_NICE 0x37e9
+#define COLOR_GAME_OUCH 0xfa46
 
 #define COLOR_POSE_DOT 0xefa9
 #define COLOR_POSE_HHAND 0xee3
 #define COLOR_POSE_MHAND 0xb3b
 
+#define COLOR_RESULTS_BG1 0x2804
+#define COLOR_RESULTS_BG2 0x3066
+#define COLOR_RESULTS_GAMEOVER 0xfa3b
+#define COLOR_RESULTS_DOT 0xefa9
+#define COLOR_RESULTS_WAVE_WINNER 0x67e6
+#define COLOR_RESULTS_CONTINUE 0xfab4
+#define COLOR_RESULTS_WAVE_DOT 0xefa9
+
 // General Methods
 
+void drawBorder(short color);
 void drawBackground(void);
 
 void drawPixel(int x, int y, short color);
+void drawResultsPixel(int x, int y, int offset);
 
 void drawChar(int font[NUM_CHARS][FONT_WIDTH][FONT_HEIGHT], int c, int tlx, int tly, short color, int scale);
 void drawString(int font[NUM_CHARS][FONT_WIDTH][FONT_HEIGHT], char s[], int tlx, int tly, short color, int scale, int kerning);

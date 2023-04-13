@@ -7,7 +7,7 @@
 #include "vgatools.h"
 
 #define AUDIO_RATE 32000 // If you change this, recalculate SAMPLES_PER_FRAME
-#define MAX_SAMPLES 9600000 // Int overflow
+#define MAX_SAMPLES 9600000
 #define NUM_SAMPLES 1000000
 #define VOLUME 0x7FFFFFF
 
