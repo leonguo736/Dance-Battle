@@ -10,7 +10,7 @@ void writeThresholds(unsigned int i, uint8_t cbLow, uint8_t cbHigh, uint8_t crLo
  */
 void writeDeviceNumber(uint8_t deviceNumber); 
 
-#define CAMERA_HW_MODULES 6
+#define CAMERA_HW_MODULES 3
 #define CAMERA_NUM_DETECTORS 6 // if CAMERA_NUM_DETECRORS > CAMERA_HW_MODULES, then the coords will be random
 #define CAMERA_BUFFER_SIZE 3
 #define CAMERA_DIMENSIONS 2
