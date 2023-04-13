@@ -927,6 +927,20 @@ int main(int argc, char** argv) {
 
             addScore(score);
             break;
+          case ESP_P1_SCORE_COMMAND:
+            sscanf(recvBuffer + 1, "%u %u", &recvID, &score);
+
+            printf("P1 Score %u: %u\n", recvID, score);
+
+            // addScore(score); for P1
+            break;
+          case ESP_P2_SCORE_COMMAND:
+            sscanf(recvBuffer + 1, "%u %u", &recvID, &score);
+
+            printf("P2 Score %u: %u\n", recvID, score);
+
+            // addScore(score); for P2
+            break;
           case ESP_CLOSE_COMMAND:
             newScreen = 0;
             // initGraphics(0);
@@ -961,7 +975,9 @@ int main(int argc, char** argv) {
         // lobbyState.p2Connected = (swState >> 2) & 1;
 
         if (keyState == 1) {
-          sprintf(sendBuffer, "{\"command\":\"setMode\",\"type\":%u}",
+          sprintf(sendBuffer,
+                  "{\"command\":\"setMode\",\"song\":%s,\"type\":%u}",
+                  song_filenames[lobbyState.songId],
                   lobbyState.mode);
           esp_write(sendBuffer);
 

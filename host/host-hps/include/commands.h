@@ -14,4 +14,7 @@
 #define ESP_SCORE_COMMAND 's'
 #define ESP_CLOSE_COMMAND 'c'
 
+#define ESP_P1_SCORE_COMMAND 'o'
+#define ESP_P2_SCORE_COMMAND 't'
+
 #endif
