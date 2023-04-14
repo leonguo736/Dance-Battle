@@ -1,4 +1,5 @@
 # Dance Battle - Group 34
+In dance battle, multiple players engage in a friendly competition to earn the highest score by either inventing intricate dance poses or trying to imitate the ones created by other players. 
 
 By Bell Chen, Alex Day, Leon Guo, and Kerry Wang
 
