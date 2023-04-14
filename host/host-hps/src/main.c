@@ -37,9 +37,9 @@
 
 #define FPS 40
 #define PIXELS_PER_SAMPLE 0.0034375
-#define POSE_LIFETIME 64000
-#define SAMPLES_PER_FRAME \
-  800  // Recalculate if you change the audio rate or frame rate
+#define POSE_LIFETIME 64000 // In samples
+#define SAMPLES_PER_FRAME 800 // Recalculate if you change the audio rate or frame rate
+#define CAPTURE_SIGNAL_OFFSET 12000 // In samples
 
 // Global State
 
@@ -55,21 +55,28 @@ int buffer = 0;  // 0 or 1
 int numSongs = 3;
 char* song_displaynames[] = {"tetris 99 theme", "groovy gray",
                              "super treadmill"};
-double song_spbs[] = {AUDIO_RATE / (140.0 / 60)};
-int song_offsets[] = {0};
+double song_spbs[] = {AUDIO_RATE / (140.0 / 60), 10, AUDIO_RATE / (77.0 / 60)};
+int song_offsets[] = {0, 0, 4000};
 char* menu_filename = "shop.txt";
-char* song_filenames[] = {"tetris.txt", "groovy.txt", "treadmill.txt"};
+char* song_filenames[] = {"tetris-long.txt", "tetris.txt", "treadmill.txt"};
 
-int numSamples;
+int numMainSamples;
+int numGameSamples;
+int numResultsSamples;
 int sampleNo;
-int samplesL[MAX_SAMPLES];
-int samplesR[MAX_SAMPLES];
+
+int samplesMainL[MAX_SAMPLES];
+int samplesMainR[MAX_SAMPLES];
+int samplesGameL[MAX_SAMPLES];
+int samplesGameR[MAX_SAMPLES];
+int samplesResultsL[MAX_SAMPLES];
+int samplesResultsR[MAX_SAMPLES];
 
 char* sampleLine = NULL;
 size_t sampleLen = 0;
 ssize_t sampleRead;
 
-void loadSong(char* filename) {
+void loadSong(char* filename, int samplesL[], int samplesR[], int* numSamples) {
   FILE* fp;
   char path[100] = "songs/";
   strcat(path, filename);
@@ -82,7 +89,7 @@ void loadSong(char* filename) {
 
   int count = 0;
   int left = true;
-  while (getline(&sampleLine, &sampleLen, fp) != -1) {
+  while (count < MAX_SAMPLES && getline(&sampleLine, &sampleLen, fp) != -1) {
     if (left) {
       samplesL[count] = (int)(VOLUME * atof(sampleLine));
     } else {
@@ -92,11 +99,10 @@ void loadSong(char* filename) {
     left = !left;
   }
 
-  sampleNo = 0;
-  numSamples = count;
+  *numSamples = count;
 
 #ifdef DEBUG
-  printf("Loaded Song %s | %d samples\n", path, numSamples);
+  printf("Loaded Song %s | %d samples\n", path, numGameSamples);
 #endif
   fclose(fp);
 }
@@ -129,6 +135,7 @@ const char* init_names[] = {"alex", "bell", "kery", "leon"};
 int init_name_speeds[] = {2, 2, -2, -2};
 int init_name_offsets[] = {0, 0, 40, 40};
 short color_init_names[] = {0xe4a, 0xd19, 0xc641, 0x7859};
+short game_flash_colors[] = {0x8033, 0x9035, 0xa838, 0xd8ff, 0xe35f, 0xf67f};
 
 struct InitState initState;
 struct LobbyState lobbyState;
@@ -168,18 +175,33 @@ void resetGameState(void) {
   gameState.oneDone = 0;  // Analogous to game started
   gameState.goDone = 0;
   gameState.score = 0;
+  gameState.goodVibes = 0;
 
   gameState.countdown = 0;
+  gameState.flashTimer = 0;
+  gameState.messageTimer = 0;
 
   gameState.earlyPoseA = -1;
   gameState.earlyPoseD = -1;
   gameState.latePoseA = -1;
   gameState.latePoseD = -1;
+  gameState.nextPoseSendA = 0;
+  gameState.nextPoseSendD = 0;
 
   for (int i = 0; i < 2; i++) {
-    struct GameScreenState state = {0,  0,  0,  0,  0,   0,  0,
+    struct GameScreenState state = {0,  0,  0,  0,  0,   0, 0, 0,
                                     -1, -1, -1, -1, {0}, {0}};
     gameState.gameScreenStates[i] = state;
+  }
+}
+
+void resetResultsState(void) {
+  resultsState.timer = 0;
+  resultsState.winMessage = "...            ...";
+  resultsState.winMessageComplete = "... winner: p1 ...";
+  for (int i = 0; i < 2; i++) {
+    struct ResultsScreenState state = {0, -40, 260, {0}};
+    resultsState.resultsScreenStates[i] = state;
   }
 }
 
@@ -208,7 +230,6 @@ void loadPoses(char* filename) {
   int maxPoses = 0;
 
   while (getline(&poseLine, &poseLen, fp) != -1) {
-    int lineSize = strlen(poseLine);
     char* ptr = strtok(poseLine, delim);
     int token = 0;
     int id;
@@ -248,27 +269,36 @@ void loadPoses(char* filename) {
 
 void insertDefenderPose(int id, double larm, double rarm, double lleg,
                         double rleg) {
+  printf("Inserting pose %d\n", id);
+
   struct Pose pose;
   pose.larmx = POSE_ARM_LENGTH * cos(larm);
   pose.rarmx = POSE_ARM_LENGTH * cos(rarm);
-  pose.larmy = POSE_CHEST_Y - POSE_ARM_LENGTH * sin(larm);
-  pose.rarmy = POSE_CHEST_Y - POSE_ARM_LENGTH * sin(rarm);
+  pose.larmy = POSE_ARM_LENGTH * sin(larm);
+  pose.rarmy = POSE_ARM_LENGTH * sin(rarm);
   pose.llegx = POSE_LEG_LENGTH * cos(lleg);
   pose.rlegx = POSE_LEG_LENGTH * cos(rleg);
-  pose.llegy = POSE_PELVIS_Y - POSE_LEG_LENGTH * sin(lleg);
-  pose.rlegy = POSE_PELVIS_Y - POSE_LEG_LENGTH * sin(rleg);
+  pose.llegy = POSE_LEG_LENGTH * sin(lleg);
+  pose.rlegy = POSE_LEG_LENGTH * sin(rleg);
   pose.sample = defenderPoses[id].sample;
   pose.isDefender = 1;
 
   defenderPoses[id] = pose;
 }
 
-void addScore(int score) { gameState.score += score; }
+void addScore(int score) { 
+  gameState.goodVibes = (score > 50);
+  gameState.messageTimer = 20;
+  gameState.gameScreenStates[0].messageKerning = 10;
+  gameState.gameScreenStates[1].messageKerning = 10;
+
+  gameState.score += score;
+}
 
 int getPoseX(struct Pose p) {
   int x = (int)(GAME_VLINE_MARGIN +
                 PIXELS_PER_SAMPLE *
-                    (p.sample - sampleNo + song_offsets[lobbyState.songId]));
+                    (p.sample - sampleNo));
   if (x >= GAME_VLINE_MARGIN && x <= WIDTH - GAME_VLINE_MARGIN) {
     return x;
   }
@@ -325,7 +355,7 @@ void initGraphics(int s) {
 
       drawStringCenter(basicFont, "sw0", LOBBY_MODE_SW_X, LOBBY_MODE_Y + 10,
                        COLOR_LOBBY_MODE_BORDER, 1, 1);
-      drawStringCenter(basicFont, "key1", 50, LOBBY_SONG_Y + 10,
+      drawStringCenter(basicFont, "key1", 40, LOBBY_SONG_Y + 10,
                        COLOR_LOBBY_MODE_BORDER, 1, 1);
       drawStringCenter(basicFont, "key2", LOBBY_SONG_KEY_X, LOBBY_SONG_Y + 10,
                        COLOR_LOBBY_MODE_BORDER, 1, 1);
@@ -349,8 +379,12 @@ void initGraphics(int s) {
                          LOBBY_PLAYER_KERNING);
       }
 
+      short color = (lobbyState.p1Connected && lobbyState.p2Connected) ? COLOR_LOBBY_GO_ON : COLOR_LOBBY_GO_OFF;
+      drawStringCenter(italicFont, "go!", 160, 200, color, 2, 2);
+      drawStringCenter(arrowFont, "b b b    a a a", 160, 200, color, 2, 2);
+      drawStringCenter(basicFont, "key0", 160, 220, (lobbyState.p1Connected && lobbyState.p2Connected) ? COLOR_LOBBY_MODE_BORDER : COLOR_BG, 1, 1);
+
     } else if (s == 2) {  // Game
-      resetGameState();
       drawBackground();
 
       // Straight lines
@@ -362,8 +396,18 @@ void initGraphics(int s) {
 
       drawPBarOutline();
 
-      drawStringCenter(basicFont, "press key1 to start", GAME_TOP_X, GAME_TOP_Y,
+      drawStringCenter(basicFont, "press key0 to start", GAME_TOP_X, GAME_TOP_Y,
                        COLOR_GAME_PBAR_FILL, 1, 1);
+    } else if (s == 3) { // Results
+      resetResultsState();
+      drawBackground();
+      video_box(BORDER + 1, RESULTS_WAVEY - 22, WIDTH - BORDER - 1, RESULTS_WAVEY + 40, COLOR_INIT_TUBE);
+
+      // for (int x = BORDER + 1; x <= WIDTH - BORDER - 1; x++) {
+      //   for (int y = BORDER + 1; y <= HEIGHT - BORDER - 1; y++) {
+      //     drawResultsPixel(x, y, 0);
+      //   }
+      // }
     }
     switchBuffer();
   }
@@ -427,12 +471,12 @@ void updateGraphics(void) {
       }
     } else if (!initState.statusSlideDone) {
       int sy = (int)round(prevState->statusY);
-      drawString(basicFont, "waiting for server connection", INIT_STATUS_X, sy,
+      drawStringCenter(basicFont, "waiting for server connection", 160, sy,
                  COLOR_BG, INIT_STATUS_SCALE, INIT_STATUS_KERNING);
       prevState->statusY =
           lerp(otherState->statusY, INIT_STATUS_Y, INIT_TITLE_LERP);
       sy = (int)round(prevState->statusY);
-      drawString(basicFont, "waiting for server connection", INIT_STATUS_X, sy,
+      drawStringCenter(basicFont, "waiting for server connection", 160, sy,
                  COLOR_INIT_STATUS, INIT_STATUS_SCALE, INIT_STATUS_KERNING);
 
       if (sy == INIT_STATUS_Y &&
@@ -440,6 +484,14 @@ void updateGraphics(void) {
         initState.statusSlideDone = 1;
       }
     } else {
+      if (esp_ready) {
+        int sy = (int)round(prevState->statusY);
+        drawStringCenter(basicFont, "waiting for server connection", 160, sy,
+                 COLOR_BG, INIT_STATUS_SCALE, INIT_STATUS_KERNING);
+        drawStringCenter(basicFont, "press key0", 160, sy,
+                 COLOR_INIT_STATUS, INIT_STATUS_SCALE, INIT_STATUS_KERNING);
+      }
+
       for (int n = 0; n < 4; n++) {
         for (int c = 0; c < 4; c++) {
           if ((prevState->namePositions)[n][c][1] != 0) {
@@ -551,14 +603,23 @@ void updateGraphics(void) {
                        160, 160, COLOR_LOBBY_SONG_TEXT, 1, 1);
       prevState->songId = lobbyState.songId;
     }
+    if ((lobbyState.p1Connected && lobbyState.p2Connected) != (prevState->p1Connected && prevState->p2Connected)) {
+      short color = (lobbyState.p1Connected && lobbyState.p2Connected) ? COLOR_LOBBY_GO_ON : COLOR_LOBBY_GO_OFF;
+      drawStringCenter(italicFont, "go!", 160, 200, color, 2, 2);
+      drawStringCenter(arrowFont, "b b b    a a a", 160, 200, color, 2, 2);
+      drawStringCenter(basicFont, "key0", 160, 220, (lobbyState.p1Connected && lobbyState.p2Connected) ? COLOR_LOBBY_MODE_BORDER : COLOR_BG, 1, 1);
+    }
 
   } else if (screen == 2) {  // Game
     struct GameScreenState* prevState = &(gameState.gameScreenStates[buffer]);
+    struct GameScreenState* otherState = &(gameState.gameScreenStates[(buffer+1)%2]);
 
     // Update progress bar
-    int newPBarWidth = (int)(157 * (double)sampleNo / NUM_SAMPLES);
-    drawPBarFill(prevState->pBarWidth, newPBarWidth);
-    prevState->pBarWidth = newPBarWidth;
+    if (sampleNo <= numGameSamples) {
+      int newPBarWidth = (int)(157 * (double)sampleNo / numGameSamples);
+      drawPBarFill(prevState->pBarWidth, newPBarWidth);
+      prevState->pBarWidth = newPBarWidth;
+    }
 
     // Poses
     int prevEarlyA = prevState->earlyPoseA;
@@ -568,7 +629,7 @@ void updateGraphics(void) {
 
     // Update top text
     if (prevState->pressedStart != gameState.pressedStart) {
-      drawStringCenter(basicFont, "press key1 to start", GAME_TOP_X, GAME_TOP_Y,
+      drawStringCenter(basicFont, "press key0 to start", GAME_TOP_X, GAME_TOP_Y,
                        COLOR_BG, 1, 1);
       drawStringCenter(basicFont, "3", GAME_TOP_X, GAME_TOP_Y,
                        COLOR_GAME_PBAR_FILL, 1, 1);
@@ -635,9 +696,8 @@ void updateGraphics(void) {
       if (gameState.earlyPoseA < numPoses &&
           sampleNo >= attackerPoses[gameState.earlyPoseA].sample) {
         // HERE (pass earlyPoseA)
-        sprintf(sendBuffer, "{\"command\":\"captureAttacker\",\"poseID\":%u}",
-                gameState.earlyPoseA);
-        esp_write(sendBuffer);
+        gameState.flashTimer = 6 * GAME_FLASH_DURATION;
+        
         gameState.earlyPoseA++;
       }
     }
@@ -658,9 +718,8 @@ void updateGraphics(void) {
       if (gameState.earlyPoseD < numPoses &&
           sampleNo >= defenderPoses[gameState.earlyPoseD].sample) {
         // HERE (pass earlyPoseD)
-        sprintf(sendBuffer, "{\"command\":\"captureDefender\",\"poseID\":%u}",
-                gameState.earlyPoseD);
-        esp_write(sendBuffer);
+        gameState.flashTimer = 6 * GAME_FLASH_DURATION;
+
         gameState.earlyPoseD++;
       }
     }
@@ -684,40 +743,78 @@ void updateGraphics(void) {
         if (newX != -1) drawPose(defenderPoses[p], newX, 0);
       }
     }
+
+    // Sending signals
+    if (gameState.nextPoseSendA < numPoses && attackerPoses[gameState.nextPoseSendA].sample - sampleNo < CAPTURE_SIGNAL_OFFSET) {
+      sprintf(sendBuffer, "{\"command\":\"captureAttacker\",\"poseID\":%u}",
+                gameState.nextPoseSendA);
+      esp_write(sendBuffer);
+      gameState.nextPoseSendA++;
+      printf("%s\n", sendBuffer);
+    }
+    if (gameState.nextPoseSendD < numPoses && defenderPoses[gameState.nextPoseSendD].sample - sampleNo < CAPTURE_SIGNAL_OFFSET) {
+      sprintf(sendBuffer, "{\"command\":\"captureDefender\",\"poseID\":%u}",
+                gameState.nextPoseSendD);
+      esp_write(sendBuffer);
+      gameState.nextPoseSendD++;
+      printf("%s\n", sendBuffer);
+    }
+
+    // Border flash
+    gameState.flashTimer = gameState.flashTimer == 0 ? 0 : gameState.flashTimer - 1;
+    int borderColorIndex = (int)(gameState.flashTimer / 4);
+    drawBorder(game_flash_colors[borderColorIndex]);
+
+    // Messages
+    gameState.messageTimer = gameState.messageTimer == 0 ? 0 : gameState.messageTimer - 1;
+    double newMessageKerning = lerp(otherState->messageKerning, 1, 0.1);
+    drawStringCenter(italicFont, gameState.goodVibes ? "sick!" : "yikes!", 160, GAME_TOP_Y + 12, COLOR_BG, 1, (int)(prevState->messageKerning));
+    drawStringCenter(italicFont, gameState.goodVibes ? "sick!" : "yikes!", 160, GAME_TOP_Y + 12, gameState.messageTimer > 0 ? (gameState.goodVibes ? COLOR_GAME_NICE : COLOR_GAME_OUCH) : COLOR_BG, 1, (int)newMessageKerning);
+    prevState->messageKerning = newMessageKerning;
+
+  } else if (screen == 3) { // Results
+    struct ResultsScreenState *prevState = &(resultsState.resultsScreenStates[buffer]);
+    struct ResultsScreenState *otherState = &(resultsState.resultsScreenStates[(buffer+1)%2]);
+
+    // Timers
+    //int oldTimer = prevState->timer;
+    int newTimer = sampleNo;
+    prevState->timer = newTimer;
+
+
+    // Draw diagonal lines
+
+    // Update Gameover
+    double newGameoverY = lerp(otherState->oldGameoverY, 80, 0.2);
+    drawStringCenter(italicFont, "game over", 160, prevState->oldGameoverY, COLOR_BG, 4, 2);
+    drawStringCenter(italicFont, "game over", 160, newGameoverY, COLOR_RESULTS_GAMEOVER, 4, 2);
+    prevState->oldGameoverY = newGameoverY;
+
+    // Update Continue
+    if (newTimer >= 5 * AUDIO_RATE) {
+      double newContinueY = lerp(otherState->oldContinueY, RESULTS_CONTINUE_ENDY, 0.2);
+      drawStringCenter(basicFont, "press key0 to go again", 160, prevState->oldContinueY, COLOR_BG, 1, 1);
+      drawStringCenter(basicFont, "press key0 to go again", 160, newContinueY, COLOR_RESULTS_CONTINUE, 1, 1);
+      prevState->oldContinueY = newContinueY;
+    }
+
+    // Update Wave
+    int newWinnerLength = (int)((newTimer - AUDIO_RATE * 1) / (AUDIO_RATE * 0.25));
+    int x = 16;
+    for (int c = 0; c < 18; c++) {
+      drawChar(italicFont, resultsState.winMessageComplete[c], x, prevState->waveYs[c] + RESULTS_WAVEY, COLOR_INIT_TUBE, 2);
+      int newY = (int)(RESULTS_WAVE_AMPLITUDE * sin((double)x / RESULTS_WAVE_WAVELENGTH_X - (double)newTimer / RESULTS_WAVE_WAVELENGTH_TIME));
+      if (newWinnerLength + 4 > (c - 4) || c >= 14) {
+        drawChar(italicFont, resultsState.winMessageComplete[c], x, newY + RESULTS_WAVEY, (c >= 4 && c < 14) ? COLOR_RESULTS_WAVE_WINNER : COLOR_RESULTS_WAVE_DOT, 2);
+      }
+      prevState->waveYs[c] = newY;
+      x += 16;
+    }
   }
 
   switchBuffer();
   pthread_mutex_unlock(&graphicsLock);
   // graphicsUpdateLock = 0;
-}
-
-void* outputThread(void* vargp) {
-  // Initialization
-
-  audio_init();
-  audio_rate(AUDIO_RATE);
-  initGraphics(0);
-
-  // Loop
-
-  int s = 0;
-
-  while (1) {
-    if ((screen == 2) && gameState.pressedStart) {
-      sampleNo =
-          (sampleNo + writeAudio(samplesL[sampleNo], samplesR[sampleNo])) %
-          numSamples;
-      //   sampleNo++;
-    } else {
-      // writeAudio(0, 0);
-    }
-    // s = (s + 1) % SAMPLES_PER_FRAME;
-    // if (s == 0) {
-    // while (switchScreenLock)
-    // ;
-    // updateGraphics();
-    // }
-  }
 }
 
 void* graphicsThread(void* vargp) {
@@ -745,12 +842,11 @@ int main(int argc, char** argv) {
   audio_init();
   audio_rate(AUDIO_RATE);
   initGraphics(newScreen);
-  // pthread_t outputThread_id;
-  // pthread_create(&outputThread_id, NULL, outputThread, NULL);
 
   pthread_mutex_init(&graphicsLock, NULL);
 
-  loadSong("shop.txt");
+  loadSong("shop.txt", samplesMainL, samplesMainR, &numMainSamples);
+  loadSong("victory.txt", samplesResultsL, samplesResultsR, &numResultsSamples);
 
   pthread_t graphicsThread_id;
   pthread_create(&graphicsThread_id, NULL, graphicsThread, NULL);
@@ -768,7 +864,6 @@ int main(int argc, char** argv) {
 
   int swState = 0;
   int keyState = 0;
-  int s = 0;
 
   while (keyState != 8) {
     SW_read(&swState);
@@ -783,7 +878,6 @@ int main(int argc, char** argv) {
 
       // Tell host what device I am
       if (esp_ready) {
-        // TODO: UPDATE TEXT HERE @ ALEX
         esp_write("{\"command\":\"setType\",\"identifier\":\"host\"}");
       }
     } else {
@@ -821,6 +915,7 @@ int main(int argc, char** argv) {
 
             printf("Pose %u: %lf %lf %lf %lf\n", recvID, angles[0], angles[1],
                    angles[2], angles[3]);
+            printf("Delay: %d\n", sampleNo - attackerPoses[recvID].sample);
 
             insertDefenderPose(recvID, angles[0], angles[1], angles[2],
                                angles[3]);
@@ -866,33 +961,54 @@ int main(int argc, char** argv) {
         // lobbyState.p2Connected = (swState >> 2) & 1;
 
         if (keyState == 1) {
-          loadSong(song_filenames[lobbyState.songId]);
+          loadSong(song_filenames[lobbyState.songId], samplesGameL, samplesGameR, &numGameSamples);
           loadPoses(song_filenames[lobbyState.songId]);
           // initGraphics(2);
+          resetGameState();
           newScreen = 2;
         }
       } else if (screen == 2) {
-        if (keyState == 1)
+        if (keyState == 4)
           // initGraphics(0);
-          newScreen = 0;
-        else if (keyState == 2) {
+          newScreen = 1;
+        else if (keyState == 1) {
           gameState.pressedStart = 1;
-        } else if (keyState == 4) {
+        } else if (keyState == 2) {
           sprintf(sendBuffer, "{\"command\":\"captureAttacker\",\"poseID\":%u}",
                   poseID);
           esp_write(sendBuffer);
           poseID++;
           // insertDefenderPose(poseID, 3.14 * poseID, 3.14, 3.14 * poseID, 3.14);
         }
+      } else if (screen == 3) {
+        if (keyState == 1) {
+          newScreen = 1;
+        }
       }
     }
 
-    // Playing a song
-    if ((newScreen == 0) || (newScreen == 1) ||
-        (newScreen == 2 && gameState.oneDone)) {
-      sampleNo =
-          (sampleNo + writeAudio(samplesL[sampleNo], samplesR[sampleNo])) %
-          numSamples;
+    // Playing samples
+    if ((newScreen == 0) || (newScreen == 1)) {
+      sampleNo = (sampleNo + writeAudio(samplesMainL[sampleNo], samplesMainR[sampleNo])) % numMainSamples;
+
+    } else if (newScreen == 2 && gameState.oneDone) {
+
+      // Stopping the song, switching screens
+      if (sampleNo < numGameSamples) {
+        sampleNo = (sampleNo + writeAudio(samplesGameL[sampleNo], samplesGameR[sampleNo]));
+      } else {
+        sampleNo = (sampleNo + writeAudio(0, 0));
+        if (sampleNo - numGameSamples == AUDIO_RATE * 2) {
+          newScreen = 3;
+        }
+      }
+
+    } else if (newScreen == 3) {
+      if (sampleNo < numResultsSamples) {
+        sampleNo = (sampleNo + writeAudio(samplesResultsL[sampleNo], samplesResultsR[sampleNo]));
+      } else {
+        sampleNo = (sampleNo + writeAudio(0, 0));
+      }
     }
 
     // Countdown
@@ -924,6 +1040,7 @@ int main(int argc, char** argv) {
     // if (esp_connected) initGraphics(2);
 
     if (newScreen != screen) {
+      if (!(newScreen == 1 && screen == 0)) sampleNo = 0;
       initGraphics(newScreen);
     }
   }

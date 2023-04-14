@@ -10,7 +10,6 @@ function startup()
         print("init.lua deleted or renamed")
     else
         gpio.write(led, gpio.LOW)
-        print("Running")
 
         net.dns.setdnsserver("8.8.8.8", 0)
         file.close("init.lua")

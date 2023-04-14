@@ -93,7 +93,7 @@ RemoteSystemsTempFiles
 .safetable
 debugger/
 
-# esp fw
+# esp fwz
 credentials.lua
 
 # eclipse metadata

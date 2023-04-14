@@ -11,11 +11,15 @@
 
 int game_pbar_rect[] = {80, 210, 160, 15};
 
+void drawBorder(short color) {
+    video_box(0, 0, WIDTH - 1, BORDER, color);
+    video_box(0, HEIGHT - 1 - BORDER, WIDTH - 1, HEIGHT - 1, color);
+    video_box(0, BORDER, BORDER, HEIGHT - 1 - BORDER, color);
+    video_box(WIDTH - 1 - BORDER, BORDER, WIDTH - 1, HEIGHT - 1 - BORDER, color);
+}
+
 void drawBackground(void) {
-    video_box(0, 0, WIDTH - 1, BORDER, COLOR_BORDER);
-    video_box(0, HEIGHT - 1 - BORDER, WIDTH - 1, HEIGHT - 1, COLOR_BORDER);
-    video_box(0, BORDER, BORDER, HEIGHT - 1 - BORDER, COLOR_BORDER);
-    video_box(WIDTH - 1 - BORDER, BORDER, WIDTH - 1, HEIGHT - 1 - BORDER, COLOR_BORDER);
+    drawBorder(COLOR_BORDER);
     video_box(BORDER + 1, BORDER + 1, WIDTH - 1 - BORDER, HEIGHT - 1 - BORDER, COLOR_BG);
 }
 
@@ -24,6 +28,14 @@ void drawPixel(int x, int y, short color) {
         return;
     } else {
         video_pixel(x, y, color);
+    }
+}
+
+void drawResultsPixel(int x, int y, int offset) {
+    if ((int)((x - y + offset) % (RESULTS_BAR_WIDTH * 2)) / RESULTS_BAR_WIDTH) {
+        video_pixel(x, y, COLOR_RESULTS_BG1);
+    } else {
+        video_pixel(x, y, COLOR_RESULTS_BG2);
     }
 }
 
@@ -77,7 +89,7 @@ void drawPBarOutline(void) {
 
 void drawPBarFill(int prevWidth, int currWidth) {
     int r[] = {game_pbar_rect[0], game_pbar_rect[1], game_pbar_rect[2], game_pbar_rect[3]};
-    video_box(r[0] + prevWidth + 1, r[1] + 1, r[0] + currWidth, r[1] + r[3] - 1, COLOR_GAME_PBAR_FILL);
+    video_box(r[0] + prevWidth + 1, r[1] + 1, r[0] + currWidth + 2, r[1] + r[3] - 1, COLOR_GAME_PBAR_FILL);
 }
 
 void drawGameVLines(void) {
@@ -87,26 +99,45 @@ void drawGameVLines(void) {
 
 void drawPose(struct Pose p, int x, int erase) {
     if (p.isDefender) {
-        video_line(x, GAME_HLINE_MARGIN + 1, x, HEIGHT - GAME_HLINE_MARGIN - 1,
+        // Vertical lines
+        video_line(x, GAME_HLINE_MARGIN + 1, x, GAME_POSE_Y + POSE_LINE_ATTACK_Y1,
+                   erase ? COLOR_BG : COLOR_GAME_HLINE);
+        video_line(x, HEIGHT - GAME_HLINE_MARGIN - 1, x, GAME_POSE_Y + POSE_LINE_ATTACK_Y2,
                    erase ? COLOR_BG : COLOR_GAME_HLINE);
 
-        video_line(x, GAME_POSE_Y + POSE_CHEST_Y, x + p.larmx,
+        // Body
+        video_line(x - POSE_SHOULDER_LENGTH, GAME_POSE_Y + POSE_CHEST_Y, x + POSE_SHOULDER_LENGTH, GAME_POSE_Y + POSE_CHEST_Y, erase ? COLOR_BG : COLOR_POSE_BODY);
+        video_line(x, GAME_POSE_Y + POSE_CHEST_Y, x, GAME_POSE_Y + POSE_PELVIS_Y, erase ? COLOR_BG : COLOR_POSE_BODY);
+
+        // Head
+        drawStringCenter(basicFont, ".", x, GAME_POSE_Y + POSE_HEAD_Y, erase ? COLOR_BG : COLOR_POSE_BODY, 1, 0);
+
+        // Arms
+        video_line(x - POSE_SHOULDER_LENGTH, GAME_POSE_Y + POSE_CHEST_Y, x + p.larmx,
                    GAME_POSE_Y + POSE_CHEST_Y + p.larmy,
                    erase ? COLOR_BG : COLOR_POSE_LARM);
-        video_line(x, GAME_POSE_Y + POSE_CHEST_Y, x + p.rarmx,
+        video_line(x + POSE_SHOULDER_LENGTH, GAME_POSE_Y + POSE_CHEST_Y, x + p.rarmx,
                    GAME_POSE_Y + POSE_CHEST_Y + p.rarmy,
                    erase ? COLOR_BG : COLOR_POSE_RARM);
 
+        // Legs
         video_line(x, GAME_POSE_Y + POSE_PELVIS_Y, x + p.llegx,
-                   GAME_POSE_Y + POSE_CHEST_Y + p.llegy,
+                   GAME_POSE_Y + POSE_PELVIS_Y + p.llegy,
                    erase ? COLOR_BG : COLOR_POSE_LLEG);
         video_line(x, GAME_POSE_Y + POSE_PELVIS_Y, x + p.rlegx,
-                   GAME_POSE_Y + POSE_CHEST_Y + p.rlegy,
+                   GAME_POSE_Y + POSE_PELVIS_Y + p.rlegy,
                    erase ? COLOR_BG : COLOR_POSE_RLEG);
 
-        video_pixel(x, GAME_POSE_Y, erase ? COLOR_BG : COLOR_POSE_DOT);
+        // Shield
+        drawStringCenter(basicFont, "(", x + p.rarmx, GAME_POSE_Y + POSE_CHEST_Y + p.rarmy, erase ? COLOR_BG : COLOR_DEFEND_ICON, 1, 0);
     } else {
-        video_line(x, GAME_HLINE_MARGIN + 1, x, HEIGHT - GAME_HLINE_MARGIN - 1,
+        // Vertical lines
+        video_line(x, GAME_HLINE_MARGIN + 1, x, GAME_POSE_Y + POSE_LINE_ATTACK_Y1,
                    erase ? COLOR_BG : COLOR_GAME_PBAR_FILL);
+        video_line(x, HEIGHT - GAME_HLINE_MARGIN - 1, x, GAME_POSE_Y + POSE_LINE_ATTACK_Y2,
+                   erase ? COLOR_BG : COLOR_GAME_PBAR_FILL);
+
+        // Icon
+        drawStringCenter(basicFont, "*", x, GAME_POSE_Y - 10, erase ? COLOR_BG : COLOR_ATTACK_ICON, 2, 0);
     }
 }

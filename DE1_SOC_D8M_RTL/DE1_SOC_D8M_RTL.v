@@ -460,10 +460,10 @@ always @(posedge CLOCK2_50) begin
 			end
 		end
 		if (~KEY[3]) begin
-			cbLow[SW[8:5]] <= Cb - 3 >= 0 ? Cb - 3 : 0;
-			cbHigh[SW[8:5]] <= Cb + 3 <= 255 ? Cb + 3 : 255;
-			crLow[SW[8:5]] <= Cr - 3 >= 0 ? Cr - 3 : 0;
-			crHigh[SW[8:5]] <= Cr + 3 <= 255 ? Cr + 3 : 255;
+			cbLow[SW[8:5]] <= Cb - 10 >= 0 ? Cb - 10 : 0;
+			cbHigh[SW[8:5]] <= Cb + 10 <= 255 ? Cb + 10 : 255;
+			crLow[SW[8:5]] <= Cr - 10 >= 0 ? Cr - 10 : 0;
+			crHigh[SW[8:5]] <= Cr + 10 <= 255 ? Cr + 10 : 255;
 		end		
 		if (hIndex == 320 && vIndex == 240) begin
 			RED8b_cached <= RED12b[7:0]; 
@@ -504,7 +504,7 @@ ball_detector  ball_detector_0(
    .iPixelAddress( VGA_ADDRESS ),
    .iVgaRequest( READ_Request ),
    .iVgaClk( VGA_CLK ),
-   .iVgaHRequest( READ_Request ),  
+   .iVgaHRequest( READ_Request ),  // Can use H_active_area or READ_Request here.
    .iVgaVRequest( V_active_area ),
    .oVideo8bRgb( oVideo8bRgb[0] ),
    .iVideoSelect( SW[9] ),
@@ -521,11 +521,11 @@ ball_detector  ball_detector_0(
  ); 
 ball_detector  ball_detector_1( 
    .reset( KEY[0] ),
-   .iVideo12bRgb( { hIndex <= 320 ? RED12b : 12'd0, hIndex <= 320 ? GREEN12b : 12'd0, hIndex <= 320 ? BLUE12b : 12'd0 } ), // left
+   .iVideo12bRgb( { RED12b, GREEN12b, BLUE12b } ),
    .iPixelAddress( VGA_ADDRESS ),
    .iVgaRequest( READ_Request ),
    .iVgaClk( VGA_CLK ),
-   .iVgaHRequest( READ_Request ),  
+   .iVgaHRequest( READ_Request ),  // Can use H_active_area or READ_Request here.
    .iVgaVRequest( V_active_area ),
    .oVideo8bRgb( oVideo8bRgb[1] ),
    .iVideoSelect( SW[9] ),
@@ -541,87 +541,23 @@ ball_detector  ball_detector_1(
    .oVIndex(  )
  );
 ball_detector ball_detector_2(
-   .reset( KEY[0] ),
-   .iVideo12bRgb( { hIndex >= 320 ? RED12b : 12'd0, hIndex >= 320 ? GREEN12b : 12'd0, hIndex >= 320 ? BLUE12b : 12'd0 } ), // right
+	   .reset( KEY[0] ),
+   .iVideo12bRgb( { RED12b, GREEN12b, BLUE12b } ),
    .iPixelAddress( VGA_ADDRESS ),
    .iVgaRequest( READ_Request ),
    .iVgaClk( VGA_CLK ),
-   .iVgaHRequest( READ_Request ),  
+   .iVgaHRequest( READ_Request ),  // Can use H_active_area or READ_Request here.
    .iVgaVRequest( V_active_area ),
    .oVideo8bRgb( oVideo8bRgb[2] ),
    .iVideoSelect( SW[9] ),
    .iFreezeRam(  ),
    .iFilterOn(  ), 
-   .iCrLow( crLow[1] ), // Follows previous ball detector
-   .iCrHigh( crHigh[1] ),
-   .iCbLow( cbLow[1] ),
-   .iCbHigh( cbHigh[1] ),
+   .iCrLow( crLow[2] ),
+   .iCrHigh( crHigh[2] ),
+   .iCbLow( cbLow[2] ),
+   .iCbHigh( cbHigh[2] ),
    .oRedPixelHIndex( redPixelHIndex[2] ),
    .oRedPixelVIndex( redPixelVIndex[2] ), 
-   .oHIndex(  ),
-   .oVIndex(  )
- );
-
-ball_detector ball_detector_3(
-   .reset( KEY[0] ),
-   .iVideo12bRgb( { RED12b, GREEN12b, BLUE12b } ),
-   .iPixelAddress( VGA_ADDRESS ),
-   .iVgaRequest( READ_Request ),
-   .iVgaClk( VGA_CLK ),
-   .iVgaHRequest( READ_Request ),  
-   .iVgaVRequest( V_active_area ),
-   .oVideo8bRgb( oVideo8bRgb[3] ),
-   .iVideoSelect( SW[9] ),
-   .iFreezeRam(  ),
-   .iFilterOn(  ), 
-   .iCrLow( crLow[3] ),
-   .iCrHigh( crHigh[3] ),
-   .iCbLow( cbLow[3] ),
-   .iCbHigh( cbHigh[3] ),
-   .oRedPixelHIndex( redPixelHIndex[3] ),
-   .oRedPixelVIndex( redPixelVIndex[3] ), 
-   .oHIndex(  ),
-   .oVIndex(  )
- );
-ball_detector ball_detector_4(
-   .reset( KEY[0] ),
-   .iVideo12bRgb( { hIndex <= 320 ? RED12b : 12'd0, hIndex <= 320 ? GREEN12b : 12'd0, hIndex <= 320 ? BLUE12b : 12'd0 } ), // left
-   .iPixelAddress( VGA_ADDRESS ),
-   .iVgaRequest( READ_Request ),
-   .iVgaClk( VGA_CLK ),
-   .iVgaHRequest( READ_Request ),  
-   .iVgaVRequest( V_active_area ),
-   .oVideo8bRgb( oVideo8bRgb[4] ),
-   .iVideoSelect( SW[9] ),
-   .iFreezeRam(  ),
-   .iFilterOn(  ), 
-   .iCrLow( crLow[4] ),
-   .iCrHigh( crHigh[4] ),
-   .iCbLow( cbLow[4] ),
-   .iCbHigh( cbHigh[4] ),
-   .oRedPixelHIndex( redPixelHIndex[4] ),
-   .oRedPixelVIndex( redPixelVIndex[4] ), 
-   .oHIndex(  ),
-   .oVIndex(  )
- );
-ball_detector ball_detector_5(
-   .reset( KEY[0] ),
-   .iVideo12bRgb( { hIndex >= 320 ? RED12b : 12'd0, hIndex >= 320 ? GREEN12b : 12'd0, hIndex >= 320 ? BLUE12b : 12'd0 } ), // right
-   .iPixelAddress( VGA_ADDRESS ),
-   .iVgaRequest( READ_Request ),
-   .iVgaClk( VGA_CLK ),
-   .iVgaHRequest( READ_Request ),  
-   .iVgaVRequest( V_active_area ),
-   .oVideo8bRgb( oVideo8bRgb[5] ),
-   .iVideoSelect( SW[9] ),
-   .iFreezeRam(  ),
-   .iFilterOn(  ), 
-   .iCrLow( crLow[4] ), // Follows previous ball detector
-   .iCrHigh( crHigh[4] ),
-   .iCbLow( cbLow[4] ),
-   .iCbHigh( cbHigh[4] ),
-   .oRedPixelHIndex( redPixelHIndex[5] ),
-   .oRedPixelVIndex( redPixelVIndex[5] ), 
    .oHIndex(  ),
    .oVIndex(  )
  );
