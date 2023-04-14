@@ -1,60 +1,24 @@
-var uuid = require('uuid-random');
 const WebSocket = require('ws');
-const mongoose = require("mongoose");
-var mongo = require("mongodb");
-var Database = require("./Database1.js");
 
 const wss = new WebSocket.WebSocketServer({ port: 8080 }, () => {
-	console.log('server started');
+	console.log('INFO: server started');
 });
-/**
- * IGNORE THIS SECTION OF COMMENTED CODE. 
- */
-// var db = new Database("mongodb://127.0.0.1:27017", "cpen391");
-// var messages = {};
-// db.getRooms().then((result) => {
-// 	console.log("werew");
-// 	console.log(result);
-// 	for (var i = 0; i < result.length; i++) {
-// 		messages[result[i]._id] = [];
-// 	}
-// });
 
-// const uri =
-//   "mongodb+srv://leonguo736:12345@cluster0.jnwwabb.mongodb.net/?retryWrites=true&w=majority";
-
-// async function connect() {
-//   try {
-//     await mongoose.connect(uri);
-//     console.log("Connected to MongoDB");
-// 	console.log(db);
-//   } catch (error) {
-//     console.error(error);
-//   }
-// }
-
-// var db = connect();
-
-// db.collection("collection1").insertOne(pose0, function(err, result) {
-// 	console.log("item inserted");
-// });
-
-
-// Object that stores player data 
-const playersData = {
-	"type": "playerData"
-}
-
-// connection count does not decrement right now
-var connectionCount = 0;
-/* set to 1 if connected, 0 if not */
+/* Variables used to keep track of DE1-SoC states */
 var atkConnected = 0;
 var defConnected = 0;
 var hostConnected = 0;
 var expected_data = "default";
 
-// Object that stores pose information
-// 5 points --> 2 angles
+/**
+ * Object used to store pose information
+ * 
+ * beat: corresponds to the beat of a song at which the pose will be displayed. Also used as a unique identifier.
+ * leftArm: angle from x-axis to the player's leftArm. Measured in radians.
+ * rightArm: angle from x-axis to the player's rightArm. Measured in radians.
+ * leftLeg: angle from x-axis to the player's leftLeg. Measured in radians.
+ * rightLeg: angle from x-axis to the player's rightLeg. Measured in radians.
+ */
 class Pose {
 	constructor(beat, leftArm, rightArm, leftLeg, rightLeg) {
 		this.beat = beat;
@@ -65,113 +29,100 @@ class Pose {
 	}
 }
 
+/* Point objects that are used to store coordinates sent by cameras. Cameras consider the top-left corner to be [0,0], so adjust y-value */
 class Point {
 	constructor(x, y) {
 		this.x = x;
-		this.y = y;
+		this.y = 480 - y;
 	}
 }
-var pose0 = new Pose(1, 100, 200);
-var pose1 = new Pose(2, 400, 90);
-var song = [pose0, pose1];
-var songBytes = "262.2, 294.8, 327.5, 349.3, 393.0, 436.7, 491.2, 524.0, 589.5";
-var testString = ""
 
-/* arrays to store poses */
-var beatArray_atk = [];
-var leftArray_atk = [];
-var rightArray_atk = [];
-var beatArray_def = [0, 1, 2, 3, 4, 5];
-var leftArray_def = [10, 20, 30, 40, 50];
-var rightArray_def = [5, 4, 3, 2, 1];
-var attackerPoses = []
-var receivedFrom = "";
-// var deviceID
+var attackerPoses = []; 
+var gamemode = 0; // set to zero to play with 1 attacker and 1 defender. set to 1 to play with 2 defenders
+var song;
+var ymca = [
+	[0, 1, 8, 135, 45],
+	[1, 1, 10, 250, 290],
+	[2, 1, 11, 60, -30],
+	[3, 1, 11.5, 225, -45],
+	[4, 1, 16, 135, 45],
+	[5, 1, 18, 250, 290],
+	[6, 1, 19, 60, -30],
+	[7, 1, 19.5, 225, -45],
+	[8, 1, 24, 225, 250],
+	[9, 1, 25, 290, 315],
+	[10, 1, 26.5, 160, 135],
+	[11, 1, 28, 290, 315],
+	[12, 1, 29, 225, 250],
+	[13, 1, 30.5, 45, 20],
+	[14, 1, 32, 250, 290],
+	[15, 1, 33, 215, 325],
+	[16, 1, 34.5, 180, 0],
+	[17, 1, 35.25, 145, 35],
+	[18, 1, 36.5, 110, 70],
+	[19, 1, 40, 135, 45],
+	[20, 1, 42, 250, 290],
+	[21, 1, 43, 60, -30],
+	[22, 1, 43.5, 225, -45],
+	[23, 1, 48, 135, 45],
+	[24, 1, 50, 250, 290],
+	[25, 1, 51, 60, -30],
+	[26, 1, 51.5, 225, -45]];
 
-// Websocket function that managages connection with clients
+/* Websocket function that managages connection with clients */
 wss.on('connection', function connection(client) {
-	// Create Unique User ID for player
-	// client.id = uuid();
-	// client.id = connectionCount;
-	// connectionCount++;
-	// setTimeout(() =>{
-	// 	for (client of wss.clients.values()) {
-	// 		client.send("you are connected");
-	// 		console.log("SENT TEST TO CLIENT: " + client.id);
-	// 	}
-	// }, 1000);
-	// client.send("l" + atkConnected + " " + defConnected);
-	console.log("new client connected");
+	console.log("INFO: websocket on connection");
 
-	//Method retrieves message from client
+	/**
+	 * Server expects each message that it receives to be in JSON format and must contain a "command" field. 
+	 * Throws an error message otherwise.
+	 */
 	client.on('message', (data) => {
-		console.log(`raw message: ${data}`);
-
 		try {
 			var parsedData = JSON.parse(data);
 		} catch (e) {
-			console.log("Server received incorrectly formatted JSON string");
+			console.log(`ERROR: Server received incorrectly formatted JSON string: ${data}`);
+			
 			var parsedData = new Object();
-			parsedData.command = "garbage";
+			parsedData.command = "bad json received";
 		}
 
-		/* for forcefully setting a client as the attacker */
-		if (parsedData.force != undefined) {
-			/* kick out existing attacker. if defender exists, do nothing. otherwise set prev attacker as defender */
-			if (atkConnected) {
+		if (parsedData.command == "lobbyInit") { // to send information regarding connected DE1s to the host
+			console.log("INFO: recieved command lobbyInit");
+			client.send("l" + atkConnected + " " + defConnected);
+		}
+		else if (parsedData.command == "setMode") { // to toggle between gamemodes
+			console.log(`INFO: received command setMode: ${data}`);
+			if ((gamemode == 0) && (parsedData.type == 1)) {
 				for (de1 of wss.clients.values()) {
 					if (de1.id == "attacker") {
-						if (defConnected) {
-							console.log("setting old attacker as zombie");
-							de1.id = "zombie";
-						}
-						else {
-							console.log("setting old attacker as defender");
-							de1.id = "defender";
-							defConnected = 1;
-						}
+						console.log("switched attacker to defender0");
+						de1.send("id,2");
 					}
 				}
 			}
-			atkConnected = 1;
-			client.id = "attacker";
-			var data = "id,1";
-			console.log("atk connected. id,1");
-			client.send(data);
 
-			for (de1 of wss.clients.values()) {
-				// console.log("client id: " + client.id);
-				if (de1.id == "host") {
-					console.log("sending data to host");
-					de1.send("l" + atkConnected + " " + defConnected);
-				}
-			}
+			gamemode = parsedData.type;
+			song = parsedData.song;
 		}
-
-		/* For lobby init. Reponds to the Host with info regarding to connected players */
-		if (parsedData.command == "lobbyInit") {
-			console.log("entered init");
-			client.send("l" + atkConnected + " " + defConnected);
-		}
-		else if (parsedData.command == "setType") {
-			console.log("entered set type");
+		else if (parsedData.command == "setType") { // depending on the value of setType, set the identity of the connected DE1
 			if (parsedData.identifier == "host") {
 				hostConnected = 1;
 				client.id = "host";
-				console.log("host connected");
+				console.log("INFO: received command setType host");
 
 				client.send("l" + atkConnected + " " + defConnected);
 			}
-			else if (parsedData.identifier == "camera") {
+			else if (parsedData.identifier == "camera") { // server determines whether a camera connection takes the role of attacker or defender
 				if (atkConnected == 0) {
+					console.log("INFO: received command setType attacker id,1. Gamemode is " + gamemode);
 					atkConnected = 1;
 					client.id = "attacker";
-					var data = "id,1";
-					console.log("atk connected. id,1");
+					
+					var data = gamemode == 0 ? "id,1" : "id,2";
 					client.send(data);
 
 					for (de1 of wss.clients.values()) {
-						// console.log("client id: " + client.id);
 						if (de1.id == "host") {
 							console.log("sending data to host");
 							de1.send("l" + atkConnected + " " + defConnected);
@@ -182,11 +133,10 @@ wss.on('connection', function connection(client) {
 					defConnected = 1;
 					client.id = "defender";
 					var data = "id,2";
-					console.log("def connected. id,2");
+					console.log("INFO: received command setType defender id,2");
 					client.send(data);
 
 					for (de1 of wss.clients.values()) {
-						// console.log("client id: " + client.id);
 						if (de1.id == "host") {
 							console.log("sending data to host");
 							de1.send("l" + atkConnected + " " + defConnected);
@@ -194,176 +144,82 @@ wss.on('connection', function connection(client) {
 					}
 				}
 				else {
-					console.log("extra client connected");
-
-					// setTimeout(() =>{
-					// 	client.send(data);
-					// }, 1000);
+					console.log("ERROR: extra client connected");
 				}
 			}
 		}
-		else if (parsedData.command == "captureAttacker") {
-			console.log("sending signal to attacker");
+		else if (parsedData.command == "captureAttacker") { // host sent a request for an attacker pose. Give the signal to capture an image.
+			process.stdout.write("INFO: sending signal to attacker ... ");
 			for (de1 of wss.clients.values()) {
 				if (de1.id == "attacker") {
-					console.log("msg to attacker");
+					process.stdout.write("sent poseId " + parsedData.poseID + " to attacker");
 
-					/* work around for client id bug */
-					console.log("expected (180): " + expected_data);
 					expected_data = "attacker";
-					// if (expected_data == "default") {
-					// 	expected_data = "attacker";
-					// }
-					// else {
-					// 	console.log("tried to send signal to attacker while awaiting data");
-					// }
-					/* end of work around */
-
 					de1.send("cap," + parsedData.poseID);
 				}
 			}
 		}
-		else if (parsedData.command == "captureDefender") {
-			console.log("sending signal to defender");
-			for (de1 of wss.clients.values()) {
-				if (de1.id == "defender") {
-					console.log("msg to defender");
-
-					/* work around for client id bug */
-					console.log("expected (200): " + expected_data);
-					expected_data = "defender";
-					// if (expected_data == "default") {
-					// 	expected_data = "defender";
-					// }
-					// else {
-					// 	console.log("tried to send signal to defender while awaiting data");
-					// }
-					/* end of work around */
-					// for (de2 of wss.clients.values()) {
-					// 	if (de2.id == "host") {
-					// 		expected_data = "default";
-					// 		// var msg = "s" + poseID + " " + score;
-					// 		var msg = "s1" + " " + "100";
-					// 		de2.send(msg);
-					// 	}
-					// 	else if (de2.id == "defender") {
-					// 		de2.send("cap," + parsedData.poseID);
-					// 	}
-					// }
-					de1.send("cap," + parsedData.poseID);
+		else if (parsedData.command == "captureDefender") { // host sent a request for a defender pose. Give the signal to capture an image.
+			process.stdout.write("INFO: sending signal to defender ... ");
+			if (gamemode == 0) {
+				for (de1 of wss.clients.values()) {
+					if (de1.id == "defender") {
+						process.stdout.write("sent poseID " + parsedData.poseID + " to defender"); 
+	
+						expected_data = "defender";
+						de1.send("cap," + parsedData.poseID);
+					}
 				}
 			}
+			else if (gamemode == 1) {
+				for (de1 of wss.clients.values()) {
+					if (de1.id == "attacker" || de1.id == "defender") {
+						process.stdout.write("sent poseID " + parsedData.poseID + " to defender"); 
+	
+						expected_data = "defender";
+						de1.send("cap," + parsedData.poseID);
+					}
+				}
+			}
+			else {
+				console.log("ERROR: unknown gamemode when sending capture cmd to defender(s)");
+			}
 		}
-		else if (parsedData.command == "poseData") { // for handling the other 99% of messages
-			console.log("reading pose data");
-
-			console.log(parsedData.median);
+		else if (parsedData.command == "poseData") { // for handling data sent from cameras
+			console.log("INFO: recieved poseData: " + JSON.stringify(parsedData.median));
 			/**
-			 * Assumes JSON has 3 fields: "command", "median" and "beat". Also assumes only one pose is sent per message.
+			 * Assumes JSON has 3 fields: "command", "median" and "poseID". Also assumes only one pose is sent per message.
 			 * 
-			 * Function takes numbers from "median" array and uses them to create 5 Point objects. 
-			 * The points are passed through find_angle() which computes and angle in radians (more info on implementation at bottom).
-			 * A pose object is then created using 2 angles and a beat, which is then passed to the host as a JSON string.
-			 * Camera sets top left of grid is [0,0], so invert y-value for proper angle calculation.
-			 * Assumes x-axis is on the same horizontal line as the chest.
+			 * Function takes numbers from "median" array and uses them to create 6 Point objects. 
+			 * The points are passed through getAngle() which computes and angle in radians.
+			 * A pose object is then created using 6 angles and a pose ID, which is then sent to the host.
 			 */
 
-			/* set up points: CENTER IS CEHST, ONE POINT IS ALWAYS ON X AXIS */
+			/* set up points */
 			var chest = new Point(parsedData.median[0][0], parsedData.median[0][1]);
 			var leftHand = new Point(parsedData.median[1][0], parsedData.median[1][1]);
 			var rightHand = new Point(parsedData.median[2][0], parsedData.median[2][1]);
 			var pelvis = new Point(parsedData.median[3][0], parsedData.median[3][1]);
 			var leftLeg = new Point(parsedData.median[4][0], parsedData.median[4][1]);
 			var rightLeg = new Point(parsedData.median[5][0], parsedData.median[5][1]);
-			var leftElbow = new Point(parsedData.median[1][0], parsedData.median[1][1]);
-			var rightElbow = new Point(parsedData.median[2][0], parsedData.median[2][1]);
-			try {
-				leftElbow = new Point(parsedData.median[6][0], parsedData.median[6][1]);
-				rightElbow = new Point(parsedData.median[7][0], parsedData.median[7][1]);
-			}
-			catch(e) {
-				console.log("elbow data does not exist!");
-			}
-			var tummy = new Point(chest.x, chest.y - 10);
-			var xaxis_upper = new Point(parsedData.median[0][0] + 25, parsedData.median[0][1]);
-			var xaxis_lower = new Point(parsedData.median[3][0] + 25, parsedData.median[3][1]);
-
-			/* calculate the 2 angles and store data in a Pose object */
-			var poseID = parsedData.poseId;
-			// var leftarm_angle = find_angle(leftArm, xaxis_upper, chest);
-			// var rightarm_angle = find_angle(rightArm, xaxis_upper, chest);
-			// var leftleg_angle = find_angle(leftLeg, xaxis_lower, pelvis);
-			// var rightleg_angle = find_angle(rightLeg, xaxis_lower, pelvis);
-
-			// Start Kerry
-			function getAngle(a, b) {
-				const deltaX = b.x - a.x;
-				const deltaY = b.y - a.y;
-				return Math.atan2(deltaY, deltaX);
-			}
-
-			function createPoint(x, y) {
-				return new Point(x, 480 - y);
-			}
-
-			try {
-				var chest_adj = createPoint(chest.x, chest.y); // median[0]
-				var leftHand_adj = createPoint(leftHand.x, leftHand.y); // median[1]
-				var rightHand_adj = createPoint(rightHand.x, rightHand.y); // median[2]
-				var pelvis_adj = createPoint(pelvis.x, pelvis.y); // median[3]
-				var leftLeg_adj = createPoint(leftLeg.x, leftLeg.y); // median[4]
-				var rightLeg_adj = createPoint(rightLeg.x, rightLeg.y); // median[5]
-				var rightElbow_adj = createPoint(rightElbow.x, rightElbow.y);
-				var leftElbow_adj = createPoint(leftElbow.x, leftElbow.y);
-				console.log("adjusted angles (rightElbow): " + rightElbow_adj.x + " " + rightElbow_adj.y);
-				console.log("adjusted angles (rightHand): " + rightHand_adj.x + " " + rightHand_adj.y);
-				console.log("adjusted angles (leftElbow): " + leftElbow_adj.x + " " + leftElbow_adj.y);
-				console.log("adjusted angles (leftHand): " + leftHand_adj.x + " " + leftHand_adj.y);
-	
-				leftarm_angle = getAngle(chest_adj, leftElbow_adj); // give to alex, counter-cw for alex
-				rightarm_angle = getAngle(chest_adj, rightElbow_adj); // give to alex, counter-cw for alex
-				leftleg_angle = getAngle(pelvis_adj, leftLeg_adj); // give to alex, counter-cw for alex
-				rightleg_angle = getAngle(pelvis_adj, rightLeg_adj); // give to alex, counter-cw for alex
-				leftelbow_angle = getAngle(leftElbow_adj, leftHand_adj);
-				rightelbow_angle = getAngle(rightElbow_adj, rightHand_adj);
-
-				console.log("leftelbow_angle: " + toDegree(leftelbow_angle) + " rightelbow_angle: " + toDegree(rightelbow_angle));
-			}
-			catch(e) {
-				console.log("elbow data deosnt not exist 1 ");
-				var chest_adj = createPoint(chest.x, chest.y); // median[0]
-				var leftHand_adj = createPoint(leftHand.x, leftHand.y); // median[1]
-				var rightHand_adj = createPoint(rightHand.x, rightHand.y); // median[2]
-				var pelvis_adj = createPoint(pelvis.x, pelvis.y); // median[3]
-				var leftLeg_adj = createPoint(leftLeg.x, leftLeg.y); // median[4]
-				var rightLeg_adj = createPoint(rightLeg.x, rightLeg.y); // median[5]
-	
-				leftarm_angle = getAngle(chest_adj, leftElbow_adj); // give to alex, counter-cw for alex
-				rightarm_angle = getAngle(chest_adj, rightElbow_adj); // give to alex, counter-cw for alex
-				leftleg_angle = getAngle(pelvis_adj, leftLeg_adj); // give to alex, counter-cw for alex
-				rightleg_angle = getAngle(pelvis_adj, rightLeg_adj); // give to alex, counter-cw for alex
-			}
-			var pose = new Pose()
-			function toDegree(r) {
-				return r * (180 / Math.PI);
-			}
+			
+			leftarm_angle = getAngle(chest, leftHand); // give to alex, counter-cw for alex
+			rightarm_angle = getAngle(chest, rightHand); // give to alex, counter-cw for alex
+			leftleg_angle = getAngle(pelvis, leftLeg); // give to alex, counter-cw for alex
+			rightleg_angle = getAngle(pelvis, rightLeg); // give to alex, counter-cw for alex
 
 			console.log("leftarm_angle: " + toDegree(leftarm_angle) + " rightarm_angle: " + toDegree(rightarm_angle) + " leftleg_angle: " + toDegree(leftleg_angle) + " rightleg_angle: " + toDegree(rightleg_angle));
 
-			// End Kerry
-
+			var poseID = parsedData.poseId;
 			var pose = new Pose(poseID, leftarm_angle, rightarm_angle, leftleg_angle, rightleg_angle);
 			console.log("-------");
 			console.log(pose);
 			console.log("-------");
 
-			/* testing client.id vs expected_data */
-			console.log("current client IS: " + client.id);
-			console.log("expected data IS: " + expected_data);
 			if (expected_data == "attacker") { // for getting attacker moves 
 				attackerPoses.push(pose);
 
-				/* send message to front end (sends to everyone connected for now) */
+				/* send message to front end */
 				for (de1 of wss.clients.values()) {
 					if (de1.id == "host") {
 						expected_data = "default";
@@ -372,33 +228,62 @@ wss.on('connection', function connection(client) {
 					}
 				}
 			}
-			else if (expected_data == "defender") { // for getting defender moves 
-				// var score = 100 - 16 * Math.round(abs(pose.leftArm - attackerPoses[pose.beat].leftArm));
-				var attackerPose = "dummy";
+			else if ((expected_data == "defender") || (expected_data == "default")) { // for getting defender moves 
+				if (gamemode == 1) {
+					var score_rightArm = getScore(pose.rightArm, toRad(ymca[pose.beat][4]));
+					var score_leftArm = getScore(pose.leftArm, toRad(ymca[pose.beat][3]));
+					var score_rightLeg = getScore(pose.rightArm, toRad(ymca[pose.beat][4]));
+					var score_leftLeg = getScore(pose.leftArm, toRad(ymca[pose.beat][3]));
 
-				for (pose_atk of attackerPoses) {
-					if (pose.beat == pose_atk.beat) {
-						attackerPose = pose_atk;
+					var score = score_rightArm + score_leftArm + score_rightLeg + score_leftLeg;
+
+					/* tell host which defender is sending data */
+					if (client.id == "attacker") {
+						de1ID = "o";
+					}
+					else if (client.id == "defender") {
+						de1ID = "t";
+					}
+					else {
+						console.log("ERROR: expected client id of either attacker or defender. Got " + client.id + "instead");
+					}
+
+					/* send message to front end */
+					for (de1 of wss.clients.values()) {
+						if (de1.id == "host") {
+							expected_data = "default";
+							console.log("sending score (mode 1): " + score);
+							var msg = de1ID + poseID + " " + score;
+							de1.send(msg);
+						}
 					}
 				}
-				if (attackerPose == "dummy") {
-					console.log("ERROR: could not find attacker pose with corresponding ID: " + pose.beat);
-				}
 				else {
-					var score_rightArm = getScore(pose.rightArm, attackerPose.rightArm);
-					var score_leftArm = getScore(pose.leftArm, attackerPose.leftArm);
-					var score_rightLeg = getScore(pose.rightLeg, attackerPose.rightLeg);
-					var score_leftLeg = getScore(pose.leftLeg, attackerPose.leftLeg);
-					var score = score_rightArm + score_leftArm + score_rightLeg + score_leftLeg;
-				}
+					var attackerPose = "dummy";
 
-				/* send message to front end (sends to everyone connected for now) */
-				for (de1 of wss.clients.values()) {
-					if (de1.id == "host") {
-						expected_data = "default";
-						console.log("sending score: " + score);
-						var msg = "s" + poseID + " " + score;
-						de1.send(msg);
+					for (pose_atk of attackerPoses) {
+						if (pose.beat == pose_atk.beat) {
+							attackerPose = pose_atk;
+						}
+					}
+					if (attackerPose == "dummy") {
+						console.log("ERROR: could not find attacker pose with corresponding ID: " + pose.beat);
+					}
+					else {
+						var score_rightArm = getScore(pose.rightArm, attackerPose.rightArm);
+						var score_leftArm = getScore(pose.leftArm, attackerPose.leftArm);
+						var score_rightLeg = getScore(pose.rightLeg, attackerPose.rightLeg);
+						var score_leftLeg = getScore(pose.leftLeg, attackerPose.leftLeg);
+						var score = score_rightArm + score_leftArm + score_rightLeg + score_leftLeg;
+					}
+					/* send message to front end */
+					for (de1 of wss.clients.values()) {
+						if (de1.id == "host") {
+							expected_data = "default";
+							console.log("sending score (mode 0): " + score);
+							var msg = "s" + poseID + " " + score;
+							de1.send(msg);
+						}
 					}
 				}
 			}
@@ -408,14 +293,12 @@ wss.on('connection', function connection(client) {
 			}
 		}
 		else {
-			console.log("host prob died");
+			console.log("ERROR: no command field in JSON string");
 		}
-
 	});
 
-	//Method notifies when client disconnects
+	// Method notifies when client disconnects
 	client.on('close', () => {
-		// connectionCount--;
 		console.log('This Connection Closed!');
 		console.log("Removing Client: " + client.id);
 		if (client.id == "host") {
@@ -428,7 +311,7 @@ wss.on('connection', function connection(client) {
 			defConnected = 0;
 		}
 		else {
-			console.log("mystery client disconnected");
+			console.log("ERROR: expected client id of either host, attacker, or defender. Got " + client.id + "instead");
 		}
 		for (de1 of wss.clients.values()) {
 			if (de1.id == "host") {
@@ -441,31 +324,9 @@ wss.on('connection', function connection(client) {
 });
 
 wss.on('listening', () => {
-	console.log('listening on 8080')
+	console.log('INFO: listening on 8080')
 });
 
-/**
- * Calculates the angle (in radians) between two vectors pointing outward from one center.
- * From stackoverflow: https://stackoverflow.com/a/7505937
- *
- * @param p0 first point
- * @param p1 second point
- * @param c center point
- */
-function find_angle(p0, p1, c) {
-	var p0c = Math.sqrt(Math.pow(c.x - p0.x, 2) +
-		Math.pow(c.y - p0.y, 2)); // p0->c (b)   
-	var p1c = Math.sqrt(Math.pow(c.x - p1.x, 2) +
-		Math.pow(c.y - p1.y, 2)); // p1->c (a)
-	var p0p1 = Math.sqrt(Math.pow(p1.x - p0.x, 2) +
-		Math.pow(p1.y - p0.y, 2)); // p0->p1 (c)
-	if (p0.y > p1.y) { // desired angle is greater than 180 deg
-		return 2 * Math.PI - Math.acos((p1c * p1c + p0c * p0c - p0p1 * p0p1) / (2 * p1c * p0c))
-	}
-	else { // desired angle is less than 180 deg
-		return Math.acos((p1c * p1c + p0c * p0c - p0p1 * p0p1) / (2 * p1c * p0c));
-	}
-}
 
 /**
  * Calculates the absolute value of a given number
@@ -482,11 +343,27 @@ function abs(number) {
  * 
  */
 function getScore(angle_atk, angle_def) {
-	console.log("computing score");
 	var score_raw = 25 - 4 * Math.round(abs(angle_atk - angle_def));
 	var score = score_raw;
-	if (score_raw > 23) {
+	if (score_raw > 22) {
 		score = 25;
 	}
 	return score;
+}
+
+function toRad(d) {
+	return d * (Math.PI / 180);
+}
+function toDegree(r) {
+	return r * (180 / Math.PI);
+}
+
+function getAngle(a, b) {
+	const deltaX = b.x - a.x;
+	const deltaY = b.y - a.y;
+	return Math.atan2(deltaY, deltaX);
+}
+
+function createPoint(x, y) {
+	return new Point(x, 480 - y);
 }
