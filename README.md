@@ -1,5 +1,6 @@
 # Dance Battle - Group 34
 In dance battle, multiple players engage in a friendly competition to earn the highest score by either inventing intricate dance poses or trying to imitate the ones created by other players. 
+There are two modes: in one mode, one player is the attacker and the other is the defender who mimics the attacker's moves; in the other mode, both players are defenders and mimic a set of predefined moves associated with a chosen song. Players are ranked based on how accurately they mimic the moves.
 
 By Bell Chen, Alex Day, Leon Guo, and Kerry Wang
 
